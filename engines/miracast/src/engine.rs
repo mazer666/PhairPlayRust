@@ -26,6 +26,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use phairplay_core::error::EngineError;
+use phairplay_core::privacy::mask_socket_addr;
 use phairplay_core::protocol::{
     EngineContext, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus,
 };
@@ -36,7 +37,10 @@ use tokio::task::JoinHandle;
 use crate::error::MiracastError;
 
 /// The port the WFD RTSP control plane listens on.
-pub const DEFAULT_WFD_PORT: u16 = 7236;
+///
+/// WHY: the value is the port every WFD sender looks for. Its single owner
+/// is [`phairplay_core::config::ports::MIRACAST_WFD`].
+pub const DEFAULT_WFD_PORT: u16 = phairplay_core::config::ports::MIRACAST_WFD;
 
 /// The configuration of the Miracast engine.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -110,7 +114,10 @@ impl Inner {
 
     /// The number of senders that are connected.
     pub(crate) fn peer_count(&self) -> u32 {
-        self.sessions.lock().map(|sessions| sessions.len()).unwrap_or(0) as u32
+        self.sessions
+            .lock()
+            .map(|sessions| sessions.len())
+            .unwrap_or(0) as u32
     }
 }
 
@@ -154,8 +161,6 @@ impl MiracastEngine {
             runtime: Mutex::new(None),
         }
     }
-
-
 }
 
 #[async_trait::async_trait]
@@ -200,10 +205,12 @@ impl ProtocolEngine for MiracastEngine {
         }
 
         let address = SocketAddr::from((Ipv4Addr::UNSPECIFIED, self.inner.config.port));
-        let listener = TcpListener::bind(address).await.map_err(|error| EngineError::Start {
-            protocol: "miracast",
-            reason: format!("could not bind {address}: {error}"),
-        })?;
+        let listener = TcpListener::bind(address)
+            .await
+            .map_err(|error| EngineError::Start {
+                protocol: "miracast",
+                reason: format!("could not bind {address}: {error}"),
+            })?;
         let local = listener.local_addr().map_err(|error| EngineError::Start {
             protocol: "miracast",
             reason: format!("could not read the local address: {error}"),
@@ -277,9 +284,13 @@ async fn accept_loop(inner: Arc<Inner>, listener: TcpListener, ctx: EngineContex
             }
         };
 
-        let sessions = inner.sessions.lock().map(|sessions| sessions.len()).unwrap_or(0);
+        let sessions = inner
+            .sessions
+            .lock()
+            .map(|sessions| sessions.len())
+            .unwrap_or(0);
         if sessions >= inner.config.max_sessions {
-            tracing::warn!(%address, "miracast refused a sender: a session is already active");
+            tracing::warn!(peer = %mask_socket_addr(&address), "miracast refused a sender: a session is already active");
             crate::peer::refuse(stream).await;
             continue;
         }
@@ -304,6 +315,7 @@ impl From<MiracastError> for EngineError {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use phairplay_core::media::{NullAudioSink, NullVideoSink};
     use phairplay_core::session::SessionEvent;
@@ -388,7 +400,9 @@ mod tests {
         engine.start(ctx).await.expect("start");
         let port = engine.status().tcp_port.expect("port");
 
-        let mut stream = TcpStream::connect(("127.0.0.1", port)).await.expect("connect");
+        let mut stream = TcpStream::connect(("127.0.0.1", port))
+            .await
+            .expect("connect");
         stream
             .write_all(b"OPTIONS rtsp://x/ RTSP/1.0\r\nCSeq: 1\r\n\r\n")
             .await
@@ -434,7 +448,9 @@ mod tests {
         engine.start(context()).await.expect("start");
         let port = engine.status().tcp_port.expect("port");
 
-        let mut first = TcpStream::connect(("127.0.0.1", port)).await.expect("connect");
+        let mut first = TcpStream::connect(("127.0.0.1", port))
+            .await
+            .expect("connect");
         first
             .write_all(b"PLAY rtsp://x/ RTSP/1.0\r\nCSeq: 1\r\n\r\n")
             .await
@@ -442,7 +458,9 @@ mod tests {
         // Give the engine a moment to register the first sender.
         tokio::time::sleep(Duration::from_millis(80)).await;
 
-        let mut second = TcpStream::connect(("127.0.0.1", port)).await.expect("connect");
+        let mut second = TcpStream::connect(("127.0.0.1", port))
+            .await
+            .expect("connect");
         let mut answer = [0_u8; 256];
         let count = second.read(&mut answer).await.expect("read");
         let text = String::from_utf8_lossy(&answer[..count]);
@@ -450,7 +468,4 @@ mod tests {
 
         engine.stop().await.expect("stop");
     }
-
-
-
 }

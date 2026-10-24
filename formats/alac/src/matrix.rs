@@ -115,6 +115,7 @@ pub fn pack_samples(samples: &[i32], bit_depth: u8) -> Result<Vec<u8>, crate::er
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

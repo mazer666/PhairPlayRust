@@ -144,6 +144,7 @@ impl<'a> BitReader<'a> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     /// Builds the six header bytes of an ELD frame.

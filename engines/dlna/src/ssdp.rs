@@ -36,7 +36,10 @@ use std::time::Duration;
 pub const MULTICAST_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
 
 /// The port SSDP uses.
-pub const SSDP_PORT: u16 = 1900;
+///
+/// WHY: the value is fixed by the UPnP specification. Its single owner is
+/// [`phairplay_core::config::ports::SSDP`].
+pub const SSDP_PORT: u16 = phairplay_core::config::ports::SSDP;
 
 /// The search target of the root device.
 pub const ROOT_DEVICE: &str = "upnp:rootdevice";
@@ -51,10 +54,18 @@ pub const ST_ALL: &str = "ssdp:all";
 pub const SERVER: &str = "Linux/1.0 UPnP/1.0 PhairPlayRust/1.0";
 
 /// The lifetime of an announcement, in seconds.
-pub const CACHE_CONTROL_MAX_AGE: u32 = 1800;
+///
+/// WHY: the UPnP specification gives the advertisement lifetime and the
+/// duration of a GENA subscription the same value, so both are one constant:
+/// [`phairplay_core::config::timeouts::UPNP_MAX_AGE_SECONDS`].
+pub const CACHE_CONTROL_MAX_AGE: u32 = phairplay_core::config::timeouts::UPNP_MAX_AGE_SECONDS;
 
 /// The maximum size of an SSDP packet the renderer reads.
-pub const MAX_PACKET_BYTES: usize = 2048;
+///
+/// WHY: the same cap applies to the SSDP browser of the discovery crate.
+/// Its single owner is
+/// [`phairplay_core::config::limits::SSDP_MESSAGE_BYTES`].
+pub const MAX_PACKET_BYTES: usize = phairplay_core::config::limits::SSDP_MESSAGE_BYTES;
 
 /// The interval the reader thread wakes up in.
 const READ_POLL_INTERVAL: Duration = Duration::from_millis(500);

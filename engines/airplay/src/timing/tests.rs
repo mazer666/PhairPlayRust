@@ -1,4 +1,4 @@
-
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 use super::*;
 
 fn probe(sequence: u16, transmit: u64) -> [u8; 32] {
@@ -15,8 +15,8 @@ fn probe(sequence: u16, transmit: u64) -> [u8; 32] {
 #[test]
 fn a_probe_is_answered_with_the_sender_sequence() {
     let request = probe(0x1234, 0x0000_0000_1000_0000);
-    let response = TimingResponder::build_response(&request, 0x0000_0000_2000_0000)
-        .expect("valid probe");
+    let response =
+        TimingResponder::build_response(&request, 0x0000_0000_2000_0000).expect("valid probe");
     assert_eq!(response[0], 0x80);
     assert_eq!(response[1], RESPONSE_TYPE);
     assert_eq!(response[2], 0x12);

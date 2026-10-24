@@ -395,6 +395,7 @@ pub fn protocol_name(kind: ProtocolKind) -> &'static str {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use phairplay_core::media::{AudioFormat, VideoFormat};
     use phairplay_core::session::SessionId;

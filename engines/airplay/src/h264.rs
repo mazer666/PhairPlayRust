@@ -156,14 +156,19 @@ pub fn parse_sps(sps: &[u8]) -> Option<SpsInfo> {
     };
     let sub_width_c: u32 = if chroma_array_type == 0 { 1 } else { 2 };
     let sub_height_c: u32 = if chroma_array_type == 1 { 2 } else { 1 };
-    let crop_unit_x: u32 = if chroma_array_type == 0 { 1 } else { sub_width_c };
+    let crop_unit_x: u32 = if chroma_array_type == 0 {
+        1
+    } else {
+        sub_width_c
+    };
     let crop_unit_y: u32 = if chroma_array_type == 0 {
         2 - frame_mbs_only
     } else {
         sub_height_c.saturating_mul(2 - frame_mbs_only)
     };
 
-    let width = coded_width.saturating_sub(crop[0].saturating_add(crop[1]).saturating_mul(crop_unit_x));
+    let width =
+        coded_width.saturating_sub(crop[0].saturating_add(crop[1]).saturating_mul(crop_unit_x));
     let height =
         coded_height.saturating_sub(crop[2].saturating_add(crop[3]).saturating_mul(crop_unit_y));
     if width == 0 || height == 0 {

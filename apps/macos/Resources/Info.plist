@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    The description of the application bundle of the macOS shell.
+
+    WHAT: the identity of the bundle, the permission of the local network
+    and the services of the discovery that the receiver announces.
+
+    WHY: macOS asks the user for the permission to reach the local network
+    before the first Bonjour announcement. The receiver cannot work
+    without it, so the reason has to be in the bundle in the words of the
+    user: the sender of the picture is in the same network, and the
+    receiver is only reachable there.
+-->
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>PhairPlayMacApp</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.phairplay.receiver</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>PhairPlayRust</string>
+    <key>CFBundleDisplayName</key>
+    <string>PhairPlayRust</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>NSSupportsAutomaticTermination</key>
+    <false/>
+    <key>NSSupportsSuddenTermination</key>
+    <false/>
+
+    <!-- The permission of the local network. The receiver talks to the
+         senders of the local network and to nothing else. -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>PhairPlayRust receives the picture and the sound of the senders in your local network. It never talks to the internet.</string>
+
+    <!-- The services that the receiver announces. -->
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_airplay._tcp</string>
+        <string>_raop._tcp</string>
+        <string>_miracast._tcp</string>
+        <string>_googlecast._tcp</string>
+        <string>_googlecast._udp</string>
+    </array>
+</dict>
+</plist>

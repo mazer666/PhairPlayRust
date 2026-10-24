@@ -21,6 +21,6 @@ pub mod response;
 pub mod router;
 
 pub use reader::{RtspRequestReader, StreamBuffer};
-pub use router::{RouteContext, route};
 pub use request::{RtspMethod, RtspRequest};
 pub use response::{RtspResponse, SERVER_TOKEN};
+pub use router::{RouteContext, route};

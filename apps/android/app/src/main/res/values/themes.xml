@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The theme of the Android shell.
+
+    WHY: the application draws its own surfaces with Compose, so the theme
+    of the platform only has to provide the window background and the
+    status bar. Everything else is decided by the Compose theme in
+    `ui/Theme.kt`.
+-->
+<resources>
+
+    <style name="Theme.PhairPlay" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+</resources>

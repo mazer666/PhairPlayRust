@@ -31,6 +31,7 @@ use std::time::Duration;
 
 use phairplay_core::config::AppConfig;
 use phairplay_core::error::EngineError;
+use phairplay_core::privacy::mask_socket_addr;
 use phairplay_core::protocol::{
     EngineContext, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus,
 };
@@ -47,16 +48,27 @@ use crate::message::DEFAULT_MEDIA_APP_ID;
 use crate::tls::TlsError;
 
 /// The port a Google Cast receiver listens on.
-pub const DEFAULT_PORT: u16 = 8009;
+///
+/// WHY: the value is the port every Cast sender looks for. Its single owner
+/// is [`phairplay_core::config::ports::CAST_TLS`].
+pub const DEFAULT_PORT: u16 = phairplay_core::config::ports::CAST_TLS;
 
 /// The number of senders that may be connected at the same time.
 pub const DEFAULT_MAX_SESSIONS: usize = 8;
 
 /// The largest message the receiver accepts.
-pub const DEFAULT_MAX_MESSAGE_BYTES: usize = 64 * 1024;
+///
+/// WHY: the same cap applies to the framing layer of the crate. Its single
+/// owner is [`phairplay_core::config::limits::CAST_MESSAGE_BYTES`].
+pub const DEFAULT_MAX_MESSAGE_BYTES: usize = phairplay_core::config::limits::CAST_MESSAGE_BYTES;
 
 /// The time a peer may take to complete the TLS handshake.
-pub const DEFAULT_HANDSHAKE_TIMEOUT_MS: u64 = 10_000;
+///
+/// WHY: the deadline of a protocol step belongs to one place. Its single
+/// owner is
+/// [`phairplay_core::config::timeouts::CAST_HANDSHAKE_TIMEOUT_MS`].
+pub const DEFAULT_HANDSHAKE_TIMEOUT_MS: u64 =
+    phairplay_core::config::timeouts::CAST_HANDSHAKE_TIMEOUT_MS;
 
 /// How the receiver terminates TLS.
 #[derive(Debug, Clone)]
@@ -459,7 +471,7 @@ async fn accept_loop(
             }
         };
         if inner.peer_count() as usize >= inner.config.max_sessions {
-            tracing::warn!(%address, "cast refused a peer: the session limit is reached");
+            tracing::warn!(peer = %mask_socket_addr(&address), "cast refused a peer: the session limit is reached");
             drop(stream);
             continue;
         }
@@ -483,6 +495,7 @@ fn advertise_error(error: AdvertiseError) -> EngineError {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::advertisement::CastService;
 
@@ -576,9 +589,16 @@ mod tests {
         let status = engine.status();
         assert_eq!(status.state, ProtocolState::Advertising);
         assert!(status.tcp_port.is_some());
-        let services = registrar.services.lock().expect("lock");
-        assert_eq!(services.len(), 1);
-        assert_eq!(services[0].service_type, "_googlecast._tcp");
+        {
+            // WHY: the lock of the registrar is released **before** the
+            // engine is stopped. `stop()` withdraws the service and locks
+            // the very same mutex — a lock that is held across the call
+            // deadlocks the test, and the test suite of the workspace never
+            // finishes.
+            let services = registrar.services.lock().expect("lock");
+            assert_eq!(services.len(), 1);
+            assert_eq!(services[0].service_type, "_googlecast._tcp");
+        }
         engine.stop().await.expect("stop");
         assert_eq!(engine.status().state, ProtocolState::Stopped);
     }

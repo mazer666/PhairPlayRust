@@ -18,6 +18,8 @@
 //! | [`config`] | The typed configuration model. |
 //! | [`identity`] | The identity advertised to senders. |
 //! | [`metrics`] | Live counters about a running session. |
+//! | [`privacy`] | The masking of the names and the addresses in the log. |
+//! | [`queue`] | The media queues, bounded by a count *and* by a byte budget. |
 //! | [`error`] | The closed error hierarchy of the whole workspace. |
 //!
 //! ## Layering
@@ -68,14 +70,20 @@ pub mod identity;
 pub mod jobs;
 pub mod media;
 pub mod metrics;
+pub mod privacy;
 pub mod protocol;
+pub mod queue;
 pub mod session;
 
 pub use build_info::BuildInfo;
 pub use capabilities::{AudioCodec, MediaCapabilities, PassthroughCodec, VideoCodec};
-pub use config::{AppConfig, DeviceConfig, LimitsConfig, PerformanceConfig, ProtocolConfig};
+pub use config::{
+    AppConfig, DeviceConfig, EngineLimits, LimitsConfig, PerformanceConfig, ProtocolConfig,
+};
 pub use error::{CoreError, EngineError, ErrorCode, ErrorKind};
 pub use identity::DeviceIdentity;
 pub use media::{AudioSink, EncodedAudioFrame, EncodedVideoFrame, VideoSink};
+pub use privacy::{mask_ip, mask_name, mask_socket_addr};
 pub use protocol::{EngineContext, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus};
+pub use queue::{AudioFrameQueue, BoundedFrameQueue, PushOutcome, QueueBudget, VideoFrameQueue};
 pub use session::{SessionEvent, SessionId, SessionRegistry, SessionSnapshot};

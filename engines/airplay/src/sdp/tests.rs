@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -77,8 +78,10 @@ fn an_sdp_without_a_media_section_is_rejected() {
 
 #[test]
 fn an_oversized_sdp_is_rejected() {
-    let mut limits = AirPlayLimits::default();
-    limits.max_sdp_bytes = 16;
+    let limits = AirPlayLimits {
+        max_sdp_bytes: 16,
+        ..AirPlayLimits::default()
+    };
     let error = parse_sdp(VIDEO_SDP, &limits).expect_err("must fail");
     assert!(matches!(error, AirPlayError::LimitExceeded { .. }));
 }

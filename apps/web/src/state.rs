@@ -224,8 +224,11 @@ pub fn convert_event(event: &FfiReceiverEvent) -> WebEvent {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use phairplay_ffi::dto::{FfiProtocolKind, FfiProtocolState, FfiProtocolStatus};
+
+    use crate::test_support::MustErr;
 
     #[test]
     fn the_state_covers_every_protocol() {
@@ -243,7 +246,7 @@ mod tests {
             .unwrap_or_else(|error| panic!("the state must start: {error}"));
         let error = state
             .protocol("telepathy")
-            .expect_err("the protocol must be refused");
+            .must_err("the protocol must be refused");
         assert_eq!(error.status.as_u16(), 404);
     }
 

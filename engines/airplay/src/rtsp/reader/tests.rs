@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -50,7 +51,10 @@ async fn a_declared_body_longer_than_the_limit_is_rejected() {
     let error = read_all(b"POST /play HTTP/1.1\r\nContent-Length: 99999999\r\n\r\n")
         .await
         .expect_err("must fail");
-    assert!(matches!(error, AirPlayError::LimitExceeded { .. }), "{error}");
+    assert!(
+        matches!(error, AirPlayError::LimitExceeded { .. }),
+        "{error}"
+    );
 }
 
 #[tokio::test]
@@ -78,7 +82,10 @@ async fn too_many_headers_are_rejected() {
     }
     input.extend_from_slice(b"\r\n");
     let error = read_all(&input).await.expect_err("must fail");
-    assert!(matches!(error, AirPlayError::LimitExceeded { .. }), "{error}");
+    assert!(
+        matches!(error, AirPlayError::LimitExceeded { .. }),
+        "{error}"
+    );
 }
 
 #[tokio::test]
@@ -89,7 +96,10 @@ async fn an_overlong_header_line_is_rejected() {
     input.extend(std::iter::repeat_n(b'a', 9000));
     input.extend_from_slice(b"\r\n\r\n");
     let error = read_all(&input).await.expect_err("must fail");
-    assert!(matches!(error, AirPlayError::LimitExceeded { .. }), "{error}");
+    assert!(
+        matches!(error, AirPlayError::LimitExceeded { .. }),
+        "{error}"
+    );
 }
 
 #[tokio::test]
@@ -99,7 +109,10 @@ async fn an_overlong_request_line_is_rejected() {
     input.extend(std::iter::repeat_n(b'a', 20_000));
     input.extend_from_slice(b" RTSP/1.0\r\n\r\n");
     let error = read_all(&input).await.expect_err("must fail");
-    assert!(matches!(error, AirPlayError::LimitExceeded { .. }), "{error}");
+    assert!(
+        matches!(error, AirPlayError::LimitExceeded { .. }),
+        "{error}"
+    );
 }
 
 #[tokio::test]
@@ -114,19 +127,22 @@ async fn a_header_without_a_colon_is_rejected() {
 async fn a_photo_body_may_use_the_photo_limit() {
     let mut config = phairplay_core::config::AppConfig::default();
     config.limits.max_photo_bytes = 4096;
-    config
-        .protocols
-        .insert("airplay".to_string(), phairplay_core::config::ProtocolConfig {
+    config.protocols.insert(
+        "airplay".to_string(),
+        phairplay_core::config::ProtocolConfig {
             enabled: true,
             port: 7000,
             require_pin: false,
             max_message_bytes: 1024,
-        });
+        },
+    );
     let limits = AirPlayLimits::from_config(&config);
     let (client, server) = tokio::io::duplex(64 * 1024);
     tokio::spawn(async move {
         let mut client = client;
-        let _ = client.write_all(b"PUT /photo HTTP/1.1\r\nContent-Length: 2048\r\n\r\n").await;
+        let _ = client
+            .write_all(b"PUT /photo HTTP/1.1\r\nContent-Length: 2048\r\n\r\n")
+            .await;
         let _ = client.write_all(&vec![0u8; 2048]).await;
     });
     let mut buffer = StreamBuffer::new(server);
@@ -152,6 +168,9 @@ async fn a_stalled_peer_hits_the_deadline() {
     limits.idle_timeout = Duration::from_millis(80);
     let mut buffer = StreamBuffer::new(server);
     let reader = RtspRequestReader::new(limits);
-    let error = reader.read_request(&mut buffer).await.expect_err("must fail");
+    let error = reader
+        .read_request(&mut buffer)
+        .await
+        .expect_err("must fail");
     assert!(matches!(error, AirPlayError::Timeout { .. }), "{error}");
 }

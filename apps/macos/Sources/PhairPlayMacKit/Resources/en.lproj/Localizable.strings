@@ -1,0 +1,66 @@
+/* The texts of the macOS shell, in English.
+ *
+ * WHY: Every text the user can read lives in this catalogue and nowhere
+ * else. A text that is written into the source of a view cannot be
+ * translated, and it cannot be reviewed by somebody who does not read
+ * Swift. The placeholders are all %@, so that the reader never has to
+ * guess the width of a number on the platform.
+ */
+
+"dashboard.title" = "Receiver";
+"dashboard.device" = "Device: %@";
+"dashboard.version" = "Version %@";
+"dashboard.running" = "The receiver is running.";
+"dashboard.stopped" = "The receiver is not running.";
+
+"protocol.airplay" = "AirPlay 2";
+"protocol.miracast" = "Miracast";
+"protocol.cast" = "Google Cast";
+"protocol.dlna" = "DLNA / UPnP";
+
+"protocol.state.disabled" = "Disabled in the settings";
+"protocol.state.disabled.reason" = "The service is not advertised at all.";
+"protocol.state.notStarted" = "Not started";
+"protocol.state.notStarted.reason" = "The protocol is switched on, but the service has never run.";
+"protocol.state.stopped" = "Service stopped";
+"protocol.state.stopped.reason" = "The protocol is switched on, but the service is not running.";
+"protocol.state.starting" = "Starting";
+"protocol.state.starting.reason" = "The sockets are bound and the service is registered.";
+"protocol.state.advertising" = "Advertising";
+"protocol.state.advertising.reason" = "Visible to the senders of the local network, waiting for a connection.";
+"protocol.state.streaming" = "Streaming";
+"protocol.state.streaming.reason" = "A sender is connected and the stream is running.";
+"protocol.state.stopping" = "Stopping";
+"protocol.state.stopping.reason" = "The connection to the sender is being closed.";
+"protocol.state.failed" = "Error";
+"protocol.state.failed.reason" = "The receiver could not be started.";
+
+"protocol.ports" = "TCP %@ · UDP %@";
+"protocol.ports.tcp" = "TCP %@";
+"protocol.ports.none" = "No port is bound";
+"protocol.peers.one" = "%@ sender";
+"protocol.peers.many" = "%@ senders";
+"protocol.switch.on" = "Switch %@ on";
+"protocol.switch.off" = "Switch %@ off";
+
+"nowplaying.title" = "Now playing";
+"nowplaying.empty" = "No sender is connected.";
+"nowplaying.sender.unknown" = "Unknown sender";
+"nowplaying.title.unknown" = "Unknown title";
+"nowplaying.artist.unknown" = "Unknown artist";
+"nowplaying.album.unknown" = "Unknown album";
+"nowplaying.video.unknown" = "No video";
+"nowplaying.audio.unknown" = "No audio";
+"nowplaying.video" = "Video: %@";
+"nowplaying.audio" = "Audio: %@";
+"nowplaying.uptime" = "Running for %@";
+
+"failure.title" = "The receiver reported a problem";
+"failure.code" = "Code %@";
+"failure.dismiss" = "Dismiss";
+
+"menu.title" = "PhairPlayRust receiver";
+"menu.running" = "The receiver is running.";
+"menu.stopped" = "The receiver is not running.";
+"menu.refresh" = "Refresh";
+"menu.quit" = "Quit";

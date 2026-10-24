@@ -12,8 +12,7 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::message::{CastMessage, Namespace};
-//! use phairplay_cast::session::PeerSession;
+//! use phairplay_cast::{CastMessage, Namespace, PeerSession};
 //!
 //! let mut session = PeerSession::new("web-1", "session-1", "CC1AD845");
 //! let reply = session
@@ -409,6 +408,7 @@ impl PeerSession {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     fn session() -> PeerSession {

@@ -13,9 +13,9 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::payloads::message_type;
+//! use phairplay_cast::message_type;
 //!
-//! assert_eq!(message_type(r#"{"type":"PING"}"#), Some("PING"));
+//! assert_eq!(message_type(r#"{"type":"PING"}"#), Some("PING".to_string()));
 //! assert_eq!(message_type("not json"), None);
 //! ```
 
@@ -303,6 +303,7 @@ pub struct VolumeRequest {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

@@ -4,6 +4,7 @@ use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 
 use phairplay_core::media::EncodedVideoFrame;
+use phairplay_core::privacy::mask_socket_addr;
 use phairplay_core::protocol::EngineContext;
 use phairplay_core::session::{SessionEndReason, SessionEvent};
 use tokio::io::AsyncWriteExt;
@@ -12,11 +13,11 @@ use tokio::net::{TcpListener, TcpStream};
 use crate::engine::ports::MirrorPorts;
 use crate::engine::{AirPlayConfig, EngineInner};
 use crate::pairing::identity::PairingIdentity;
+use crate::rtp::{self, FuAReassembler};
 use crate::rtsp::reader::{RtspRequestReader, StreamBuffer};
 use crate::rtsp::request::RtspMethod;
 use crate::rtsp::response::RtspResponse;
 use crate::rtsp::router::{PhotoSlot, RouteContext};
-use crate::rtp::{self, FuAReassembler};
 use crate::session::AirPlaySession;
 
 pub(super) async fn accept_loop(
@@ -50,7 +51,7 @@ pub(super) async fn accept_loop(
         if busy {
             // AirPlay serves one sender at a time. The second one is told so
             // instead of being queued.
-            tracing::warn!(%peer, "rejecting a second AirPlay sender");
+            tracing::warn!(peer = %mask_socket_addr(&peer), "rejecting a second AirPlay sender");
             reject_second_peer(socket).await;
             continue;
         }
@@ -105,14 +106,14 @@ async fn handle_connection(
         pairing_public_key: Some(identity.public_key()),
     };
 
-    tracing::info!(%peer, "an AirPlay sender connected");
+    tracing::info!(peer = %mask_socket_addr(&peer), "an AirPlay sender connected");
     let mut switch_to_rtp = false;
     loop {
         let request = match reader.read_request(&mut stream).await {
             Ok(Some(request)) => request,
             Ok(None) => break,
             Err(error) => {
-                tracing::warn!(%peer, %error, "the AirPlay request could not be read");
+                tracing::warn!(peer = %mask_socket_addr(&peer), %error, "the AirPlay request could not be read");
                 break;
             }
         };
@@ -124,7 +125,7 @@ async fn handle_connection(
             socket.write_all(&bytes).await
         };
         if let Err(error) = write_result {
-            tracing::warn!(%peer, %error, "the AirPlay answer could not be written");
+            tracing::warn!(peer = %mask_socket_addr(&peer), %error, "the AirPlay answer could not be written");
             break;
         }
         if request.method == RtspMethod::Record
@@ -142,12 +143,10 @@ async fn handle_connection(
     }
 
     if session.streaming {
-        let _ = ctx
-            .events
-            .try_send(SessionEvent::Ended {
-                session: session.id,
-                reason: SessionEndReason::SenderDisconnected,
-            });
+        let _ = ctx.events.try_send(SessionEvent::Ended {
+            session: session.id,
+            reason: SessionEndReason::SenderDisconnected,
+        });
     }
     ctx.video_sink.reset();
     ctx.audio_sink.reset();
@@ -157,7 +156,7 @@ async fn handle_connection(
     if let Ok(mut state) = inner.state.lock() {
         state.peer_count = 0;
     }
-    tracing::info!(%peer, "the AirPlay sender disconnected");
+    tracing::info!(peer = %mask_socket_addr(&peer), "the AirPlay sender disconnected");
 }
 
 /// Reads the interleaved media of a mirroring session.

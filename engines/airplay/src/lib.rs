@@ -18,7 +18,7 @@
 //! | [`h264`] | The H.264 SPS parser (resolution from the bitstream). |
 //! | [`rtp`] | Interleaved framing and FU-A reassembly. |
 //! | [`session`] | The per-connection state machine. |
-//! | [`engine`] | The [`ProtocolEngine`] implementation. |
+//! | [`engine`] | The [`phairplay_core::protocol::ProtocolEngine`] implementation. |
 //! | [`pairing`] | Ed25519/X25519 pairing and the legacy SRP PIN flow. |
 //! | [`fairplay`] | The `fp-setup` exchange and the DRM boundary. |
 //! | [`plist`] | Apple property lists (binary and XML). |
@@ -51,18 +51,18 @@ pub mod mirror;
 pub mod pairing;
 pub mod photo;
 pub mod plist;
+pub mod queue;
 pub mod rtp;
 pub mod rtsp;
 pub mod sdp;
 pub mod session;
 pub mod timing;
 
-
 pub use engine::{AirPlayConfig, AirPlayEngine};
 pub use error::AirPlayError;
 pub use limits::AirPlayLimits;
 pub use rtsp::{RtspMethod, RtspRequest, RtspRequestReader, RtspResponse};
 
-pub use sdp::{SdpSession, parse_sdp};
 pub use rtp::FuAReassembler;
+pub use sdp::{SdpSession, parse_sdp};
 pub use session::PlaybackState;

@@ -218,6 +218,7 @@ pub const MAX_FRAME_AGE: Duration = Duration::from_secs(2);
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

@@ -1,7 +1,7 @@
 project:
   name: PhairPlayRust
   baseline_version: "0.1"
-  product_status: "m0-in-progress"
+  product_status: "m0-implemented-awaiting-device-tests"
   current_milestone: "M0"
   current_milestone_name: "Foundation"
   current_submilestone: "M0.0"
@@ -9,6 +9,22 @@ project:
   completed_submilestones: []
   in_progress_submilestones:
     - "M0.0"
+  # The state of the code and the state of the evidence are two different
+  # things. The code of the four engines, the four format crates, the bridge
+  # and the dashboard is written and tested. What is missing is the evidence
+  # that only hardware can produce: the device test plan.
+  verification:
+    workspace_builds: true
+    lint_clean: true
+    format_clean: true
+    tests_passed: 1054
+    tests_failed: 0
+    structural_gates_green: true
+    licence_gate_green: true
+    documentation_links_green: true
+    device_tests: "not-run"
+    performance_budgets_measured: "not-run"
+    acceptance_record: "docs/acceptance/M0-ACCEPTANCE.md"
   license: "AGPL-3.0-or-later"
   contribution_model: "DCO"
   # The last time this file was written by hand. The state of the project

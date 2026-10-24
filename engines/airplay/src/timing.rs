@@ -28,7 +28,10 @@ use std::sync::atomic::{AtomicI64, Ordering};
 use crate::error::AirPlayError;
 
 /// The UDP port the sender probes for clock synchronisation.
-pub const TIMING_PORT: u16 = 6002;
+///
+/// WHY: the value is the port the Apple timing service uses. Its single
+/// owner is [`phairplay_core::config::ports::AIRPLAY_TIMING`].
+pub const TIMING_PORT: u16 = phairplay_core::config::ports::AIRPLAY_TIMING;
 
 /// The size of a timing packet.
 pub const PACKET_SIZE: usize = 32;
@@ -70,7 +73,11 @@ impl TimingResponder {
     ///
     /// # Errors
     /// Returns [`AirPlayError::Parse`] when the probe cannot be answered.
-    pub fn handle_probe(&self, request: &[u8], receive_ntp: u64) -> Result<Option<[u8; 32]>, AirPlayError> {
+    pub fn handle_probe(
+        &self,
+        request: &[u8],
+        receive_ntp: u64,
+    ) -> Result<Option<[u8; 32]>, AirPlayError> {
         if request.len() < PACKET_SIZE {
             return Ok(None);
         }

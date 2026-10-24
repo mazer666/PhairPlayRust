@@ -55,7 +55,7 @@ pub(crate) async fn run_peer(
         let outcome = tokio::select! {
             biased;
             _ = shutdown.changed() => ReadOutcome::Shutdown,
-            result = tokio::time::timeout(IDLE_TIMEOUT, stream.read(&mut chunk)) => {
+            result = tokio::time::timeout(idle_timeout(), stream.read(&mut chunk)) => {
                 match result {
                     Ok(Ok(0)) => ReadOutcome::Eof,
                     Ok(Ok(count)) => ReadOutcome::Data(count),
@@ -129,7 +129,11 @@ pub(crate) async fn run_peer(
                     .await;
             }
 
-            if stream.write_all(&response.to_bytes(request.cseq)).await.is_err() {
+            if stream
+                .write_all(&response.to_bytes(request.cseq))
+                .await
+                .is_err()
+            {
                 break;
             }
             let _ = stream.flush().await;
@@ -206,7 +210,13 @@ fn find_header_end(buffer: &[u8]) -> Option<usize> {
 }
 
 /// The time the engine waits before it reports a stalled peer.
-pub(crate) const IDLE_TIMEOUT: Duration = Duration::from_secs(30);
+///
+/// WHY: the deadline is the idle timeout of the *performance budget* of the
+/// core, not a number of this engine. The engine reads it from the
+/// configuration, so the value has exactly one owner.
+fn idle_timeout() -> Duration {
+    phairplay_core::config::PerformanceConfig::default().idle_timeout()
+}
 
 /// How a read from the sender ended.
 enum ReadOutcome {
@@ -224,6 +234,7 @@ enum ReadOutcome {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

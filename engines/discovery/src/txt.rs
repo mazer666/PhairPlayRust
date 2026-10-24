@@ -7,7 +7,7 @@
 //! never starts the mirroring pipeline.
 //!
 //! HOW: every record is built from the data the core crate owns — the
-//! [`DeviceIdentity`] and the [`MediaCapabilities`] — plus the constants
+//! [`DeviceIdentity`] and the [`phairplay_core::capabilities::MediaCapabilities`] — plus the constants
 //! that the reference implementation proved to work with real senders. The
 //! values are plain ASCII: RFC 6763 requires a TXT string to consist of
 //! printable US-ASCII characters, and a name with a control character in it

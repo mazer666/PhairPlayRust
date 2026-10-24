@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -36,10 +37,7 @@ impl Client {
         let x = BigUint::from_bytes_be(&sha1(&[salt, &inner]));
         let verifier = BigUint::from(2u8).modpow(&x, &group());
         let k = BigUint::from_bytes_be(&sha1(&[&pad(&group()), &pad(&BigUint::from(2u8))]));
-        let u = BigUint::from_bytes_be(&sha1(&[
-            &pad(&self.public),
-            &pad(&server_public),
-        ]));
+        let u = BigUint::from_bytes_be(&sha1(&[&pad(&self.public), &pad(&server_public)]));
         let base = (&server_public + group() - (&k * &verifier) % group()) % group();
         let exponent = (&self.private + &u * &x) % group();
         let shared = base.modpow(&exponent, &group());
@@ -56,11 +54,7 @@ impl Client {
 
     /// The expected answer of the server to the proof.
     fn expected_proof(&self, client_proof: &[u8]) -> Vec<u8> {
-        sha1(&[
-            &to_bytes(&self.public),
-            client_proof,
-            &self.session_key,
-        ])
+        sha1(&[&to_bytes(&self.public), client_proof, &self.session_key])
     }
 
     /// Encrypts the client key for the third step.
@@ -69,11 +63,10 @@ impl Client {
         let (aes_key, mut iv) = derive_step_three_material(&self.session_key);
         increment_counter(&mut iv);
         let mut buffer = key.to_vec();
-        let cipher = AesGcm::<Aes128, U16>::new_from_slice(&aes_key)
-            .expect("valid key");
+        let cipher = AesGcm::<Aes128, U16>::new_from_slice(&aes_key).expect("valid key");
         let nonce = aes_gcm::Nonce::<U16>::from_slice(&iv);
         let tag = cipher
-            .encrypt_in_place_detached(&nonce, &[], &mut buffer)
+            .encrypt_in_place_detached(nonce, &[], &mut buffer)
             .expect("encryptable");
         (buffer, tag.to_vec())
     }
@@ -89,7 +82,7 @@ impl Client {
         let nonce = aes_gcm::Nonce::<U16>::from_slice(&iv);
         let tag = aes_gcm::Tag::<U16>::from_slice(tag);
         cipher
-            .decrypt_in_place_detached(&nonce, &[], &mut buffer, &tag)
+            .decrypt_in_place_detached(nonce, &[], &mut buffer, tag)
             .ok()?;
         Some(buffer)
     }

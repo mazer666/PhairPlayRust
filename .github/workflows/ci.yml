@@ -1,0 +1,232 @@
+# The gate of PhairPlayRust on a GitHub-hosted Linux runner.
+#
+# WHAT THIS WORKFLOW PROVES — and what it does not:
+#
+#   * `quality-gate` — the workspace compiles, the format is the format of
+#     `rustfmt`, the lint is clean with `-D warnings`, the tests are green
+#     and the documentation builds.
+#   * `licenses` — the dependency policy of `deny.toml` is satisfied, read
+#     by the **pinned** version of cargo-deny. The version is part of the
+#     configuration: a different version reads the same file differently.
+#   * `audit` — the RustSec advisory database knows no vulnerability in the
+#     tree of the dependencies.
+#   * `structure` — the shape of the repository holds: the crate boundaries,
+#     the length of the source files, the licence headers and the links of
+#     the documentation.
+#
+# WHAT THIS WORKFLOW DOES **NOT** PROVE — and the acceptance document says
+# so in the same words:
+#
+#   * the behaviour of the receiver on a real sender (that is the device
+#     test plan, `docs/guides/DEVICE_TEST_PLAN.md`; it needs hardware and
+#     it is NOT RUN here),
+#   * the performance budgets of the running receiver (the budgets live in
+#     `config/performance-budgets.toml` and are proved on a device),
+#   * the legal clearance of a release.
+#
+# The workflow reads the repository and writes into the workspace of the
+# runner. It publishes nothing, signs nothing and uploads nothing.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# The workflow reads the repository and nothing else. It needs no secret
+# and it gets no write permission.
+permissions:
+  contents: read
+
+# A new push makes the run of the old revision pointless.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The pinned version of cargo-deny. `deny.toml` is read differently by
+  # the different versions of the tool: the spellings of the GNU licences
+  # are the example, and the crates of this workspace carry
+  # `AGPL-3.0-or-later`. The version is therefore part of the
+  # configuration of the project and is named in one place — here and in
+  # `scripts/audit-licenses.sh`.
+  CARGO_DENY_VERSION: "0.20.2"
+
+jobs:
+  # ── the compiler, the lint, the tests and the documentation ───────────────
+  quality-gate:
+    name: Quality Gate (format, lint, tests, documentation)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install the Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal \
+            --component rustfmt --component clippy --no-self-update
+          rustup default stable
+          rustc --version
+          cargo --version
+          cargo fmt --version
+          cargo clippy --version
+
+      - name: Cache the registry and the build of Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+
+      - name: The format of the sources
+        run: cargo fmt --all -- --check
+
+      - name: The lint of the workspace
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: The tests of the workspace
+        run: cargo test --workspace
+
+      - name: The documentation of the workspace
+        run: cargo doc --workspace --no-deps
+
+      - name: The summary of the run
+        if: always()
+        run: |
+          {
+            echo "### The quality gate"
+            echo ""
+            echo "- The format: \`cargo fmt --all -- --check\`"
+            echo "- The lint: \`cargo clippy --workspace --all-targets -- -D warnings\`"
+            echo "- The tests: \`cargo test --workspace\`"
+            echo "- The documentation: \`cargo doc --workspace --no-deps\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── the licences of the dependencies ──────────────────────────────────────
+  licenses:
+    name: Licenses (cargo-deny, pinned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install the Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      - name: Install the pinned cargo-deny
+        run: |
+          # WHY: the version of the tool is part of the configuration of the
+          # project. `deny.toml` states it in its header, and
+          # `scripts/audit-licenses.sh` refuses to run with another one.
+          cargo install cargo-deny --version "${CARGO_DENY_VERSION}" --locked
+          cargo deny --version
+
+      - name: The audit of the licences
+        run: bash scripts/audit-licenses.sh
+
+      - name: The summary of the run
+        if: always()
+        run: |
+          {
+            echo "### The licence audit"
+            echo ""
+            echo "- cargo-deny \`${CARGO_DENY_VERSION}\` against \`deny.toml\`"
+            echo "- The exit code 2 of the script means NOT RUN — the audit did not happen."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── the advisories of the dependencies ────────────────────────────────────
+  audit:
+    name: Security Audit (cargo-audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install the Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      - name: Install cargo-audit
+        run: |
+          # The tool is installed from the source of the project itself, so
+          # that the version is the one of the repository and not the one of
+          # the runner image.
+          cargo install cargo-audit --locked
+
+      - name: Fetch the crates of the workspace
+        run: cargo fetch --locked
+
+      - name: The audit of the advisories
+        # WHY: the advisory database is a moving target. The audit is run
+        # against the lock file of the repository, and a vulnerability that
+        # has no patch yet is reported as a finding — it is never hidden
+        # behind a `continue-on-error` that nobody reads.
+        #
+        # The one exception is named here, and it is named with its
+        # identifier: `RUSTSEC-2023-0071` is the "Marvin attack", a timing
+        # side channel of the RSA decryption of the crate `rsa 0.9.10`. The
+        # crate has no fixed version — the advisory says so explicitly — and
+        # the crate is used for the **legacy** AirPlay pairing, whose key
+        # comes over the network. The risk is accepted, written down and
+        # reviewed: see `docs/acceptance/M0-ACCEPTANCE.md`, the limitation
+        # L-7, and `SECURITY.md`. Every **other** vulnerability still fails
+        # this job.
+        run: cargo audit --ignore RUSTSEC-2023-0071
+
+      - name: The summary of the run
+        if: always()
+        run: |
+          {
+            echo "### The security audit"
+            echo ""
+            echo "- \`cargo audit\` against the lock file of the repository"
+            echo "- A vulnerability without a patch is a finding for the owner of the project."
+            echo "- The accepted exception: \`RUSTSEC-2023-0071\` (the Marvin attack of \`rsa 0.9.10\`)"
+            echo "  — see \`docs/acceptance/M0-ACCEPTANCE.md\`, the limitation L-7."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── the shape of the repository ───────────────────────────────────────────
+  structure:
+    name: Structure (boundaries, file size, licence headers, documentation)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: The crate boundaries
+        run: bash scripts/check-crate-boundaries.sh
+
+      - name: The length of the source files
+        run: bash scripts/check-file-size.sh
+
+      - name: The licence headers
+        run: bash scripts/check-license-headers.sh
+
+      - name: The links of the documentation
+        run: bash scripts/check-docs-links.sh
+
+      - name: The summary of the run
+        if: always()
+        run: |
+          {
+            echo "### The structural gate"
+            echo ""
+            echo "- The crate boundaries: \`scripts/check-crate-boundaries.sh\`"
+            echo "- The length of the sources: \`scripts/check-file-size.sh\`"
+            echo "- The licence headers: \`scripts/check-license-headers.sh\`"
+            echo "- The links of the documentation: \`scripts/check-docs-links.sh\`"
+          } >> "$GITHUB_STEP_SUMMARY"

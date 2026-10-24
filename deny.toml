@@ -1,0 +1,127 @@
+# The dependency policy of PhairPlayRust, read by cargo-deny.
+#
+# WHY: the receiver is a piece of software that runs on a home network and
+# that people trust with their media. The licences of the components it
+# links are part of that trust: a permissive dependency is fine, a copyleft
+# dependency that forces the whole product into a licence the project did
+# not choose is a legal accident waiting to happen. The gate of this file
+# makes that accident a build failure instead of a surprise.
+#
+# THE PINNED VERSION OF THE TOOL IS PART OF THIS FILE. cargo-deny reads the
+# same configuration differently from one version to the next: the spellings
+# of the GNU licences are the example — `AGPL-3.0` and `AGPL-3.0-or-later`
+# are two different licences in SPDX, and the bare name does not cover the
+# suffixed one. The crates of this workspace carry `AGPL-3.0-or-later`, and
+# cargo-deny checks the members of the workspace as well: without the
+# suffixed spelling the check fails on the crates of the project itself.
+#
+# The version that reads this file is `0.20.2`; it is pinned in
+# `scripts/audit-licenses.sh` (`CARGO_DENY_REQUIRED_VERSION`) and installed
+# by `.github/workflows/ci.yml`. A machine that carries another version
+# reports **NOT RUN** with the reason — it never reports a false error and
+# never reports a green run for a configuration it did not read.
+
+[graph]
+# The graph of the workspace is built with all the features of the
+# workspace, so that a dependency that is only pulled in by a feature of a
+# development dependency is still seen by the audit.
+all-features = true
+
+# ── The advisories ──────────────────────────────────────────────────────────
+[advisories]
+version = 2
+# A crate that was withdrawn from the registry is never used.
+yanked = "deny"
+# The RustSec advisory database is the source of the known vulnerabilities.
+# A vulnerability that has no patch yet is a finding, not an error: the
+# project does not refuse to build for an advisory that cannot be fixed, but
+# it must never stay invisible. `cargo audit` (the job `audit` of the
+# continuous integration) is the tool that reports it.
+ignore = []
+
+# ── The licences ────────────────────────────────────────────────────────────
+[licenses]
+version = 2
+# A licence is only trusted when the text of the crate is clear enough.
+confidence-threshold = 0.8
+# The licences that may travel with the product.
+#
+# The licence of the project is written in the **suffixed** spelling:
+# `AGPL-3.0-or-later` is the *or later* variant, `AGPL-3.0` is the *only*
+# variant, and they are two different licences in SPDX. The crates of the
+# workspace carry `AGPL-3.0-or-later`, and cargo-deny checks the members
+# of the workspace as well: without the suffixed spelling the check fails
+# with "license is not explicitly allowed" on the crates of the project
+# itself. The bare spelling is not in the list, because no crate of the
+# tree carries it — an allowance that nothing uses is a warning, and a
+# warning in the gate is a warning that nobody reads.
+allow = [
+    # The licence of this project.
+    "AGPL-3.0-or-later",
+    # Permissive licences.
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "Unicode-3.0",
+    "BSL-1.0",
+    # The licence of the UniFFI crates, the bridge between the Rust core
+    # and the native shells. The Mozilla Public License 2.0 is a
+    # file-level copyleft: it does not touch the licence of the product.
+    "MPL-2.0",
+]
+# The crates whose licence is a problem are **not** named here: the
+# licences that are not allowed are the ones that are not in `allow`.
+#
+# WHY: cargo-deny **0.20.2** removed the `deny` key of the section
+# `[licenses]` (the change of the pull request 611 of the project). A
+# configuration that names a removed key is a configuration that the tool
+# refuses to load, and a gate that cannot load its own configuration proves
+# nothing. The version of the tool is pinned in `scripts/audit-licenses.sh`
+# for exactly this reason.
+
+# ── The duplicated versions ─────────────────────────────────────────────────
+[bans]
+# Two versions of the same crate are a warning, not an error: the tree of
+# the dependencies is what it is, and a duplicate is not a legal problem.
+multiple-versions = "warn"
+# A wildcard requirement is never acceptable: it lets a new version of a
+# dependency change the product without a change of the repository.
+wildcards = "deny"
+# WHY: the path dependencies of the workspace carry no version. A crate of
+# the workspace is built from the tree of the repository and never from
+# the registry, so a version would say nothing — and the rule of the
+# wildcard is about the dependencies that come from outside.
+allow-wildcard-paths = true
+# WHY: the crates of the workspace are skipped by the check of the
+# wildcards. They depend on each other by path, and the path carries no
+# version — the version of a crate of the workspace is the version of the
+# workspace, and it is written in one place. The rule of the wildcard
+# exists for the dependencies that come from the registry, and those are
+# not skipped.
+skip = [
+    "phairplay-core",
+    "phairplay-airplay",
+    "phairplay-miracast",
+    "phairplay-cast",
+    "phairplay-dlna",
+    "phairplay-discovery",
+    "phairplay-plist",
+    "phairplay-h264",
+    "phairplay-aac",
+    "phairplay-alac",
+    "phairplay-ffi",
+    "phairplay-web",
+]
+
+# ── The sources ─────────────────────────────────────────────────────────────
+[sources]
+# Only the crates.io registry and the crates that are vendored into the
+# repository are allowed. A dependency that comes from an unknown registry
+# or from an unknown git repository is a supply-chain hole.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

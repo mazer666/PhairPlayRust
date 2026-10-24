@@ -156,12 +156,10 @@ fn ok(protocol: &str) -> RtspResponse {
 
 /// The `OPTIONS` answer: the verbs the receiver supports.
 fn options(protocol: &str) -> RtspResponse {
-    RtspResponse::ok()
-        .with_protocol(protocol)
-        .with_header(
-            "Public",
-            "ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER",
-        )
+    RtspResponse::ok().with_protocol(protocol).with_header(
+        "Public",
+        "ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER",
+    )
 }
 
 /// The `ANNOUNCE` answer: the session description of the sender.
@@ -275,9 +273,10 @@ fn set_parameter(
     let body = request.body_text().unwrap_or_default();
     let content_type = request.content_type().unwrap_or_default();
     if body.trim_start().starts_with("volume") {
-        if let Some(value) = body.split_once(':').and_then(|(_, rest)| {
-            rest.trim().parse::<f32>().ok()
-        }) {
+        if let Some(value) = body
+            .split_once(':')
+            .and_then(|(_, rest)| rest.trim().parse::<f32>().ok())
+        {
             session.volume = value;
         }
         return ok(request.response_protocol());

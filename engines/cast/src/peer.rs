@@ -8,25 +8,27 @@
 //! auditable.
 //!
 //! WHAT: [`run_peer`] owns one connection from the TLS handshake to the
-//! final `Ended` event.
+//! final `Ended` event. It is an internal function: the public way into a
+//! Cast connection is the engine.
 //!
 //! EXAMPLE:
 //!
 //! ```no_run
-//! # use phairplay_cast::peer::run_peer;
+//! use phairplay_cast::{CastConfig, CastEngine};
+//! use phairplay_core::protocol::ProtocolEngine;
+//!
 //! # async fn example() {
-//! # let inner = unimplemented!();
-//! # let stream = unimplemented!();
-//! # let tls = unimplemented!();
-//! # let ctx = unimplemented!();
-//! # let addr = unimplemented!();
-//! run_peer(inner, stream, tls, ctx, addr).await;
+//! // The engine owns the listener, the TLS layer and the peer loop.
+//! let engine = CastEngine::new(CastConfig::default());
+//! let status = engine.status();
+//! assert!(status.tcp_port.is_none());
 //! # }
 //! ```
 
 use std::net::SocketAddr;
 use std::sync::Arc;
 
+use phairplay_core::privacy::mask_socket_addr;
 use phairplay_core::protocol::EngineContext;
 use phairplay_core::session::{SessionEndReason, SessionEvent, SessionId, SessionSnapshot};
 use tokio::net::TcpStream;
@@ -54,11 +56,11 @@ pub(crate) async fn run_peer(
     let tls_stream = match handshake {
         Ok(Ok(stream)) => stream,
         Ok(Err(_)) => {
-            tracing::debug!(%peer_addr, "cast peer failed the TLS handshake");
+            tracing::debug!(peer = %mask_socket_addr(&peer_addr), "cast peer failed the TLS handshake");
             return;
         }
         Err(_) => {
-            tracing::debug!(%peer_addr, "cast peer did not finish the TLS handshake in time");
+            tracing::debug!(peer = %mask_socket_addr(&peer_addr), "cast peer did not finish the TLS handshake in time");
             return;
         }
     };
@@ -74,7 +76,7 @@ pub(crate) async fn run_peer(
     );
     let session = SessionId::next();
     inner.register_session(session, transport_id);
-    tracing::info!(%peer_addr, %session, "cast peer connected");
+    tracing::info!(peer = %mask_socket_addr(&peer_addr), %session, "cast peer connected");
 
     let snapshot = SessionSnapshot {
         id: session,
@@ -85,7 +87,14 @@ pub(crate) async fn run_peer(
         audio: None,
         started_at: std::time::Instant::now(),
     };
-    let _ = ctx.events.send(SessionEvent::Started { session: snapshot });
+    // WHY: the future of `send` is awaited. A future that is dropped
+    // without being polled never puts the message into the channel — the
+    // event of the session would be lost, and the host would never learn
+    // that a sender had connected.
+    let _ = ctx
+        .events
+        .send(SessionEvent::Started { session: snapshot })
+        .await;
 
     for message in peer.greeting() {
         if write_message(&mut writer, &message, inner.config.max_message_bytes)
@@ -99,11 +108,14 @@ pub(crate) async fn run_peer(
     let reason = peer_loop(&inner, &mut reader, &mut writer, &mut peer, &ctx, session).await;
 
     inner.unregister_session(session);
-    let _ = ctx.events.send(SessionEvent::Ended {
-        session,
-        reason: reason.clone(),
-    });
-    tracing::info!(%peer_addr, %session, %reason, "cast peer disconnected");
+    let _ = ctx
+        .events
+        .send(SessionEvent::Ended {
+            session,
+            reason: reason.clone(),
+        })
+        .await;
+    tracing::info!(peer = %mask_socket_addr(&peer_addr), %session, %reason, "cast peer disconnected");
 }
 
 /// The read-dispatch-write loop of a peer.
@@ -158,7 +170,7 @@ where
         };
 
         for action in &dispatch.actions {
-            apply_action(action, ctx, session);
+            apply_action(action, ctx, session).await;
         }
         for reply in &dispatch.replies {
             if write_message(writer, reply, inner.config.max_message_bytes)
@@ -179,7 +191,11 @@ where
 }
 
 /// Applies one action of the dispatch to the sinks and the event channel.
-fn apply_action(action: &SessionAction, ctx: &EngineContext, session: SessionId) {
+///
+/// WHY: the function is asynchronous. The event of a change of the
+/// metadata or of the playback state is only delivered when the future of
+/// the channel is awaited; a future that is dropped sends nothing.
+async fn apply_action(action: &SessionAction, ctx: &EngineContext, session: SessionId) {
     match action {
         SessionAction::SetVolume { level, muted } => {
             let _ = ctx.audio_sink.set_volume(*level);
@@ -192,18 +208,24 @@ fn apply_action(action: &SessionAction, ctx: &EngineContext, session: SessionId)
             artist,
             album,
         } => {
-            let _ = ctx.events.send(SessionEvent::MetadataChanged {
-                session,
-                title: title.clone(),
-                artist: artist.clone(),
-                album: album.clone(),
-            });
+            let _ = ctx
+                .events
+                .send(SessionEvent::MetadataChanged {
+                    session,
+                    title: title.clone(),
+                    artist: artist.clone(),
+                    album: album.clone(),
+                })
+                .await;
         }
         SessionAction::PlaybackStateChanged { state } => {
-            let _ = ctx.events.send(SessionEvent::PlaybackStateChanged {
-                session,
-                state: state.clone(),
-            });
+            let _ = ctx
+                .events
+                .send(SessionEvent::PlaybackStateChanged {
+                    session,
+                    state: state.clone(),
+                })
+                .await;
         }
         SessionAction::Close => {}
     }

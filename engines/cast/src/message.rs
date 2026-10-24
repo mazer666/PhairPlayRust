@@ -12,7 +12,7 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::message::{CastMessage, Namespace, PayloadType};
+//! use phairplay_cast::{CastMessage, Namespace, PayloadType};
 //!
 //! let message = CastMessage::text(
 //!     Namespace::Heartbeat,
@@ -323,6 +323,7 @@ impl CastMessage {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]
@@ -382,10 +383,7 @@ mod tests {
 
     #[test]
     fn a_truncated_message_is_rejected() {
-        let mut bytes = Vec::new();
-        bytes.push(0x12);
-        bytes.push(0x40);
-        bytes.push(b'a');
+        let bytes = vec![0x12, 0x40, b'a'];
         assert_eq!(CastMessage::decode(&bytes), Err(ProtoError::Truncated));
     }
 

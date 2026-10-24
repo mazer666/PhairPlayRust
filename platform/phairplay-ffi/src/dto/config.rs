@@ -176,6 +176,8 @@ pub struct FfiLimitsConfig {
     pub video_queue_bytes: u64,
     /// The maximum number of audio packets buffered in the sink queue.
     pub audio_queue_packets: u64,
+    /// The maximum total number of bytes buffered in the audio sink queue.
+    pub audio_queue_bytes: u64,
     /// The maximum number of pairing attempts before the sender is locked out.
     pub max_pairing_attempts: u32,
     /// The maximum size of an album artwork payload, in bytes.
@@ -196,6 +198,7 @@ impl From<&LimitsConfig> for FfiLimitsConfig {
             video_queue_frames: limits.video_queue_frames as u64,
             video_queue_bytes: limits.video_queue_bytes as u64,
             audio_queue_packets: limits.audio_queue_packets as u64,
+            audio_queue_bytes: limits.audio_queue_bytes as u64,
             max_pairing_attempts: limits.max_pairing_attempts,
             max_artwork_bytes: limits.max_artwork_bytes as u64,
             max_photo_bytes: limits.max_photo_bytes as u64,
@@ -212,6 +215,7 @@ impl From<&FfiLimitsConfig> for LimitsConfig {
             video_queue_frames: limits.video_queue_frames as usize,
             video_queue_bytes: limits.video_queue_bytes as usize,
             audio_queue_packets: limits.audio_queue_packets as usize,
+            audio_queue_bytes: limits.audio_queue_bytes as usize,
             max_pairing_attempts: limits.max_pairing_attempts,
             max_artwork_bytes: limits.max_artwork_bytes as usize,
             max_photo_bytes: limits.max_photo_bytes as usize,
@@ -263,6 +267,7 @@ impl From<&FfiPerformanceConfig> for PerformanceConfig {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::test_support::{Must, MustErr};
 

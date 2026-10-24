@@ -25,8 +25,8 @@
 use std::sync::Arc;
 
 use aes::Aes128;
-use ctr::cipher::{KeyIvInit, StreamCipher};
 use ctr::Ctr128BE;
+use ctr::cipher::{KeyIvInit, StreamCipher};
 use sha2::{Digest, Sha512};
 use x25519_dalek::{PublicKey, StaticSecret};
 

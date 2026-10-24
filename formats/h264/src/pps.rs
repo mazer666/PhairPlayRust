@@ -172,6 +172,7 @@ fn read_scaling_list(reader: &mut BitReader<'_>) -> Result<(), H264Error> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     /// The payload of a baseline PPS, as sent by many cameras. The NAL

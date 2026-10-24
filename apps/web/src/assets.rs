@@ -39,11 +39,12 @@ pub fn static_root() -> PathBuf {
     if development.join("index.html").exists() {
         return development;
     }
-    std::env::current_dir().unwrap_or_else(|_| development)
+    std::env::current_dir().unwrap_or(development)
 }
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

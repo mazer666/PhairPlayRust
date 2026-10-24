@@ -66,6 +66,14 @@ pub(crate) fn read_uncompressed_pair(
         )));
     }
     let shift = 32 - chan_bits;
+    // WHY: the single-channel twin walks the buffer instead of indexing it.
+    // A buffer that is shorter than the number of samples must not turn
+    // into an index-out-of-bounds panic.
+    if mix_u.len() < num_samples || mix_v.len() < num_samples {
+        return Err(AlacError::Malformed(format!(
+            "a stereo element of {num_samples} samples does not fit into the mix buffer"
+        )));
+    }
     if chan_bits <= 16 {
         for index in 0..num_samples {
             let first = bits.read(chan_bits)? as i32;

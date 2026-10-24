@@ -31,7 +31,7 @@ pub fn decode(text: &str, max_bytes: usize) -> Result<PlistValue, AirPlayError> 
             text.len()
         )));
     }
-    let events = tokenize(text);
+    let events = tokenize(text)?;
     let mut cursor = 0usize;
     skip_whitespace(&events, &mut cursor);
     // The document is wrapped in a `plist` element.
@@ -56,7 +56,13 @@ fn skip_whitespace(events: &[Event], cursor: &mut usize) {
 }
 
 /// Splits the document into tags and text.
-fn tokenize(text: &str) -> Vec<Event> {
+///
+/// # Errors
+/// Returns [`AirPlayError::Parse`] when the document carries a markup
+/// declaration that this decoder refuses — a `DOCTYPE` with an internal
+/// subset is the one that matters, because that is where an entity is
+/// declared.
+fn tokenize(text: &str) -> Result<Vec<Event>, AirPlayError> {
     let bytes = text.as_bytes();
     let mut events = Vec::new();
     let mut position = 0usize;
@@ -86,10 +92,7 @@ fn tokenize(text: &str) -> Vec<Event> {
             continue;
         }
         if text[position..].starts_with("<!") {
-            match text[position..].find('>') {
-                Some(offset) => position += offset + 1,
-                None => break,
-            }
+            position = skip_declaration(text, position)?;
             text_start = position;
             continue;
         }
@@ -114,7 +117,71 @@ fn tokenize(text: &str) -> Vec<Event> {
     if text_start < text.len() {
         events.push(Event::Text(text[text_start..].to_string()));
     }
-    events
+    Ok(events)
+}
+
+/// Skips a markup declaration and returns the position behind it.
+///
+/// WHY a declaration is not simply skipped: a `DOCTYPE` may carry an
+///      *internal subset*, and the subset is where an entity is declared.
+///      The declaration is also the one construct of XML whose end cannot be
+///      found by looking for the next `>`: a subset may hold a quoted value
+///      with a `>` in it. A decoder that cuts the declaration at the first
+///      `>` therefore reads a *different* document than the sender sent —
+///      a parser differential, which is the seed of every XXE that slips
+///      through a filter.
+///
+/// WHY the subset is refused: this decoder resolves the five entities that
+///      XML defines itself and nothing else. A subset can only declare
+///      entities that the decoder will not resolve, so the subset is
+///      meaningless here — and it is the only way to make the decoder do
+///      something else than what the sender wrote. The plain `DOCTYPE` that
+///      Apple itself writes carries a public identifier and no subset; it is
+///      skipped, because a modern sender would otherwise be refused.
+///
+/// # Errors
+/// Returns [`AirPlayError::Parse`] when the declaration carries an internal
+/// subset or when it is not closed.
+fn skip_declaration(text: &str, position: usize) -> Result<usize, AirPlayError> {
+    let bytes = text.as_bytes();
+    let mut index = position + 2;
+    let mut quote: Option<u8> = None;
+    let mut has_subset = false;
+    while index < bytes.len() {
+        let byte = bytes[index];
+        match quote {
+            Some(open) => {
+                if byte == open {
+                    quote = None;
+                }
+            }
+            None => match byte {
+                b'"' | b'\'' => quote = Some(byte),
+                b'[' => has_subset = true,
+                b'<' => {
+                    // A declaration never holds a `<` outside a quoted value.
+                    // The one that does is the internal subset — and the one
+                    // that does not is a declaration that was never closed.
+                    return Err(if has_subset {
+                        AirPlayError::parse("the plist carries a doctype with an internal subset")
+                    } else {
+                        AirPlayError::parse("the markup declaration is not closed")
+                    });
+                }
+                b'>' => {
+                    if has_subset {
+                        return Err(AirPlayError::parse(
+                            "the plist carries a doctype with an internal subset",
+                        ));
+                    }
+                    return Ok(index + 1);
+                }
+                _ => {}
+            },
+        }
+        index += 1;
+    }
+    Err(AirPlayError::parse("the markup declaration is not closed"))
 }
 
 /// Parses one value at the cursor.

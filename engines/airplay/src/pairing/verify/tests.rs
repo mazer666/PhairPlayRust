@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -163,7 +164,9 @@ fn the_second_message_without_the_first_is_rejected() {
 #[test]
 fn a_message_of_the_wrong_size_is_rejected() {
     let mut session = receiver();
-    let error = session.pair_verify(&[1u8, 0, 0, 0, 1, 2]).expect_err("must fail");
+    let error = session
+        .pair_verify(&[1u8, 0, 0, 0, 1, 2])
+        .expect_err("must fail");
     assert!(matches!(error, AirPlayError::Parse { .. }));
 }
 

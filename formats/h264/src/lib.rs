@@ -9,7 +9,7 @@
 //!
 //! WHY: the bitstream arrives from the network, and the Exp-Golomb codes
 //!      of the parameter sets are a classic overflow trap. The reader in
-//!      [`bits`] counts in `u64` and clamps, so a sequence parameter set
+//!      `bits` counts in `u64` and clamps, so a sequence parameter set
 //!      with 31 leading zero bits is decoded instead of overflowing the
 //!      shift. Every loop in the parsers is bounded by the number of
 //!      elements the specification allows.

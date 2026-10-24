@@ -239,6 +239,7 @@ fn width_for(value: u64) -> usize {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::binary::decode::decode;
 

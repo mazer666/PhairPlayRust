@@ -1,0 +1,64 @@
+/* Die Texte der macOS-Shell, auf Deutsch.
+ *
+ * WHY: Jeder Text, den der Benutzer lesen kann, steht in diesem Katalog
+ * und nirgends sonst. Ein Text im Quelltext einer Ansicht lässt sich
+ * nicht übersetzen und nicht von jemandem prüfen, der Swift nicht liest.
+ */
+
+"dashboard.title" = "Empfänger";
+"dashboard.device" = "Gerät: %@";
+"dashboard.version" = "Version %@";
+"dashboard.running" = "Der Empfänger läuft.";
+"dashboard.stopped" = "Der Empfänger läuft nicht.";
+
+"protocol.airplay" = "AirPlay 2";
+"protocol.miracast" = "Miracast";
+"protocol.cast" = "Google Cast";
+"protocol.dlna" = "DLNA / UPnP";
+
+"protocol.state.disabled" = "In den Einstellungen deaktiviert";
+"protocol.state.disabled.reason" = "Der Dienst wird gar nicht erst angeboten.";
+"protocol.state.notStarted" = "Nie gestartet";
+"protocol.state.notStarted.reason" = "Das Protokoll ist eingeschaltet, aber der Dienst lief noch nie.";
+"protocol.state.stopped" = "Dienst gestoppt";
+"protocol.state.stopped.reason" = "Das Protokoll ist eingeschaltet, aber der Dienst läuft nicht.";
+"protocol.state.starting" = "Startet";
+"protocol.state.starting.reason" = "Die Sockets sind gebunden und der Dienst ist angemeldet.";
+"protocol.state.advertising" = "Bereit";
+"protocol.state.advertising.reason" = "Für die Sender im lokalen Netz sichtbar und auf eine Verbindung wartend.";
+"protocol.state.streaming" = "Stream läuft";
+"protocol.state.streaming.reason" = "Ein Sender ist verbunden und der Stream läuft.";
+"protocol.state.stopping" = "Stoppt";
+"protocol.state.stopping.reason" = "Die Verbindung zum Sender wird geschlossen.";
+"protocol.state.failed" = "Fehler";
+"protocol.state.failed.reason" = "Der Empfänger konnte nicht gestartet werden.";
+
+"protocol.ports" = "TCP %@ · UDP %@";
+"protocol.ports.tcp" = "TCP %@";
+"protocol.ports.none" = "Kein Port gebunden";
+"protocol.peers.one" = "%@ Sender";
+"protocol.peers.many" = "%@ Sender";
+"protocol.switch.on" = "%@ einschalten";
+"protocol.switch.off" = "%@ ausschalten";
+
+"nowplaying.title" = "Läuft gerade";
+"nowplaying.empty" = "Es ist kein Sender verbunden.";
+"nowplaying.sender.unknown" = "Unbekannter Sender";
+"nowplaying.title.unknown" = "Unbekannter Titel";
+"nowplaying.artist.unknown" = "Unbekannter Künstler";
+"nowplaying.album.unknown" = "Unbekanntes Album";
+"nowplaying.video.unknown" = "Kein Video";
+"nowplaying.audio.unknown" = "Kein Ton";
+"nowplaying.video" = "Video: %@";
+"nowplaying.audio" = "Ton: %@";
+"nowplaying.uptime" = "Läuft seit %@";
+
+"failure.title" = "Der Empfänger hat ein Problem gemeldet";
+"failure.code" = "Code %@";
+"failure.dismiss" = "Ausblenden";
+
+"menu.title" = "PhairPlayRust-Empfänger";
+"menu.running" = "Der Empfänger läuft.";
+"menu.stopped" = "Der Empfänger läuft nicht.";
+"menu.refresh" = "Aktualisieren";
+"menu.quit" = "Beenden";

@@ -46,11 +46,22 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+use phairplay_core::privacy::mask_url;
+
 /// The timeout of a GENA notification.
-pub const NOTIFY_TIMEOUT: Duration = Duration::from_secs(3);
+///
+/// WHY: the deadline of a protocol step belongs to one place. Its single
+/// owner is [`phairplay_core::config::timeouts::GENA_NOTIFY_TIMEOUT_MS`].
+pub const NOTIFY_TIMEOUT: Duration =
+    Duration::from_millis(phairplay_core::config::timeouts::GENA_NOTIFY_TIMEOUT_MS);
 
 /// The lifetime of a subscription, in seconds.
-pub const SUBSCRIPTION_TIMEOUT_SECONDS: u32 = 1800;
+///
+/// WHY: the UPnP specification gives the advertisement lifetime and the
+/// duration of a GENA subscription the same value, so both are one constant:
+/// [`phairplay_core::config::timeouts::UPNP_MAX_AGE_SECONDS`].
+pub const SUBSCRIPTION_TIMEOUT_SECONDS: u32 =
+    phairplay_core::config::timeouts::UPNP_MAX_AGE_SECONDS;
 
 /// The maximum size of the body of a notification.
 pub const MAX_NOTIFY_BODY_BYTES: usize = 16 * 1024;
@@ -342,7 +353,10 @@ impl GenaEventManager {
         };
         for (callback, sid, sequence) in targets {
             if let Err(error) = self.notifier.notify(&callback, &sid, sequence, &body) {
-                tracing::warn!(callback = %callback, reason = %error, "the GENA notification failed");
+                // WHY the masked URL: the callback carries the address of the
+                // control point and often a token in its path. The log needs
+                // to name the peer, not to identify it.
+                tracing::warn!(callback = %mask_url(&callback), reason = %error, "the GENA notification failed");
             }
         }
     }

@@ -14,12 +14,18 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::media::{MediaCommand, MediaSession};
+//! use phairplay_cast::{LoadRequest, MediaCommand, MediaItem, MediaSession};
 //!
 //! let mut session = MediaSession::new();
-//! let outcome = session.apply(&MediaCommand::Load(
-//!     phairplay_cast::payloads::LoadRequest { autoplay: Some(true), ..Default::default() },
-//! ));
+//! let outcome = session.apply(&MediaCommand::Load(LoadRequest {
+//!     media: Some(MediaItem {
+//!         content_id: Some("https://example.invalid/movie.m3u8".to_string()),
+//!         content_type: Some("application/x-mpegURL".to_string()),
+//!         ..MediaItem::default()
+//!     }),
+//!     autoplay: Some(true),
+//!     ..LoadRequest::default()
+//! }));
 //! assert!(outcome.is_ok());
 //! assert_eq!(session.player_state(), "PLAYING");
 //! ```
@@ -32,6 +38,14 @@ use crate::payloads::{
 };
 
 /// A command of the media channel.
+//
+// WHY: the lint of the size of the variants is switched off for this
+// enumeration. `Load` carries the whole description of a media item, and
+// the other variants carry nothing: boxing the large variant would make
+// every call site of the public API of the crate allocate, and the
+// enumeration is the wire format of the media channel — its shape is the
+// shape of the protocol, not a question of layout.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq)]
 pub enum MediaCommand {
     /// Load a media item.
@@ -319,6 +333,7 @@ impl MediaStatusResponse {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     fn load_request(autoplay: bool) -> LoadRequest {

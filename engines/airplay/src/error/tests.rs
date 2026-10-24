@@ -1,4 +1,3 @@
-
 use super::*;
 
 use crate::error::AirPlayError;
@@ -18,8 +17,7 @@ fn a_protocol_violation_maps_onto_the_core_protocol_variant() {
 
 #[test]
 fn the_core_error_kind_of_a_limit_is_resource_exhausted() {
-    let error: phairplay_core::error::CoreError =
-        AirPlayError::limit_exceeded("body").into();
+    let error: phairplay_core::error::CoreError = AirPlayError::limit_exceeded("body").into();
     assert_eq!(ErrorKind::classify(&error), ErrorKind::ResourceExhausted);
 }
 

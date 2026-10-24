@@ -359,6 +359,7 @@ pub fn pixel_format_name(format: PixelFormat) -> &'static str {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

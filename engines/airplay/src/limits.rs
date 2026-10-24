@@ -22,6 +22,7 @@ use std::time::Duration;
 
 use phairplay_core::config::AppConfig;
 use phairplay_core::protocol::ProtocolKind;
+use phairplay_core::queue::QueueBudget;
 
 /// The resource limits the AirPlay engine enforces.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,6 +47,10 @@ pub struct AirPlayLimits {
     pub max_pairing_attempts: u32,
     /// The maximum time a peer may stay connected without sending anything.
     pub idle_timeout: Duration,
+    /// The budget of the queue of the mirrored video frames.
+    pub video_queue: QueueBudget,
+    /// The budget of the queue of the mirrored audio packets.
+    pub audio_queue: QueueBudget,
 }
 
 impl AirPlayLimits {
@@ -74,6 +79,12 @@ impl AirPlayLimits {
             max_artwork_bytes: config.limits.max_artwork_bytes,
             max_pairing_attempts: config.limits.max_pairing_attempts.max(1),
             idle_timeout: Duration::from_millis(config.performance.idle_timeout_ms.max(1_000)),
+            // The queue of the mirrored media is bounded twice: by a number of
+            // frames and by a number of bytes. A queue that only knows the
+            // count can be filled with hundreds of megabytes by a peer that
+            // sends maximum-size frames.
+            video_queue: QueueBudget::video(&config.limits),
+            audio_queue: QueueBudget::audio(&config.limits),
         }
     }
 

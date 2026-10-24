@@ -198,13 +198,14 @@ impl<'a> WfdInformationElement<'a> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]
     fn an_element_with_one_block_is_parsed() {
         let element = WfdInformationElement::parse(&[0x10, 0x02, 0x01, 0x00]).expect("parse");
         assert_eq!(element.blocks().len(), 1);
-        assert_eq!(element.block(WfdBlockKind::ProtocolVersion).is_some(), true);
+        assert!(element.block(WfdBlockKind::ProtocolVersion).is_some());
     }
 
     #[test]
@@ -232,13 +233,19 @@ mod tests {
     fn a_block_that_runs_past_the_end_is_rejected() {
         // The block announces 10 bytes but only 2 are present.
         let error = WfdInformationElement::parse(&[0x10, 0x0a, 0x01, 0x00]).expect_err("must fail");
-        assert!(matches!(error, MiracastError::TruncatedBlock { .. }), "{error}");
+        assert!(
+            matches!(error, MiracastError::TruncatedBlock { .. }),
+            "{error}"
+        );
     }
 
     #[test]
     fn a_trailing_type_byte_without_a_length_is_rejected() {
         let error = WfdInformationElement::parse(&[0x10]).expect_err("must fail");
-        assert!(matches!(error, MiracastError::TruncatedBlock { .. }), "{error}");
+        assert!(
+            matches!(error, MiracastError::TruncatedBlock { .. }),
+            "{error}"
+        );
     }
 
     #[test]
@@ -256,7 +263,10 @@ mod tests {
         // Every block is two bytes long and carries no payload.
         let input = vec![0x00_u8; MAX_BLOCKS * 2 + 2];
         let error = WfdInformationElement::parse(&input).expect_err("must fail");
-        assert!(matches!(error, MiracastError::TooManyBlocks { .. }), "{error}");
+        assert!(
+            matches!(error, MiracastError::TooManyBlocks { .. }),
+            "{error}"
+        );
     }
 
     #[test]

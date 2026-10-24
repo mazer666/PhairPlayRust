@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The colours of the platform theme.
+
+    WHY: the window of the application is drawn by Compose, but the window
+    itself is created by the platform before the first frame of Compose
+    exists. Without these colours the window flashes in the wrong colour
+    while the process starts.
+-->
+<resources>
+
+    <color name="background">#FFF7F8FA</color>
+    <color name="launcher_background">#FF1F2933</color>
+
+</resources>

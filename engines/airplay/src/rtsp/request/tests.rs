@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -9,8 +10,8 @@ fn parse(text: &str) -> Result<RtspRequest, AirPlayError> {
 
 #[test]
 fn an_options_request_is_parsed_completely() {
-    let request = parse("OPTIONS rtsp://10.0.0.1/live RTSP/1.0\r\nCSeq: 2\r\n\r\n")
-        .expect("valid request");
+    let request =
+        parse("OPTIONS rtsp://10.0.0.1/live RTSP/1.0\r\nCSeq: 2\r\n\r\n").expect("valid request");
     assert_eq!(request.method, RtspMethod::Options);
     assert_eq!(request.uri, "rtsp://10.0.0.1/live");
     assert_eq!(request.protocol, "RTSP/1.0");
@@ -20,16 +21,16 @@ fn an_options_request_is_parsed_completely() {
 
 #[test]
 fn headers_are_matched_case_insensitively() {
-    let request = parse("GET /info HTTP/1.1\r\ncontent-type: text/plain\r\n\r\n")
-        .expect("valid request");
+    let request =
+        parse("GET /info HTTP/1.1\r\ncontent-type: text/plain\r\n\r\n").expect("valid request");
     assert_eq!(request.header("Content-Type"), Some("text/plain"));
     assert_eq!(request.content_type().as_deref(), Some("text/plain"));
 }
 
 #[test]
 fn the_body_is_kept_as_raw_bytes() {
-    let request = parse("POST /play HTTP/1.1\r\nContent-Length: 3\r\n\r\nabc")
-        .expect("valid request");
+    let request =
+        parse("POST /play HTTP/1.1\r\nContent-Length: 3\r\n\r\nabc").expect("valid request");
     assert_eq!(request.body, b"abc");
     assert_eq!(request.body_text().as_deref(), Some("abc"));
 }
@@ -57,8 +58,8 @@ fn a_request_without_a_terminator_is_rejected() {
 
 #[test]
 fn a_header_without_a_colon_is_rejected() {
-    let error = parse("OPTIONS rtsp://x/y RTSP/1.0\r\nbroken-header\r\n\r\n")
-        .expect_err("must fail");
+    let error =
+        parse("OPTIONS rtsp://x/y RTSP/1.0\r\nbroken-header\r\n\r\n").expect_err("must fail");
     assert!(matches!(error, AirPlayError::Parse { .. }));
 }
 

@@ -56,6 +56,7 @@ def a_configuration():
             video_queue_frames=42,
             video_queue_bytes=12345678,
             audio_queue_packets=7,
+            audio_queue_bytes=7654321,
             max_pairing_attempts=3,
             max_artwork_bytes=111,
             max_photo_bytes=222,
@@ -100,6 +101,7 @@ def the_configuration_survives_the_bridge():
     assert read_back.protocols[0].require_pin is True
     assert read_back.limits.video_queue_frames == 42
     assert read_back.limits.max_header_bytes == 555
+    assert read_back.limits.audio_queue_bytes == 7654321
     assert read_back.performance.idle_timeout_ms == 9999
     print("ok  the configuration survives the bridge through the C ABI")
 

@@ -203,7 +203,10 @@ impl SessionRegistry {
     }
 
     /// Every live session.
-    #[must_use]
+    ///
+    /// WHY: the iterator itself is already `#[must_use]`, so the attribute
+    /// on the function would be a duplicate. `clippy::double_must_use` says
+    /// so, and it is right.
     pub fn sessions(&self) -> impl Iterator<Item = &SessionSnapshot> {
         self.sessions.values()
     }
@@ -223,6 +226,7 @@ impl SessionRegistry {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::media::{AudioCodec, AudioFormat};
 

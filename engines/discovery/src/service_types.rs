@@ -37,21 +37,26 @@ use phairplay_core::identity::sanitize_service_name;
 pub use phairplay_core::identity::MAX_SERVICE_NAME_LENGTH;
 
 /// The AirPlay mirroring service type.
-pub const AIRPLAY_TCP: &str = "_airplay._tcp";
+///
+/// WHY: the spelling of a service type is a contract with the sender. The
+/// single owner of every type of the workspace is
+/// [`phairplay_core::config::service_types`]; this crate re-exports it so
+/// that the discovery code and its tests speak the same names.
+pub use phairplay_core::config::service_types::AIRPLAY_TCP;
 
 /// The RAOP (Remote Audio Output Protocol) service type.
 ///
 /// WHY: it is required *alongside* [`AIRPLAY_TCP`], not instead of it.
-pub const RAOP_TCP: &str = "_raop._tcp";
+pub use phairplay_core::config::service_types::RAOP_TCP;
 
 /// The Google Cast service type.
-pub const GOOGLECAST_TCP: &str = "_googlecast._tcp";
+pub use phairplay_core::config::service_types::GOOGLECAST_TCP;
 
 /// The Miracast / Wi-Fi Display service type.
-pub const MIRACAST_TCP: &str = "_miracast._tcp";
+pub use phairplay_core::config::service_types::MIRACAST_TCP;
 
 /// Every service type this crate knows how to advertise.
-pub const ALL_SERVICE_TYPES: [&str; 4] = [AIRPLAY_TCP, RAOP_TCP, GOOGLECAST_TCP, MIRACAST_TCP];
+pub const ALL_SERVICE_TYPES: [&str; 4] = phairplay_core::config::service_types::ALL;
 
 /// The separator between the MAC prefix and the display name in a RAOP
 /// service instance name.

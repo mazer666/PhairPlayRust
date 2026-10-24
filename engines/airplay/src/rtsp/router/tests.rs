@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 use crate::rtsp::request::RtspRequest;
@@ -27,10 +28,12 @@ fn an_options_request_is_answered_with_the_public_verbs() {
         &ctx,
     );
     assert_eq!(response.status, 200);
-    assert!(response
-        .headers
-        .iter()
-        .any(|(name, value)| name == "Public" && value.contains("ANNOUNCE")));
+    assert!(
+        response
+            .headers
+            .iter()
+            .any(|(name, value)| name == "Public" && value.contains("ANNOUNCE"))
+    );
 }
 
 #[test]

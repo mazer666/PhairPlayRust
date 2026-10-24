@@ -38,13 +38,22 @@ use crate::service_types::{
 use crate::txt::TxtRecord;
 
 /// The default port of the AirPlay RTSP listener.
-pub const DEFAULT_AIRPLAY_PORT: u16 = 7000;
+///
+/// WHY: the value is the port every AirPlay sender looks for. Its single
+/// owner is [`phairplay_core::config::ports::AIRPLAY_RTSP`].
+pub const DEFAULT_AIRPLAY_PORT: u16 = phairplay_core::config::ports::AIRPLAY_RTSP;
 
 /// The default port of the Google Cast TLS listener.
-pub const DEFAULT_CAST_PORT: u16 = 8009;
+///
+/// WHY: the value is the port every Cast sender looks for. Its single
+/// owner is [`phairplay_core::config::ports::CAST_TLS`].
+pub const DEFAULT_CAST_PORT: u16 = phairplay_core::config::ports::CAST_TLS;
 
 /// The default port of the Miracast / WFD RTSP listener.
-pub const DEFAULT_MIRACAST_PORT: u16 = 7236;
+///
+/// WHY: the value is the port every WFD sender looks for. Its single owner
+/// is [`phairplay_core::config::ports::MIRACAST_WFD`].
+pub const DEFAULT_MIRACAST_PORT: u16 = phairplay_core::config::ports::MIRACAST_WFD;
 
 /// The mDNS domain every service is registered in.
 pub const MDNS_DOMAIN: &str = "local.";

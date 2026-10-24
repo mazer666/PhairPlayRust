@@ -1,4 +1,4 @@
-
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 use super::*;
 
 use crate::error::AirPlayError;
@@ -42,7 +42,10 @@ fn the_request_carries_the_token() {
         .build_request(DacpCommand::PlayPause)
         .expect("request");
     let text = String::from_utf8(request).expect("utf-8");
-    assert!(text.starts_with("GET /ctrl-int/1/playpause HTTP/1.1\r\n"), "{text}");
+    assert!(
+        text.starts_with("GET /ctrl-int/1/playpause HTTP/1.1\r\n"),
+        "{text}"
+    );
     assert!(text.contains("Active-Remote: secret-token\r\n"), "{text}");
 }
 

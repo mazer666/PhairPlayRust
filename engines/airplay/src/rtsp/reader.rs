@@ -142,7 +142,10 @@ impl<R: AsyncRead + Unpin> StreamBuffer<R> {
         let deadline = Instant::now() + timeout;
         let mut line: Vec<u8> = Vec::new();
         loop {
-            if let Some(position) = self.buffer[self.start..].iter().position(|byte| *byte == b'\n') {
+            if let Some(position) = self.buffer[self.start..]
+                .iter()
+                .position(|byte| *byte == b'\n')
+            {
                 let end = self.start + position;
                 line.extend_from_slice(&self.buffer[self.start..end]);
                 self.consume(position + 1);

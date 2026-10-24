@@ -11,6 +11,44 @@ values. The mapping is:
 | `config/performance-budgets.toml` | `PerformanceConfig`, `LimitsConfig` in `core/phairplay-core/src/config.rs` |
 | `config/security-policy.toml` | `AppConfig` in `core/phairplay-core/src/config.rs` plus the parser, callback and pairing guards of the engines |
 
+## Who owns which budget
+
+Every budget of `performance-budgets.toml` has exactly one owner. The owner
+is the place a change has to be made — and the only place the value is
+written down.
+
+| Budget | Owner | Machine-checked? |
+|---|---|---|
+| `latency.first_frame_ms` | `PerformanceConfig::first_frame_latency_ms` | yes — compared with the typed model |
+| `latency.idle_timeout_ms` | `PerformanceConfig::idle_timeout_ms` | yes |
+| `throughput.minimum_fps` | `PerformanceConfig::minimum_fps` | yes |
+| `resources.max_memory_mb` | `PerformanceConfig::max_memory_mb` | yes |
+| `resources.max_cpu_percent` | `PerformanceConfig::max_cpu_percent` | yes |
+| `queues.video_queue_frames` | `LimitsConfig::video_queue_frames` | yes |
+| `queues.video_queue_bytes` | `LimitsConfig::video_queue_bytes` | yes |
+| `queues.audio_queue_packets` | `LimitsConfig::audio_queue_packets` | yes |
+| `queues.audio_queue_bytes` | `LimitsConfig::audio_queue_bytes` | yes |
+| `limits.max_message_bytes` | `LimitsConfig::max_message_bytes` | yes |
+| `limits.max_header_count` | `LimitsConfig::max_header_count` | yes |
+| `limits.max_header_bytes` | `LimitsConfig::max_header_bytes` | yes |
+| `limits.max_pairing_attempts` | `LimitsConfig::max_pairing_attempts` | yes |
+| `limits.max_artwork_bytes` | `LimitsConfig::max_artwork_bytes` | yes |
+| `limits.max_photo_bytes` | `LimitsConfig::max_photo_bytes` | yes |
+| `limits.max_media_bytes` | `LimitsConfig::max_media_bytes` | yes |
+| `latency.audio_video_sync_ms` | this file — a measurement target, not a default | yes — must exist and must not be copied |
+| `throughput.measurement_window_seconds` | this file — a measurement target | yes |
+| `jobs.max_concurrent_workers` | this file — a bound of the job executor | yes |
+| `jobs.max_queued_jobs` | this file — a bound of the job executor | yes |
+| `jobs.max_queue_wait_ms` | this file — a bound of the job executor | yes |
+| `code_limits.target_max_lines_per_file` | this file — a rule of the code style | yes |
+| `code_limits.hard_max_lines_per_file` | this file — a rule of the code style | yes |
+
+"Mirrored" means that the value also exists in the typed Rust model and that
+`scripts/check-docs-links.sh` compares the two. "Owned by this file" means
+that the value has no typed counterpart — it is a measurement target, a job
+bound or a rule of the code style. The script checks that such a value exists
+and that it is not written down a second time.
+
 ## The single-source rule
 
 **Every number and every rule in the documentation tree is written down

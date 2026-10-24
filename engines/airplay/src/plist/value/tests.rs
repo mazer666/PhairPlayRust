@@ -1,4 +1,3 @@
-
 use super::*;
 
 #[test]
@@ -29,7 +28,9 @@ fn a_nested_value_can_be_reached() {
     let streams = document.get("streams").and_then(PlistValue::as_array);
     let first = streams.and_then(|items| items.first());
     assert_eq!(
-        first.and_then(|item| item.get("type")).and_then(PlistValue::as_integer),
+        first
+            .and_then(|item| item.get("type"))
+            .and_then(PlistValue::as_integer),
         Some(110)
     );
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The foreground of the icon of the application.
+
+    WHY: the icon of the launcher is drawn on the background of the
+    adaptive icon, and the system crops it. The shape therefore stays in
+    the middle of the canvas, where no crop can reach it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFF2F5F8"
+        android:pathData="M34,38h40a4,4 0 0 1 4,4v24a4,4 0 0 1 -4,4h-40a4,4 0 0 1 -4,-4v-24a4,4 0 0 1 4,-4zM38,44v6h32v-6zM38,54v6h22v-6z" />
+    <path
+        android:fillColor="#FF7FD1AE"
+        android:pathData="M70,62a6,6 0 1 0 0,12a6,6 0 1 0 0,-12zM70,66a2,2 0 1 1 0,4a2,2 0 1 1 0,-4z" />
+</vector>

@@ -12,9 +12,9 @@
 //! |---|---|
 //! | [`wfd`] | The WFD information element and its hardened parser. |
 //! | [`rtsp`] | The WFD RTSP control plane: the reader, the router, the sink parameters. |
-//! | [`engine`] | The state machine and the socket that owns the session. |
-//! | [`peer`] | The life of one sender. |
-//! | [`error`] | The failures of the crate. |
+//! | `engine` | The state machine and the socket that owns the session. |
+//! | `peer` | The life of one sender. |
+//! | `error` | The failures of the crate. |
 //!
 //! The control plane is RTSP on port 7236. The sender asks with `OPTIONS`
 //! what the sink supports, reads the sink's parameters with `GET_PARAMETER`,

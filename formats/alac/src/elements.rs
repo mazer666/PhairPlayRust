@@ -49,7 +49,23 @@ impl AlacDecoder {
             ));
         }
         let escape = header & 1;
-        let chan_bits = self.config.bit_depth as u32 - (bytes_shifted * 8);
+        // WHY: the reference implementation resets the shift to zero in the
+        // escape path — an escaped element carries the samples in full and
+        // is never shifted afterwards. Without this the element would apply
+        // the shift of a *previous* element.
+        let mut applied_shift = bytes_shifted;
+        // WHY: the shift is subtracted from the width of a sample. If the
+        // width is smaller than the shift, the subtraction underflows — and
+        // a subtraction that underflows is a panic in a debug build and a
+        // huge number in a release build. The check has to come first.
+        let shift_bits = bytes_shifted * 8;
+        if u32::from(self.config.bit_depth) < shift_bits {
+            return Err(AlacError::Malformed(format!(
+                "a channel of {} bit samples cannot carry a shift of {shift_bits} bits",
+                self.config.bit_depth
+            )));
+        }
+        let chan_bits = self.config.bit_depth as u32 - shift_bits;
         if chan_bits > 32 {
             return Err(AlacError::Malformed(format!(
                 "a channel of {} bit samples with a shift of {bytes_shifted} bytes does not fit",
@@ -128,11 +144,14 @@ impl AlacDecoder {
             }
         } else {
             read_uncompressed(bits, &mut self.mix_u, num_samples, chan_bits)?;
+            // The escape path carries the samples in full: the shift of the
+            // header does not apply to them.
+            applied_shift = 0;
         }
 
         for index in 0..num_samples {
-            let value = if matches!(self.config.bit_depth, 24 | 32) && bytes_shifted != 0 {
-                apply_shift(self.mix_u[index], self.shift_buffer[index], bytes_shifted)
+            let value = if matches!(self.config.bit_depth, 24 | 32) && applied_shift != 0 {
+                apply_shift(self.mix_u[index], self.shift_buffer[index], applied_shift)
             } else {
                 self.mix_u[index]
             };
@@ -170,6 +189,10 @@ impl AlacDecoder {
             ));
         }
         let escape = header & 1;
+        // WHY: the reference implementation resets the shift to zero in the
+        // escape path — an escaped element carries the samples in full and
+        // is never shifted afterwards.
+        let mut applied_shift = bytes_shifted;
         let num_samples = self.read_partial_length(bits, partial, num_samples)?;
 
         let mut mix_bits = 0_u32;
@@ -179,7 +202,16 @@ impl AlacDecoder {
         // 32 bit samples would need 33 bits, which no bit field of the
         // format can hold; such a frame is refused instead of being
         // decoded into a value that does not exist.
-        let mut chan_bits = self.config.bit_depth as u32 - (bytes_shifted * 8) + 1;
+        // WHY: see the single-channel path — the subtraction has to be
+        // guarded, or a narrow sample width underflows the shift.
+        let shift_bits = bytes_shifted * 8;
+        if u32::from(self.config.bit_depth) < shift_bits {
+            return Err(AlacError::Malformed(format!(
+                "a stereo element of {} bit samples cannot carry a shift of {shift_bits} bits",
+                self.config.bit_depth
+            )));
+        }
+        let mut chan_bits = self.config.bit_depth as u32 - shift_bits + 1;
         if chan_bits > 32 {
             return Err(AlacError::Malformed(format!(
                 "a stereo element of {} bit samples needs {chan_bits} bits",
@@ -315,6 +347,9 @@ impl AlacDecoder {
                 num_samples,
                 chan_bits,
             )?;
+            // The escape path carries the samples in full: the shift of the
+            // header does not apply to them.
+            applied_shift = 0;
         }
 
         let mixed = unmix(
@@ -324,20 +359,20 @@ impl AlacDecoder {
             mix_res,
         );
         for index in 0..num_samples {
-            let left = if matches!(self.config.bit_depth, 24 | 32) && bytes_shifted != 0 {
+            let left = if matches!(self.config.bit_depth, 24 | 32) && applied_shift != 0 {
                 apply_shift(
                     mixed.left[index],
                     self.shift_buffer[index * 2],
-                    bytes_shifted,
+                    applied_shift,
                 )
             } else {
                 mixed.left[index]
             };
-            let right = if matches!(self.config.bit_depth, 24 | 32) && bytes_shifted != 0 {
+            let right = if matches!(self.config.bit_depth, 24 | 32) && applied_shift != 0 {
                 apply_shift(
                     mixed.right[index],
                     self.shift_buffer[index * 2 + 1],
-                    bytes_shifted,
+                    applied_shift,
                 )
             } else {
                 mixed.right[index]

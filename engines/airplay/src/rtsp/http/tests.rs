@@ -1,4 +1,5 @@
 //! The tests of the HTTP-like routes.
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 use crate::limits::AirPlayLimits;
@@ -57,7 +58,11 @@ fn an_unknown_get_route_is_not_implemented() {
     let limits = AirPlayLimits::default();
     let ctx = context(&identity, &capabilities, &limits);
     let mut session = AirPlaySession::new();
-    let response = route_get(&request("GET /nonsense HTTP/1.1\r\n\r\n"), &mut session, &ctx);
+    let response = route_get(
+        &request("GET /nonsense HTTP/1.1\r\n\r\n"),
+        &mut session,
+        &ctx,
+    );
     assert_eq!(response.status, 501);
 }
 
@@ -67,7 +72,8 @@ fn the_pair_setup_answer_carries_the_public_key() {
     let capabilities = MediaCapabilities::empty();
     let limits = AirPlayLimits::default();
     let ctx = context(&identity, &capabilities, &limits);
-    let mut session = AirPlaySession::with_identity(Arc::new(PairingIdentity::from_seed(&[4u8; 32])));
+    let mut session =
+        AirPlaySession::with_identity(Arc::new(PairingIdentity::from_seed(&[4u8; 32])));
     let body = vec![0u8; 32];
     let text = format!(
         "POST /pair-setup HTTP/1.1\r\nContent-Length: {}\r\n\r\n",
@@ -179,7 +185,11 @@ fn a_photo_delete_clears_the_published_photo() {
             data: Arc::new(vec![1, 2, 3]),
         });
     }
-    let response = route_delete(&request("DELETE /photo HTTP/1.1\r\n\r\n"), &mut session, &ctx);
+    let response = route_delete(
+        &request("DELETE /photo HTTP/1.1\r\n\r\n"),
+        &mut session,
+        &ctx,
+    );
     assert_eq!(response.status, 200);
     assert!(photos.lock().expect("lock").is_none());
 }
@@ -210,11 +220,7 @@ fn a_play_request_without_a_url_is_rejected() {
     let limits = AirPlayLimits::default();
     let ctx = context(&identity, &capabilities, &limits);
     let mut session = AirPlaySession::new();
-    let response = route_post(
-        &request("POST /play HTTP/1.1\r\n\r\n"),
-        &mut session,
-        &ctx,
-    );
+    let response = route_post(&request("POST /play HTTP/1.1\r\n\r\n"), &mut session, &ctx);
     assert_eq!(response.status, 400);
 }
 
@@ -289,7 +295,10 @@ fn the_scrub_answer_reports_the_position() {
 fn the_generated_pin_has_four_digits() {
     let pin = generate_pin();
     assert_eq!(pin.len(), 4);
-    assert!(pin.chars().all(|character| character.is_ascii_digit()), "{pin}");
+    assert!(
+        pin.chars().all(|character| character.is_ascii_digit()),
+        "{pin}"
+    );
 }
 
 #[test]

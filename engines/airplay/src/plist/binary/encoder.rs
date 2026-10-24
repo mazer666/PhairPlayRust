@@ -3,7 +3,7 @@
 use crate::error::AirPlayError;
 use crate::plist::value::PlistValue;
 
-use super::{int_size, write_int, MAGIC, MAX_OBJECTS, TRAILER_SIZE};
+use super::{MAGIC, MAX_OBJECTS, TRAILER_SIZE, int_size, write_int};
 
 pub(super) enum RawObject {
     Boolean(bool),
@@ -145,10 +145,7 @@ pub fn encode(value: &PlistValue) -> Result<Vec<u8>, AirPlayError> {
 /// # Errors
 /// Returns [`AirPlayError::LimitExceeded`] when the document would exceed
 /// `max_bytes`.
-pub fn encode_with_limit(
-    value: &PlistValue,
-    max_bytes: usize,
-) -> Result<Vec<u8>, AirPlayError> {
+pub fn encode_with_limit(value: &PlistValue, max_bytes: usize) -> Result<Vec<u8>, AirPlayError> {
     let mut objects: Vec<RawObject> = Vec::new();
     let root = build(value, &mut objects);
     if objects.len() as u64 > MAX_OBJECTS {

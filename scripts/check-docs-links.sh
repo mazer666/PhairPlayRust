@@ -38,6 +38,8 @@ LINK_ERRORS=()
 MIRROR_ERRORS=()
 MIRROR_WARNINGS=()
 MIRROR_CHECKED=0
+DOCUMENT_ONLY_CHECKED=0
+DUPLICATES=()
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -239,6 +241,7 @@ MAPPING=(
   "queues|video_queue_frames|video_queue_frames"
   "queues|video_queue_bytes|video_queue_bytes"
   "queues|audio_queue_packets|audio_queue_packets"
+  "queues|audio_queue_bytes|audio_queue_bytes"
   "limits|max_message_bytes|max_message_bytes"
   "limits|max_header_count|max_header_count"
   "limits|max_header_bytes|max_header_bytes"
@@ -246,6 +249,20 @@ MAPPING=(
   "limits|max_artwork_bytes|max_artwork_bytes"
   "limits|max_photo_bytes|max_photo_bytes"
   "limits|max_media_bytes|max_media_bytes"
+)
+
+# The budgets that this file owns alone. They have no typed counterpart in
+# the Rust model — they are measurement targets, job bounds and code limits.
+# They still have to exist, and their value must not appear in a second
+# document: the rule of the single source of truth applies to them as well.
+DOCUMENT_ONLY=(
+  "latency|audio_video_sync_ms"
+  "throughput|measurement_window_seconds"
+  "jobs|max_concurrent_workers"
+  "jobs|max_queued_jobs"
+  "jobs|max_queue_wait_ms"
+  "code_limits|target_max_lines_per_file"
+  "code_limits|hard_max_lines_per_file"
 )
 
 if [ ! -f "$BUDGETS" ] || [ ! -f "$MODEL" ]; then
@@ -279,7 +296,61 @@ else
     if [ "$documented" != "$implemented" ]; then
       MIRROR_ERRORS+=("${section}.${key}: documented ${documented}, typed model ${implemented} (${field})")
     fi
+    DUPLICATES+=("${section}|${key}|${documented}")
   done
+
+  for entry in "${DOCUMENT_ONLY[@]}"; do
+    section="${entry%%|*}"
+    key="${entry#*|}"
+    documented="$(toml_value "$BUDGETS" "$section" "$key")"
+    if [ -z "$documented" ]; then
+      MIRROR_ERRORS+=("${BUDGETS}: the key '${section}.${key}' does not exist")
+      continue
+    fi
+    DOCUMENT_ONLY_CHECKED=$((DOCUMENT_ONLY_CHECKED + 1))
+    DUPLICATES+=("${section}|${key}|${documented}")
+  done
+fi
+
+# A budget must not be written down a second time. A copy in a document is a
+# value that will drift away from its owner.
+#
+# WHY: a bare number is not a copy — the number 4 appears in every heading
+# of the document tree. A copy of a budget carries a unit, so the unit is
+# part of the pattern.
+#
+# WHY one pass: the tree has a few dozen documents and a few dozen budgets.
+# One scan of the tree with one pattern is fast; one scan per budget is not.
+COPY_PATTERN=""
+for entry in "${DUPLICATES[@]}"; do
+  value="${entry#*|}"
+  value="${value#*|}"
+  COPY_PATTERN="${COPY_PATTERN}|(^|[^0-9.])${value}([^0-9.]|$)[^|]*(ms|MB|fps|percent|bytes|lines|workers|jobs|seconds)"
+done
+COPY_PATTERN="${COPY_PATTERN#|}"
+
+if [ -n "$COPY_PATTERN" ]; then
+  # WHY `-h`: the file name and the line number must not take part in the
+  # search — a line number of 40 would otherwise look like the budget 40.
+  COPIES="$(find . -name '*.md' -not -path './target/*' -not -path './config/*' \
+    -not -path './docs/acceptance/*' -not -path './docs/audit/*' -print0 \
+    | xargs -0 grep -hE "${COPY_PATTERN}" 2>/dev/null || true)"
+
+  if [ -n "$COPIES" ]; then
+    for entry in "${DUPLICATES[@]}"; do
+      rest="${entry#*|}"
+      key="${rest%%|*}"
+      value="${rest#*|}"
+      hits="$(printf '%s\n' "$COPIES" | grep -cE "(^|[^0-9.])${value}([^0-9.]|$)" || true)"
+      if [ "$hits" -gt 0 ]; then
+        places="$(find . -name '*.md' -not -path './target/*' -not -path './config/*' \
+          -not -path './docs/acceptance/*' -not -path './docs/audit/*' -print0 \
+          | xargs -0 grep -lE "(^|[^0-9.])${value}([^0-9.]|$)[^|]*(ms|MB|fps|percent|bytes|lines|workers|jobs|seconds)" 2>/dev/null \
+          | sed 's|^\./||' | tr '\n' ' ')"
+        MIRROR_ERRORS+=("${key}: the value ${value} is written down in ${hits} place(s) as well (${places}) — it belongs to ${BUDGETS} alone")
+      fi
+    done
+  fi
 fi
 
 if [ "${#MIRROR_WARNINGS[@]}" -gt 0 ]; then
@@ -303,6 +374,7 @@ say "Markdown files scanned : ${CHECKED_FILES}"
 say "Internal links checked : ${CHECKED_LINKS}"
 say "Broken links           : ${BROKEN_LINKS}"
 say "Budgets compared       : ${MIRROR_CHECKED}"
+say "Budgets owned alone    : ${DOCUMENT_ONLY_CHECKED}"
 
 if [ "$BROKEN_LINKS" -gt 0 ] || [ "${#MIRROR_ERRORS[@]}" -gt 0 ]; then
   say ""
@@ -311,5 +383,5 @@ if [ "$BROKEN_LINKS" -gt 0 ] || [ "${#MIRROR_ERRORS[@]}" -gt 0 ]; then
 fi
 
 say ""
-say "OK: every internal link resolves and every documented budget matches the typed model."
+say "OK: every internal link resolves, every mirrored budget matches the typed model, and every budget owned alone exists exactly once."
 exit 0

@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -47,9 +48,48 @@ fn a_document_with_a_doctype_is_decoded() {
     let text = "<?xml version=\"1.0\"?>\n<!DOCTYPE plist PUBLIC \"x\" \"y\">\n\
 <plist version=\"1.0\"><dict><key>a</key><integer>1</integer></dict></plist>";
     let value = decode(text, 64 * 1024).expect("decodable");
-    assert_eq!(
-        value.get("a").and_then(PlistValue::as_integer),
-        Some(1)
+    assert_eq!(value.get("a").and_then(PlistValue::as_integer), Some(1));
+}
+
+#[test]
+fn a_doctype_with_an_internal_subset_is_refused() {
+    // The attack: the internal subset is where an entity is declared, and
+    // the subset may hold a `>` inside a quoted value — so a decoder that
+    // cuts the declaration at the first `>` reads a different document than
+    // the sender sent. The subset is refused instead of being skipped.
+    let text = "<?xml version=\"1.0\"?>\n\
+<!DOCTYPE plist [ <!ENTITY xxe SYSTEM \"file:///etc/passwd\"> ]>\n\
+<plist version=\"1.0\"><dict><key>a</key><string>&xxe;</string></dict></plist>";
+    let error = decode(text, 64 * 1024).expect_err("the subset must be refused");
+    assert!(
+        matches!(error, AirPlayError::Parse { .. }),
+        "the subset must be refused as malformed: {error}"
+    );
+}
+
+#[test]
+fn a_doctype_with_a_subset_that_holds_a_greater_than_sign_is_refused() {
+    // The parser differential: the `>` of the entity value is not the end
+    // of the declaration. A document that hides a `>` inside a quoted value
+    // must not be able to smuggle markup past the scanner.
+    let text = "<?xml version=\"1.0\"?>\n\
+<!DOCTYPE plist [ <!ENTITY x \"a>b\"> ]>\n\
+<plist version=\"1.0\"><dict><key>a</key><integer>1</integer></dict></plist>";
+    let error = decode(text, 64 * 1024).expect_err("the subset must be refused");
+    assert!(
+        matches!(error, AirPlayError::Parse { .. }),
+        "the subset must be refused as malformed: {error}"
+    );
+}
+
+#[test]
+fn an_unclosed_declaration_is_refused() {
+    let text = "<?xml version=\"1.0\"?>\n<!DOCTYPE plist PUBLIC \"x\"\n\
+<plist version=\"1.0\"><dict><key>a</key><integer>1</integer></dict></plist>";
+    let error = decode(text, 64 * 1024).expect_err("the declaration must be refused");
+    assert!(
+        matches!(error, AirPlayError::Parse { .. }),
+        "the declaration must be refused as malformed: {error}"
     );
 }
 

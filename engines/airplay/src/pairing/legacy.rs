@@ -164,8 +164,8 @@ impl LegacyPinPairing {
 
         let server_private = random_private();
         let k = BigUint::from_bytes_be(&sha1(&[&pad(&group()), &pad(&BigUint::from(2u8))]));
-        let server_public = (&k * &verifier + BigUint::from(2u8).modpow(&server_private, &group()))
-            % group();
+        let server_public =
+            (&k * &verifier + BigUint::from(2u8).modpow(&server_private, &group())) % group();
         let server_public_bytes = to_bytes(&server_public);
 
         self.step_one = Some(StepOne {
@@ -202,7 +202,9 @@ impl LegacyPinPairing {
 
         let a = BigUint::from_bytes_be(client_public);
         if a == BigUint::from(0u8) || a >= group() {
-            return Err(AirPlayError::crypto("pair-setup-pin client key is out of range"));
+            return Err(AirPlayError::crypto(
+                "pair-setup-pin client key is out of range",
+            ));
         }
         let a_bytes = to_bytes(&a);
 
@@ -244,7 +246,9 @@ impl LegacyPinPairing {
             .and_then(PlistValue::as_data)
             .ok_or_else(|| AirPlayError::parse("pair-setup-pin step 3 without a tag"))?;
         if encrypted.is_empty() || tag.len() != 16 {
-            return Err(AirPlayError::parse("pair-setup-pin step 3 has a malformed payload"));
+            return Err(AirPlayError::parse(
+                "pair-setup-pin step 3 has a malformed payload",
+            ));
         }
 
         let (key, base_iv) = derive_step_three_material(&self.session_key);

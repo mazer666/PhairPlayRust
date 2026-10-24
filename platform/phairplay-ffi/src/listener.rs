@@ -70,6 +70,7 @@ impl EventListener for CallbackEventListener {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::dto::{FfiProtocolKind, FfiProtocolState, FfiProtocolStatus};
     use crate::test_support::Must;

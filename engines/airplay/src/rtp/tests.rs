@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -105,7 +106,9 @@ async fn an_interleaved_frame_is_read() {
     tokio::spawn(async move {
         let mut client = client;
         use tokio::io::AsyncWriteExt;
-        let _ = client.write_all(&[0x24, 0x00, 0x00, 0x03, 0xAA, 0xBB, 0xCC]).await;
+        let _ = client
+            .write_all(&[0x24, 0x00, 0x00, 0x03, 0xAA, 0xBB, 0xCC])
+            .await;
     });
     let mut stream = StreamBuffer::new(server);
     let frame = read_interleaved_frame(&mut stream, 1024, Duration::from_secs(1))

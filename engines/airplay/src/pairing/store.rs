@@ -29,7 +29,8 @@ pub trait PairingStore: Send + Sync + Debug {
     ///
     /// # Errors
     /// Returns [`AirPlayError::Io`] when the store cannot be written.
-    fn add_controller(&self, controller_id: &str, long_term_key: &[u8]) -> Result<(), AirPlayError>;
+    fn add_controller(&self, controller_id: &str, long_term_key: &[u8])
+    -> Result<(), AirPlayError>;
 
     /// Loads the long-term public key of a controller.
     ///

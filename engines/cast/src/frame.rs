@@ -12,7 +12,7 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::frame::read_frame;
+//! use phairplay_cast::read_frame;
 //!
 //! # tokio::runtime::Runtime::new().unwrap().block_on(async {
 //! let mut stream: &[u8] = &[0x00, 0x00, 0x00, 0x02, 0x08, 0x01];
@@ -24,7 +24,10 @@
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 
 /// The default upper bound for a single CastV2 message.
-pub const DEFAULT_MAX_MESSAGE_BYTES: usize = 64 * 1024;
+///
+/// WHY: the same cap applies to the engine of the crate. Its single owner
+/// is [`phairplay_core::config::limits::CAST_MESSAGE_BYTES`].
+pub const DEFAULT_MAX_MESSAGE_BYTES: usize = phairplay_core::config::limits::CAST_MESSAGE_BYTES;
 
 /// A failure while reading or writing a framed message.
 #[derive(Debug, thiserror::Error)]
@@ -94,6 +97,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[tokio::test]

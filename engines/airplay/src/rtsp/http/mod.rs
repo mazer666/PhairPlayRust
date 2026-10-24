@@ -61,7 +61,10 @@ pub const MODEL: &str = "AppleTV5,3";
 pub const SOURCE_VERSION: &str = "220.68";
 
 /// The UDP port the timing service listens on.
-pub const TIMING_PORT: u16 = 6002;
+///
+/// WHY: the value is the port the Apple timing service uses. Its single
+/// owner is [`phairplay_core::config::ports::AIRPLAY_TIMING`].
+pub const TIMING_PORT: u16 = phairplay_core::config::ports::AIRPLAY_TIMING;
 
 /// Routes an HTTP-like read request.
 pub fn route_get(
@@ -112,11 +115,8 @@ pub fn route_put(
         return RtspResponse::not_implemented().with_protocol(request.response_protocol());
     }
     let content_type = request.header("Content-Type");
-    let validation = crate::photo::validate_photo(
-        &request.body,
-        content_type,
-        context.limits.max_photo_bytes,
-    );
+    let validation =
+        crate::photo::validate_photo(&request.body, content_type, context.limits.max_photo_bytes);
     match validation {
         crate::photo::PhotoValidation::Valid { image_type } => {
             let payload = crate::photo::PhotoPayload {
@@ -162,13 +162,22 @@ fn info(request: &RtspRequest, context: &RouteContext<'_>) -> RtspResponse {
     }
     let identity = context.identity;
     let mut entries = vec![
-        ("deviceID".into(), PlistValue::String(identity.device_id.clone())),
-        ("macAddress".into(), PlistValue::String(identity.device_id.clone())),
+        (
+            "deviceID".into(),
+            PlistValue::String(identity.device_id.clone()),
+        ),
+        (
+            "macAddress".into(),
+            PlistValue::String(identity.device_id.clone()),
+        ),
         ("features".into(), PlistValue::Integer(AIRPLAY_FEATURES)),
         ("statusFlags".into(), PlistValue::Integer(status_flags)),
         ("model".into(), PlistValue::String(MODEL.into())),
         ("name".into(), PlistValue::String(identity.name.clone())),
-        ("sourceVersion".into(), PlistValue::String(SOURCE_VERSION.into())),
+        (
+            "sourceVersion".into(),
+            PlistValue::String(SOURCE_VERSION.into()),
+        ),
         ("pi".into(), PlistValue::String(identity.device_id.clone())),
         ("vv".into(), PlistValue::Integer(2)),
         ("protovers".into(), PlistValue::String("1.1".into())),
@@ -271,10 +280,7 @@ fn server_info(request: &RtspRequest) -> RtspResponse {
 
 /// Parses the media URL and the start fraction of a `POST /play` body.
 #[must_use]
-pub fn parse_play_request(
-    document: &PlistValue,
-    text: Option<&str>,
-) -> (Option<String>, f64) {
+pub fn parse_play_request(document: &PlistValue, text: Option<&str>) -> (Option<String>, f64) {
     let url = document
         .get("Content-Location")
         .and_then(PlistValue::as_str)
@@ -332,9 +338,7 @@ pub fn ended_event(session: &AirPlaySession) -> SessionEvent {
 mod handshake;
 mod playback;
 
-use handshake::{
-    fp_setup, pair_pin_start, pair_setup, pair_setup_pin, pair_verify,
-};
+use handshake::{fp_setup, pair_pin_start, pair_setup, pair_setup_pin, pair_verify};
 pub use handshake::{mirror_setup, teardown_stream_types};
 use playback::{play, rate, scrub_post, stop};
 

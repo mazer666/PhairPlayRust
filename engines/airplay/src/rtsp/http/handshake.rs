@@ -1,14 +1,15 @@
 //! The handshake routes of the AirPlay control channel.
 
-
 use crate::error::AirPlayError;
 use crate::plist::{PlistValue, binary};
 use crate::rtsp::request::RtspRequest;
 use crate::rtsp::response::RtspResponse;
 use crate::rtsp::router::RouteContext;
-use crate::session::{AirPlaySession, STREAM_TYPE_AUDIO, STREAM_TYPE_BUFFERED_AUDIO, STREAM_TYPE_VIDEO};
+use crate::session::{
+    AirPlaySession, STREAM_TYPE_AUDIO, STREAM_TYPE_BUFFERED_AUDIO, STREAM_TYPE_VIDEO,
+};
 
-use super::{generate_pin, BINARY_PLIST, OCTET_STREAM, TIMING_PORT};
+use super::{BINARY_PLIST, OCTET_STREAM, TIMING_PORT, generate_pin};
 
 /// The `POST /pair-setup` answer: the public key of the receiver.
 pub(super) fn pair_setup(request: &RtspRequest, session: &mut AirPlaySession) -> RtspResponse {
@@ -51,7 +52,8 @@ pub(super) fn pair_pin_start(
     }
     if let Some(store) = context.pairing_store {
         if store.failed_attempts().unwrap_or(0) >= context.limits.max_pairing_attempts {
-            return RtspResponse::authorization_required().with_protocol(request.response_protocol());
+            return RtspResponse::authorization_required()
+                .with_protocol(request.response_protocol());
         }
     }
     let pin = generate_pin();
@@ -76,7 +78,8 @@ pub(super) fn pair_setup_pin(
         if store.failed_attempts().unwrap_or(0) >= context.limits.max_pairing_attempts {
             session.shown_pin = None;
             session.legacy_pin = None;
-            return RtspResponse::authorization_required().with_protocol(request.response_protocol());
+            return RtspResponse::authorization_required()
+                .with_protocol(request.response_protocol());
         }
     }
     let document = match crate::plist::decode(&request.body, context.limits.max_message_bytes) {
@@ -181,7 +184,10 @@ pub fn mirror_setup(
         }
     }
     response.push(("eventPort".into(), PlistValue::Integer(0)));
-    response.push(("timingPort".into(), PlistValue::Integer(i64::from(TIMING_PORT))));
+    response.push((
+        "timingPort".into(),
+        PlistValue::Integer(i64::from(TIMING_PORT)),
+    ));
 
     if let Some(streams) = document.get("streams").and_then(PlistValue::as_array) {
         let mut answers = Vec::new();
@@ -226,9 +232,5 @@ pub fn teardown_stream_types(request: &RtspRequest) -> Option<Vec<u8>> {
         .filter_map(|stream| stream.get("type").and_then(PlistValue::as_integer))
         .filter_map(|value| u8::try_from(value).ok())
         .collect();
-    if types.is_empty() {
-        None
-    } else {
-        Some(types)
-    }
+    if types.is_empty() { None } else { Some(types) }
 }

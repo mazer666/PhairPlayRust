@@ -285,6 +285,7 @@ pub fn total_samples(frames: &[AdtsHeader]) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     /// A low complexity frame of 44100 Hz with two channels.

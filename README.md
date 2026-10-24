@@ -30,18 +30,25 @@ network and without a decoder.
 
 | Part | State |
 |---|---|
-| Cargo workspace with eleven crates | in place |
-| Shared core: protocol trait, session registry, media sinks, capabilities, configuration, identity, metrics, error hierarchy, job executor | in place, with unit tests |
+| Cargo workspace with twelve crates | in place, compiles clean |
+| Shared core: protocol trait, session registry, media sinks, capabilities, configuration, identity, metrics, error hierarchy, job executor, bounded queue, log masking | in place, with unit tests |
 | Build contract for the crate interfaces | in place: [`docs/design/BUILD-CONTRACT.md`](docs/design/BUILD-CONTRACT.md) |
 | Central configuration: defaults, performance budgets, security policy | in place: [`config/`](config/README.md) |
 | Documentation landscape in the house format | in place: [`docs/`](docs/README.md) |
-| The four protocol engines and the five format crates | the crates exist; the implementation is the work of M1 and M2 |
-| The platform bridge and the local dashboard | planned — M2 |
-| Native shells for Android and macOS | planned — M3 |
-| Hardening, gate and release readiness | planned — M4 |
+| The four protocol engines and the four format crates | **implemented and tested** — the control plane of each protocol; the media path belongs to the platform layer |
+| The platform bridge and the local dashboard | **implemented and tested** — the bridge carries a value out and back, the dashboard answers its API |
+| Native shells for Android and macOS | **written**; their Gradle and Xcode builds are a device test — see the acceptance record |
+| Hardening, structural gates and the licence gate | **in place** — the gates are green, see [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md) |
 
-The table names the parts of the repository, not the completeness of an
-implementation. The machine-readable state is
+**The gate of the workspace is green:** the workspace compiles, the lint is
+clean under `-D warnings`, **1054** tests pass, the crate boundaries, the
+file-length limit, the licence headers, the documentation links and the
+dependency policy are all checked by scripts that fail when a rule is
+broken. What is **not** proven yet is the behaviour on real hardware — the
+acceptance record names every such row as NOT RUN and says where it will be
+measured.
+
+The machine-readable state is
 [`project/project.yaml`](project/project.yaml); the narrative of the
 milestones is in [`ROADMAP.md`](ROADMAP.md).
 
@@ -54,12 +61,18 @@ green and the evidence is in
 
 ## The four protocols
 
-| Protocol | Service | Picture | Sound | Milestone |
+| Protocol | Service | Picture | Sound | Control plane |
 |---|---|---|---|---|
-| AirPlay 2 | `_airplay._tcp` + `_raop._tcp` | yes | yes | M1 |
-| Miracast / Wi-Fi Display | `_miracast._tcp` | yes | yes | M2 |
-| Google Cast | `_googlecast._tcp` | yes | yes | M2 |
-| DLNA / UPnP MediaRenderer | SSDP | no (audio and pictures) | yes | M2 |
+| AirPlay 2 | `_airplay._tcp` + `_raop._tcp` | yes | yes | implemented |
+| Miracast / Wi-Fi Display | `_miracast._tcp` | yes | yes | implemented |
+| Google Cast | `_googlecast._tcp` | yes | yes | implemented |
+| DLNA / UPnP MediaRenderer | SSDP | no (audio and pictures) | yes | implemented |
+
+"Control plane implemented" means the handshake, the negotiation, the
+session lifecycle and the limits — the part of a protocol that a receiver
+owns. The *media* path needs a decoder of the host device and belongs to
+the native shell; a receiver that cannot decode a codec does not advertise
+it.
 
 Every protocol can be switched on and off independently, and a disabled
 protocol is neither advertised nor bound to a socket.

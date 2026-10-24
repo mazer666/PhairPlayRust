@@ -118,6 +118,7 @@ impl IntoResponse for ApiError {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use phairplay_ffi::error::FfiError;
 

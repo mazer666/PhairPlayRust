@@ -189,6 +189,7 @@ fn read<T>(lock: &RwLock<T>) -> std::sync::RwLockReadGuard<'_, T> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::test_support::{Must, MustErr};
     use phairplay_core::capabilities::{AudioCodec, VideoCodec};

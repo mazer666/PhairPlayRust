@@ -172,6 +172,7 @@ fn read_u32(data: &[u8], offset: usize) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     /// Builds a magic cookie of 24 bytes.

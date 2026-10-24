@@ -218,6 +218,7 @@ pub const fn session_id_value(id: &SessionId) -> u64 {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::dto::media::FfiAudioCodec;
     use phairplay_core::capabilities::AudioCodec;

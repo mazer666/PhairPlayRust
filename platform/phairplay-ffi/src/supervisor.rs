@@ -70,7 +70,15 @@ pub struct ReceiverCore {
 }
 
 struct Inner {
-    runtime: Runtime,
+    /// The runtime of the bridge.
+    ///
+    /// WHY: it is an `Option`. Tokio refuses to drop a runtime inside an
+    /// asynchronous context — the runtime wants to block the worker thread
+    /// while it shuts its blocking pool down — and a receiver that is
+    /// dropped by a host that runs its own event loop would panic. The
+    /// `Drop` of `Inner` therefore hands the runtime to
+    /// `shutdown_background`, which does not block.
+    runtime: Option<Runtime>,
     config: RwLock<AppConfig>,
     identity: RwLock<DeviceIdentity>,
     capabilities: RwLock<MediaCapabilities>,
@@ -90,6 +98,33 @@ impl std::fmt::Debug for ReceiverCore {
         f.debug_struct("ReceiverCore")
             .field("uptime_ms", &self.uptime_ms())
             .finish_non_exhaustive()
+    }
+}
+
+impl Inner {
+    /// The runtime of the bridge, while the receiver lives.
+    ///
+    /// WHY: the runtime is an `Option` because the `Drop` of `Inner` takes
+    /// it out of the struct — a receiver that is dropped inside an
+    /// asynchronous context must not block the thread of the host.
+    fn runtime(&self) -> &Runtime {
+        match self.runtime.as_ref() {
+            Some(runtime) => runtime,
+            None => panic!("the runtime of the bridge is already shut down"),
+        }
+    }
+}
+
+impl Drop for Inner {
+    fn drop(&mut self) {
+        if let Some(runtime) = self.runtime.take() {
+            // WHY: `shutdown_background` does not block the thread that
+            // drops the receiver, so the receiver may be dropped inside an
+            // asynchronous context — inside a coroutine of a host, or
+            // inside a test. A plain drop of the runtime would panic
+            // there.
+            runtime.shutdown_background();
+        }
     }
 }
 
@@ -118,7 +153,7 @@ impl ReceiverCore {
         };
 
         let inner = Arc::new(Inner {
-            runtime,
+            runtime: Some(runtime),
             config: RwLock::new(config),
             identity: RwLock::new(identity),
             capabilities: RwLock::new(MediaCapabilities::empty()),
@@ -427,7 +462,7 @@ impl ReceiverCore {
             Ok(handle) => tokio::task::block_in_place(|| handle.block_on(future)),
             // The caller is an ordinary thread: the runtime of the bridge
             // does the work.
-            Err(_) => self.inner.runtime.block_on(future),
+            Err(_) => self.inner.runtime().block_on(future),
         }
     }
 }
@@ -457,7 +492,7 @@ fn write<T>(lock: &RwLock<T>) -> std::sync::RwLockWriteGuard<'_, T> {
 fn spawn_dispatcher(inner: &Arc<Inner>, mut events: mpsc::Receiver<SessionEvent>) {
     let sessions = Arc::clone(&inner.sessions);
     let listener = Arc::clone(&inner.listener);
-    inner.runtime.spawn(async move {
+    inner.runtime().spawn(async move {
         while let Some(event) = events.recv().await {
             // WHY: A panic in a foreign callback must not take the
             // dispatcher — and with it every future event — down.

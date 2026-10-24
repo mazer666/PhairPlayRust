@@ -217,6 +217,7 @@ fn decode_numeric_entity(entity: &str) -> Result<String, PlistError> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     fn events(input: &str) -> Vec<Event> {

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The manifest of the Android shell of PhairPlayRust.
+
+    WHAT: the permissions the shell asks for, the foreground service that
+    keeps the receiver alive, and the single activity that shows the
+    dashboard.
+
+    WHY: The list of permissions is deliberately short (FR-075). Every entry
+    below is needed by the receiver itself, and there is no location, no
+    microphone and no contact permission in it:
+
+      * INTERNET                 the receiver opens the TCP and UDP sockets
+                                 of the four protocols.
+      * ACCESS_NETWORK_STATE     the receiver reads the state of the network
+                                 before it advertises a service.
+      * CHANGE_WIFI_MULTICAST_STATE
+                                 the discovery of AirPlay, Cast and Miracast
+                                 uses multicast; Android drops multicast
+                                 packets from an application that does not
+                                 hold a multicast lock.
+      * WAKE_LOCK                the foreground service keeps the processor
+                                 awake while a session is running, so that
+                                 the frames keep coming with the screen off.
+      * FOREGROUND_SERVICE       the receiver runs as a foreground service
+                                 (FR-074).
+      * FOREGROUND_SERVICE_MEDIA_PLAYBACK
+                                 the permission that belongs to the type of
+                                 the foreground service on Android 14 and
+                                 later.
+      * NEARBY_WIFI_DEVICES      the Wi-Fi Direct radio of Miracast. The
+                                 flag `neverForLocation` says that the
+                                 application does not derive the location
+                                 of the user from it, so that no location
+                                 permission is needed at all.
+      * ACCESS_WIFI_STATE        the state of the Wi-Fi radio.
+      * CHANGE_WIFI_STATE        the Wi-Fi Direct radio of the sink role.
+
+    The notification of the foreground service needs no permission: the
+    system shows it even when the user has withdrawn the permission for
+    notifications, and the shell uses that one notification for everything
+    it has to say.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- The Wi-Fi Direct radio of Miracast. -->
+    <uses-permission
+        android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="tiramisu" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+    <!-- The receiver works on a telephone and on a television. -->
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi.direct"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <application
+        android:name=".ReceiverApplication"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PhairPlay"
+        android:usesCleartextTraffic="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.PhairPlay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            The receiver runs as a foreground service: a mirroring session
+            has to survive the backgrounding of the interface, and the
+            notification of the service tells the user that the receiver is
+            still there.
+        -->
+        <service
+            android:name=".ReceiverService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+    </application>
+
+</manifest>

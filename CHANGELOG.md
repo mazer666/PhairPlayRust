@@ -14,7 +14,37 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **The four protocol engines**, with the control plane of each protocol and
+  the tests that prove it: AirPlay 2 (RTSP, SDP, RTP, HomeKit-style and
+  legacy PIN pairing, FairPlay session keys, DACP, DMAP), Miracast (the WFD
+  RTSP control plane and the information element), Google Cast (the CastV2
+  handshake, the heartbeat, the channel management and the media status) and
+  DLNA/UPnP (the description documents, the SOAP actions and GENA).
+- **The discovery layer** — DNS-SD and SSDP, with the service types the
+  senders actually look for.
+- **The four format crates** — the property-list codec (XML and binary), the
+  H.264 bitstream, the AAC framing and a native Rust port of the Apple
+  Lossless decoder.
+- **The platform bridge** — a UniFFI bridge with a round-trip test, and the
+  local dashboard with its HTTP API and its WebSocket channel.
+- **The native shells** for Android and macOS, and the binding generator.
+- **The gates**: the structural checks, the licence audit with a *pinned*
+  cargo-deny, the continuous integration, and the acceptance record.
+
+### Fixed
+
+The adversarial review of the first implementation found real defects. Each
+of them now has a test that fails without the fix:
+
+- A lost packet in the TAP-A path of the ALAC decoder.
+- A panic in the Golomb coder of the ALAC decoder on 33-bit samples.
+- An overflow in the shift of an ALAC element, and a stale shift buffer in
+  the escape path — a *remote* panic, and a wrong picture without an error.
+- An index out of bounds in the stereo path of the ALAC decoder.
+- A lost frame in the AirPlay engine, and a collision of two tests on one
+  port.
 
 ---
 
@@ -27,7 +57,7 @@ table in [`README.md`](README.md).
 
 ### Added
 
-- **The Cargo workspace** with eleven members: the shared core
+- **The Cargo workspace** with twelve members: the shared core
   (`core/phairplay-core`), five engine crates (`engines/{discovery,airplay,
   miracast,cast,dlna}`), four format crates (`formats/{plist,h264,aac,
   alac}`) and the platform bridge (`platform/phairplay-ffi`).

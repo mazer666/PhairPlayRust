@@ -334,6 +334,7 @@ pub fn describe(error: &dyn std::error::Error) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

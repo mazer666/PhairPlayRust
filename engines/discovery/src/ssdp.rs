@@ -38,7 +38,10 @@ use std::time::Duration;
 pub const MULTICAST_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
 
 /// The port SSDP uses.
-pub const SSDP_PORT: u16 = 1900;
+///
+/// WHY: the value is fixed by the UPnP specification. Its single owner is
+/// [`phairplay_core::config::ports::SSDP`].
+pub const SSDP_PORT: u16 = phairplay_core::config::ports::SSDP;
 
 /// The search target that matches every device.
 pub const ST_ALL: &str = "ssdp:all";
@@ -50,7 +53,11 @@ pub const ST_ROOT_DEVICE: &str = "upnp:rootdevice";
 pub const ST_MEDIA_RENDERER: &str = "urn:schemas-upnp-org:device:MediaRenderer:1";
 
 /// The maximum size of an SSDP message this crate reads or writes.
-pub const MAX_SSDP_MESSAGE_BYTES: usize = 2048;
+///
+/// WHY: the same cap applies to the DLNA renderer, which answers on the
+/// same multicast group. Its single owner is
+/// [`phairplay_core::config::limits::SSDP_MESSAGE_BYTES`].
+pub const MAX_SSDP_MESSAGE_BYTES: usize = phairplay_core::config::limits::SSDP_MESSAGE_BYTES;
 
 /// The maximum number of headers in one SSDP message.
 pub const MAX_SSDP_HEADER_COUNT: usize = 32;

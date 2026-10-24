@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -88,21 +89,29 @@ fn a_document_that_declares_an_absurd_object_count_is_rejected() {
     let trailer = encoded.len() - TRAILER_SIZE;
     encoded[trailer + 8..trailer + 16].copy_from_slice(&u64::MAX.to_be_bytes());
     let error = decode(&encoded, 1024).expect_err("must fail");
-    assert!(matches!(error, AirPlayError::LimitExceeded { .. }), "{error}");
+    assert!(
+        matches!(error, AirPlayError::LimitExceeded { .. }),
+        "{error}"
+    );
 }
 
 #[test]
 fn a_document_with_a_reference_cycle_is_rejected() {
-    let mut encoded =
-        encode(&PlistValue::array(vec![PlistValue::Integer(1)])).expect("encodable");
+    let mut encoded = encode(&PlistValue::array(vec![PlistValue::Integer(1)])).expect("encodable");
     // The array holds one element; point it at the array itself.
     let trailer = encoded.len() - TRAILER_SIZE;
     let offset_size = encoded[trailer + 6] as usize;
     let ref_size = encoded[trailer + 7] as usize;
-    let offset_table =
-        u64::from_be_bytes(encoded[trailer + 24..trailer + 32].try_into().unwrap_or([0; 8]))
-            as usize;
-    let root = u64::from_be_bytes(encoded[trailer + 16..trailer + 24].try_into().unwrap_or([0; 8]));
+    let offset_table = u64::from_be_bytes(
+        encoded[trailer + 24..trailer + 32]
+            .try_into()
+            .unwrap_or([0; 8]),
+    ) as usize;
+    let root = u64::from_be_bytes(
+        encoded[trailer + 16..trailer + 24]
+            .try_into()
+            .unwrap_or([0; 8]),
+    );
     let array_offset =
         read_int(&encoded[offset_table + offset_size..offset_table + offset_size * 2]);
     let mut buffer = vec![0u8; ref_size];

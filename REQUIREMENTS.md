@@ -973,9 +973,21 @@ count, header length or queue size.
 The typed model in `core/phairplay-core/src/config.rs` carries the same
 values as the TOML files in [`config/`](config/README.md).
 
-**How to Verify:** `bash scripts/check-docs-links.sh` also compares the
-documented budgets with the Rust defaults and fails on a difference.
-**Pass Condition:** The check is green; a difference makes it red.
+The budgets of [`config/performance-budgets.toml`](config/performance-budgets.toml)
+fall into two groups, and both are checked:
+
+- **Mirrored budgets** — every value that has a typed counterpart in the Rust
+  model. The script compares the two and fails on a difference.
+- **Budgets owned by the file alone** — the measurement targets, the bounds
+  of the job executor and the code limits. They have no typed counterpart;
+  the script checks that they exist and that their value is not written down
+  a second time in the documentation.
+
+**How to Verify:** `bash scripts/check-docs-links.sh` compares the mirrored
+budgets with the Rust defaults, checks the existence and the uniqueness of
+the budgets that the file owns alone, and fails on a difference.
+**Pass Condition:** The check is green and reports the count of both groups;
+a difference or a second copy makes it red.
 
 ### FR-090 — The receiver writes no log about a peer that identifies it
 Sender names and IP addresses are masked in every log line, and the content
@@ -1361,11 +1373,17 @@ Every internal link of the documentation points at a file that exists.
 Every number and every rule of the documentation tree is written down exactly
 once. The other documents link to it.
 
-**How to Verify:** `bash scripts/check-docs-links.sh` compares the documented
-budgets with the typed Rust model, and a search for a repeated budget value
-in the documentation finds exactly one hit.
-**Pass Condition:** The check is green and no budget value appears in two
-documents.
+The owner of a budget is named in the table of
+[`config/README.md`](config/README.md): either the typed Rust model (for a
+mirrored budget) or the TOML file of the configuration (for a budget that the
+file owns alone).
+
+**How to Verify:** `bash scripts/check-docs-links.sh` compares the mirrored
+budgets with the typed Rust model, and it looks for a second copy of every
+budget that a configuration file owns alone — a copy carries a unit, and that
+is what the search looks for.
+**Pass Condition:** The check is green, it reports the count of both groups,
+and no budget value with a unit appears in two documents.
 
 ### NFR-PORT-001 — The supported platforms are named
 The supported platforms and their minimum versions are named in one place.

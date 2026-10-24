@@ -150,6 +150,7 @@ fn escape_into(out: &mut String, text: &str) {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::limits::PlistLimits;
     use crate::xml::decode::decode as decode_xml;

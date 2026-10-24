@@ -15,7 +15,7 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::proto::ProtoWriter;
+//! use phairplay_cast::ProtoWriter;
 //!
 //! let mut writer = ProtoWriter::new();
 //! writer.write_string_field(4, "urn:x-cast:com.google.cast.receiver");
@@ -48,7 +48,7 @@ pub const MAX_FIELD_BYTES: usize = 1024 * 1024;
 pub enum ProtoError {
     /// The message ended in the middle of a field.
     Truncated,
-    /// A varint was longer than [`MAX_VARINT_BYTES`].
+    /// A varint was longer than the limit of the variable integer.
     VarintTooLong,
     /// The wire type of a field is not supported by the CastV2 envelope.
     UnsupportedWireType(u8),
@@ -123,7 +123,7 @@ impl ProtoWriter {
     ///
     /// # Errors
     /// Returns [`ProtoError::FieldTooLarge`] when `bytes` is longer than
-    /// [`MAX_FIELD_BYTES`]. The limit is checked *before* the length prefix
+    /// the limit of a field. The limit is checked *before* the length prefix
     /// is written, so an oversized payload is never announced on the wire.
     pub fn write_bytes_field(&mut self, field: u32, bytes: &[u8]) -> Result<(), ProtoError> {
         if bytes.len() > MAX_FIELD_BYTES {
@@ -139,7 +139,7 @@ impl ProtoWriter {
     ///
     /// # Errors
     /// Returns [`ProtoError::FieldTooLarge`] when the string is longer than
-    /// [`MAX_FIELD_BYTES`].
+    /// the limit of a field.
     pub fn write_string_field(&mut self, field: u32, value: &str) -> Result<(), ProtoError> {
         self.write_bytes_field(field, value.as_bytes())
     }
@@ -188,7 +188,7 @@ impl<'a> ProtoReader<'a> {
     /// # Errors
     /// Returns [`ProtoError::Truncated`] when the buffer ends inside the
     /// varint and [`ProtoError::VarintTooLong`] when the varint does not
-    /// terminate within [`MAX_VARINT_BYTES`].
+    /// terminate within the limit of the variable integer.
     pub fn read_varint(&mut self) -> Result<u64, ProtoError> {
         let mut result: u64 = 0;
         let mut shift = 0u32;
@@ -227,7 +227,7 @@ impl<'a> ProtoReader<'a> {
     /// # Errors
     /// Returns [`ProtoError::Truncated`] when the buffer is shorter than the
     /// declared length, [`ProtoError::FieldTooLarge`] when the declared length
-    /// exceeds [`MAX_FIELD_BYTES`] and any error of
+    /// exceeds the limit of a field and any error of
     /// [`ProtoReader::read_varint`].
     pub fn read_bytes(&mut self) -> Result<&'a [u8], ProtoError> {
         let length = self.read_varint()? as usize;
@@ -289,6 +289,7 @@ impl<'a> ProtoReader<'a> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

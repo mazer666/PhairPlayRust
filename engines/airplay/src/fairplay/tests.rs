@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -22,7 +23,11 @@ fn the_first_phase_answers_with_142_bytes() {
 fn every_mode_has_its_own_answer() {
     let mut session = FairPlaySession::new();
     let answers: Vec<Vec<u8>> = (0..4)
-        .map(|mode| session.setup(&phase_one(VERSION_V3, mode)).expect("phase 1"))
+        .map(|mode| {
+            session
+                .setup(&phase_one(VERSION_V3, mode))
+                .expect("phase 1")
+        })
         .collect();
     for (index, answer) in answers.iter().enumerate() {
         for (other, other_answer) in answers.iter().enumerate() {
@@ -64,7 +69,9 @@ fn an_unsupported_version_is_rejected() {
 #[test]
 fn an_invalid_mode_is_rejected() {
     let mut session = FairPlaySession::new();
-    let error = session.setup(&phase_one(VERSION_V3, 9)).expect_err("must fail");
+    let error = session
+        .setup(&phase_one(VERSION_V3, 9))
+        .expect_err("must fail");
     assert!(matches!(error, AirPlayError::Parse { .. }));
 }
 

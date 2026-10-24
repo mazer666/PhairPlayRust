@@ -22,14 +22,14 @@
 //! assert_eq!(engine.status().state, ProtocolState::Idle);
 //! ```
 
-
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use async_trait::async_trait;
 use phairplay_core::error::EngineError;
-use phairplay_core::protocol::{EngineContext, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus};
-
+use phairplay_core::protocol::{
+    EngineContext, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus,
+};
 
 use tokio::net::TcpListener;
 use tokio::task::JoinHandle;
@@ -40,15 +40,13 @@ use crate::pairing::identity::PairingIdentity;
 use crate::pairing::store::PairingStore;
 use crate::photo::PhotoPayload;
 
-
-
-
-
 use crate::timing::TimingResponder;
 
-
 /// The TCP port the AirPlay control channel listens on.
-pub const DEFAULT_RTSP_PORT: u16 = 7000;
+///
+/// WHY: the value is the port every AirPlay sender looks for. Its single
+/// owner is [`phairplay_core::config::ports::AIRPLAY_RTSP`].
+pub const DEFAULT_RTSP_PORT: u16 = phairplay_core::config::ports::AIRPLAY_RTSP;
 
 /// The number of attempts to bind the control port.
 /// The number of attempts to bind the control port.
@@ -452,8 +450,8 @@ mod connection;
 mod formats;
 mod ports;
 
-pub use formats::{audio_format_of, video_format_of};
 use connection::accept_loop;
+pub use formats::{audio_format_of, video_format_of};
 use ports::MirrorPorts;
 
 #[cfg(test)]

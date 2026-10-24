@@ -131,11 +131,7 @@ impl PairingIdentity {
 
     /// Verifies an Ed25519 signature of a public key.
     #[must_use]
-    pub fn verify(
-        public_key: &[u8; ED25519_KEY_BYTES],
-        message: &[u8],
-        signature: &[u8],
-    ) -> bool {
+    pub fn verify(public_key: &[u8; ED25519_KEY_BYTES], message: &[u8], signature: &[u8]) -> bool {
         let Ok(key) = VerifyingKey::from_bytes(public_key) else {
             return false;
         };

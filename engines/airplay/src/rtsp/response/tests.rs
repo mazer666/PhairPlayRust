@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 
 use super::*;
 
@@ -25,9 +26,7 @@ fn an_ok_response_carries_the_cseq_and_the_server_token() {
 
 #[test]
 fn an_http_response_omits_the_cseq() {
-    let bytes = RtspResponse::ok()
-        .with_protocol("HTTP/1.1")
-        .to_bytes(12);
+    let bytes = RtspResponse::ok().with_protocol("HTTP/1.1").to_bytes(12);
     let (head, _) = header_and_body(&bytes);
     assert!(head.starts_with("HTTP/1.1 200 OK\r\n"), "{head}");
     assert!(!head.contains("CSeq"), "{head}");
@@ -64,5 +63,8 @@ fn extra_headers_are_written_in_order() {
 fn the_second_peer_is_answered_with_service_unavailable() {
     let bytes = RtspResponse::service_unavailable().to_bytes(0);
     let (head, _) = header_and_body(&bytes);
-    assert!(head.starts_with("RTSP/1.0 503 Service Unavailable\r\n"), "{head}");
+    assert!(
+        head.starts_with("RTSP/1.0 503 Service Unavailable\r\n"),
+        "{head}"
+    );
 }

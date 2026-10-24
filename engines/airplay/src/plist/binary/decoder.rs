@@ -3,7 +3,7 @@
 use crate::error::AirPlayError;
 use crate::plist::value::PlistValue;
 
-use super::{read_int, MAGIC, MAX_DEPTH, MAX_OBJECTS, TRAILER_SIZE};
+use super::{MAGIC, MAX_DEPTH, MAX_OBJECTS, TRAILER_SIZE, read_int};
 
 ///
 /// # Errors
@@ -30,7 +30,9 @@ pub fn decode(bytes: &[u8], max_bytes: usize) -> Result<PlistValue, AirPlayError
         )));
     }
     if !matches!(offset_size, 1 | 2 | 4 | 8) || !matches!(ref_size, 1 | 2 | 4 | 8) {
-        return Err(AirPlayError::parse("plist declares an invalid integer size"));
+        return Err(AirPlayError::parse(
+            "plist declares an invalid integer size",
+        ));
     }
     if top_object >= object_count {
         return Err(AirPlayError::parse("plist root object is out of range"));
@@ -87,7 +89,8 @@ fn decode_object(
     }
     let offset = *offsets
         .get(index as usize)
-        .ok_or_else(|| AirPlayError::parse("plist object index is out of range"))? as usize;
+        .ok_or_else(|| AirPlayError::parse("plist object index is out of range"))?
+        as usize;
     let marker = *bytes
         .get(offset)
         .ok_or_else(|| AirPlayError::parse("plist object is out of range"))?;
@@ -121,9 +124,7 @@ fn decode_object(
                 return Err(AirPlayError::parse("plist real is out of range"));
             }
             if size == 4 {
-                let raw = f32::from_be_bytes(
-                    bytes[start..end].try_into().unwrap_or([0; 4]),
-                );
+                let raw = f32::from_be_bytes(bytes[start..end].try_into().unwrap_or([0; 4]));
                 Ok(PlistValue::Real(f64::from(raw)))
             } else {
                 let raw = f64::from_be_bytes(bytes[start..end].try_into().unwrap_or([0; 8]));
@@ -253,6 +254,7 @@ fn read_length(bytes: &[u8], offset: usize, low: usize) -> Result<(usize, usize)
         return Err(AirPlayError::parse("plist length is out of range"));
     }
     let length = read_int(&bytes[start..end]);
-    let length = usize::try_from(length).map_err(|_| AirPlayError::parse("plist length overflows"))?;
+    let length =
+        usize::try_from(length).map_err(|_| AirPlayError::parse("plist length overflows"))?;
     Ok((length, end))
 }

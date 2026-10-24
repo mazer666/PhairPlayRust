@@ -123,9 +123,7 @@ pub fn detect_image_type(bytes: &[u8]) -> Option<PhotoImageType> {
     if bytes.len() >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF {
         return Some(PhotoImageType::Jpeg);
     }
-    if bytes.len() >= 8
-        && bytes[..8] == [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
-    {
+    if bytes.len() >= 8 && bytes[..8] == [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A] {
         return Some(PhotoImageType::Png);
     }
     None

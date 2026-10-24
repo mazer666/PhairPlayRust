@@ -40,7 +40,10 @@ use crate::ssdp::SsdpResponder;
 use crate::state::RendererState;
 
 /// The default port of the SSDP responder.
-pub const DEFAULT_SSDP_PORT: u16 = 1900;
+///
+/// WHY: the value is fixed by the UPnP specification. Its single owner is
+/// [`phairplay_core::config::ports::SSDP`].
+pub const DEFAULT_SSDP_PORT: u16 = phairplay_core::config::ports::SSDP;
 
 /// The configuration of the DLNA engine.
 #[derive(Debug, Clone, PartialEq, Eq)]

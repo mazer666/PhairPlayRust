@@ -10,16 +10,16 @@
 //!
 //! | Module | Responsibility |
 //! |---|---|
-//! | [`proto`] | The protobuf wire format of the message envelope. |
-//! | [`message`] | The `CastMessage` envelope and the four namespaces. |
-//! | [`frame`] | The length-prefixed framing of the transport. |
-//! | [`payloads`] | The JSON payloads of the control channels. |
-//! | [`media`] | The media channel: load, play, pause, seek, status. |
-//! | [`session`] | The state of one peer and the dispatch of its messages. |
-//! | [`tls`] | The TLS layer with a self-signed certificate. |
-//! | [`advertisement`] | The `_googlecast._tcp` DNS-SD advertisement. |
-//! | [`peer`] | The life of one connection. |
-//! | [`engine`] | The [`ProtocolEngine`] implementation. |
+//! | `proto` | The protobuf wire format of the message envelope. |
+//! | `message` | The `CastMessage` envelope and the four namespaces. |
+//! | `frame` | The length-prefixed framing of the transport. |
+//! | `payloads` | The JSON payloads of the control channels. |
+//! | `media` | The media channel: load, play, pause, seek, status. |
+//! | `session` | The state of one peer and the dispatch of its messages. |
+//! | `tls` | The TLS layer with a self-signed certificate. |
+//! | `advertisement` | The `_googlecast._tcp` DNS-SD advertisement. |
+//! | `peer` | The life of one connection. |
+//! | `engine` | The [`phairplay_core::protocol::ProtocolEngine`] implementation. |
 //!
 //! The transport is TLS on port 8009, the protocol version is CastV2 1.0 and
 //! the application the receiver offers is the Google default media receiver

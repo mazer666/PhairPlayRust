@@ -30,13 +30,20 @@ use tokio::net::TcpStream;
 use crate::error::AirPlayError;
 
 /// The service type of the DACP control channel.
-pub const DACP_SERVICE_TYPE: &str = "_dacp._tcp";
+///
+/// WHY: the spelling of a service type is a contract with the sender. Its
+/// single owner is [`phairplay_core::config::service_types::DACP_TCP`].
+pub const DACP_SERVICE_TYPE: &str = phairplay_core::config::service_types::DACP_TCP;
 
 /// The prefix of the service name of a sender.
 pub const DACP_SERVICE_PREFIX: &str = "iTunes_Ctrl_";
 
 /// The timeout of a DACP request.
-pub const DACP_TIMEOUT: Duration = Duration::from_secs(2);
+///
+/// WHY: the deadline of a protocol step belongs to one place. Its single
+/// owner is [`phairplay_core::config::timeouts::DACP_TIMEOUT_MS`].
+pub const DACP_TIMEOUT: Duration =
+    Duration::from_millis(phairplay_core::config::timeouts::DACP_TIMEOUT_MS);
 
 /// The commands of the DACP protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

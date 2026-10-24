@@ -14,7 +14,7 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::advertisement::{READY_STATE_IDLE, txt_properties};
+//! use phairplay_cast::{READY_STATE_IDLE, txt_properties};
 //! use phairplay_core::identity::DeviceIdentity;
 //!
 //! let identity = DeviceIdentity::with_name("Living Room");
@@ -31,7 +31,11 @@ use phairplay_core::identity::DeviceIdentity;
 use sha2::{Digest, Sha256};
 
 /// The DNS-SD service type of a Google Cast receiver.
-pub const GOOGLECAST_SERVICE_TYPE: &str = "_googlecast._tcp";
+///
+/// WHY: the spelling of a service type is a contract with the sender. Its
+/// single owner is
+/// [`phairplay_core::config::service_types::GOOGLECAST_TCP`].
+pub const GOOGLECAST_SERVICE_TYPE: &str = phairplay_core::config::service_types::GOOGLECAST_TCP;
 
 /// The version the receiver reports in its TXT record.
 pub const DEFAULT_TXT_VERSION: &str = "05";
@@ -84,14 +88,15 @@ pub fn txt_properties(
     version: &str,
     ready_state: &str,
 ) -> Vec<(String, String)> {
-    let mut properties = Vec::with_capacity(7);
-    properties.push(("id".to_string(), device_id(identity)));
-    properties.push(("cd".to_string(), BASE64.encode(model.as_bytes())));
-    properties.push(("fn".to_string(), identity.name.clone()));
-    properties.push(("md".to_string(), model.to_string()));
-    properties.push(("rs".to_string(), ready_state.to_string()));
-    properties.push(("ve".to_string(), version.to_string()));
-    properties.push(("ic".to_string(), String::new()));
+    let properties = vec![
+        ("id".to_string(), device_id(identity)),
+        ("cd".to_string(), BASE64.encode(model.as_bytes())),
+        ("fn".to_string(), identity.name.clone()),
+        ("md".to_string(), model.to_string()),
+        ("rs".to_string(), ready_state.to_string()),
+        ("ve".to_string(), version.to_string()),
+        ("ic".to_string(), String::new()),
+    ];
     properties
 }
 
@@ -237,6 +242,7 @@ fn local_address() -> Result<IpAddr, AdvertiseError> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     fn identity() -> DeviceIdentity {

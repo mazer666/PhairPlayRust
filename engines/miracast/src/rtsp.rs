@@ -87,12 +87,7 @@ impl RtspResponse {
     }
 
     /// Builds an answer with one header.
-    fn with_header(
-        status_code: u16,
-        status_message: &'static str,
-        key: &str,
-        value: &str,
-    ) -> Self {
+    fn with_header(status_code: u16, status_message: &'static str, key: &str, value: &str) -> Self {
         let mut headers = HashMap::new();
         headers.insert(key.to_string(), value.to_string());
         Self {
@@ -209,7 +204,8 @@ pub fn route(request: &RtspRequest) -> Result<RtspResponse, MiracastError> {
             WFD_PUBLIC_METHODS,
         )),
         "GET_PARAMETER" => {
-            let mut response = RtspResponse::with_header(200, "OK", "Content-Type", "text/parameters");
+            let mut response =
+                RtspResponse::with_header(200, "OK", "Content-Type", "text/parameters");
             response.body = sink_parameters();
             Ok(response)
         }
@@ -222,9 +218,12 @@ pub fn route(request: &RtspRequest) -> Result<RtspResponse, MiracastError> {
             );
             Ok(response)
         }
-        "PLAY" | "PAUSE" | "TEARDOWN" => {
-            Ok(RtspResponse::with_header(200, "OK", "Session", WFD_SESSION_ID))
-        }
+        "PLAY" | "PAUSE" | "TEARDOWN" => Ok(RtspResponse::with_header(
+            200,
+            "OK",
+            "Session",
+            WFD_SESSION_ID,
+        )),
         other => Err(MiracastError::UnknownMethod {
             protocol: "miracast",
             method: other.to_string(),
@@ -255,16 +254,21 @@ pub fn sink_parameters() -> String {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]
     fn a_request_is_parsed() {
-        let raw = b"OPTIONS rtsp://192.168.1.10:7236/ RTSP/1.0\r\nCSeq: 7\r\nUser-Agent: Test\r\n\r\n";
+        let raw =
+            b"OPTIONS rtsp://192.168.1.10:7236/ RTSP/1.0\r\nCSeq: 7\r\nUser-Agent: Test\r\n\r\n";
         let request = read_request(raw).expect("parse");
         assert_eq!(request.method, "OPTIONS");
         assert_eq!(request.uri, "rtsp://192.168.1.10:7236/");
         assert_eq!(request.cseq, 7);
-        assert_eq!(request.headers.get("User-Agent").map(String::as_str), Some("Test"));
+        assert_eq!(
+            request.headers.get("User-Agent").map(String::as_str),
+            Some("Test")
+        );
     }
 
     #[test]
@@ -355,7 +359,10 @@ mod tests {
             headers: HashMap::new(),
         };
         let response = route(&request).expect("route");
-        assert_eq!(response.headers.get("Session").map(String::as_str), Some(WFD_SESSION_ID));
+        assert_eq!(
+            response.headers.get("Session").map(String::as_str),
+            Some(WFD_SESSION_ID)
+        );
         assert!(response.headers.contains_key("Transport"));
     }
 

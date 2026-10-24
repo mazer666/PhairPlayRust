@@ -1,3 +1,4 @@
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 use super::*;
 use crate::config::AlacConfig;
 
@@ -292,4 +293,97 @@ fn packs_the_samples_of_a_frame() {
     let bytes = audio.to_pcm_bytes(16).unwrap_or_else(|err| panic!("{err}"));
     assert_eq!(bytes.len(), 8);
     assert_eq!(&bytes[0..2], &[1, 0]);
+}
+
+// ─── The three findings of the second verification round ───────────────────
+
+#[test]
+fn refuses_a_shift_that_is_wider_than_the_sample() {
+    // WHY: the shift of the element is subtracted from the width of a
+    // sample. A sample of one bit with a shift of one byte would underflow
+    // that subtraction — a panic in a debug build and a huge channel width
+    // in a release build. The frame has to be refused instead.
+    let narrow = AlacConfig {
+        bit_depth: 1,
+        ..config()
+    };
+    let mut decoder = AlacDecoder::new(narrow).unwrap_or_else(|err| panic!("{err}"));
+    let mut writer = BitWriter::new();
+    writer.bits(ID_SCE as u32, 3);
+    writer.bits(0, 4);
+    writer.bits(0, 12);
+    // Partial frame, one byte of shift, no escape.
+    writer.bits(0b0010, 4);
+    let frame = writer.finish();
+    assert!(
+        matches!(decoder.decode(&frame), Err(AlacError::Malformed(_))),
+        "a shift that does not fit into the sample must be refused"
+    );
+}
+
+#[test]
+fn refuses_a_stereo_shift_that_is_wider_than_the_sample() {
+    let narrow = AlacConfig {
+        bit_depth: 1,
+        ..stereo_config()
+    };
+    let mut decoder = AlacDecoder::new(narrow).unwrap_or_else(|err| panic!("{err}"));
+    let mut writer = BitWriter::new();
+    writer.bits(ID_CPE as u32, 3);
+    writer.bits(0, 4);
+    writer.bits(0, 12);
+    // Partial frame, two bytes of shift, no escape.
+    writer.bits(0b0100, 4);
+    let frame = writer.finish();
+    assert!(
+        matches!(decoder.decode(&frame), Err(AlacError::Malformed(_))),
+        "a stereo shift that does not fit into the sample must be refused"
+    );
+}
+
+#[test]
+fn an_escaped_element_is_not_shifted_with_a_stale_buffer() {
+    // WHY: the reference implementation resets the shift in the escape
+    // path. Without that, an escaped element would apply the shift of the
+    // element before it — the samples would come out wrong, and wrong
+    // without any error.
+    let mut decoder = AlacDecoder::new(config()).unwrap_or_else(|err| panic!("{err}"));
+    // The first element is a 24 bit element with a shift of two bytes; it
+    // fills the shift buffer.
+    let mut first = BitWriter::new();
+    first.bits(ID_SCE as u32, 3);
+    first.bits(0, 4);
+    first.bits(0, 12);
+    // Partial frame, two bytes of shift, no escape.
+    first.bits(0b0100, 4);
+    first.bits(0, 8); // mix bits
+    first.bits(0, 8); // mix residue
+    first.bits(0, 8); // mode and denominator shift
+    first.bits(0, 8); // prediction factor and number of coefficients
+    for _ in 0..4 {
+        first.bit(false);
+    }
+    let first_frame = first.finish();
+    let _ = decoder.decode(&first_frame);
+
+    // The second element escapes and carries 16 bit samples. It must come
+    // out unchanged.
+    let second = escape_frame(&[1, -1, 2, -2]);
+    let audio = decoder
+        .decode(&second)
+        .unwrap_or_else(|err| panic!("{err}"));
+    assert_eq!(audio.samples, vec![1, -1, 2, -2]);
+}
+
+#[test]
+fn refuses_a_stereo_element_that_does_not_fit_into_the_mix_buffer() {
+    // WHY: the single-channel path walks its buffer; the stereo path used
+    // to index it. A buffer that is too short has to be an error, not an
+    // index-out-of-bounds panic.
+    let mut mix_u = [0_i32; 2];
+    let mut mix_v = [0_i32; 2];
+    let mut bits = crate::bits::BitReader::new(&[0_u8; 64]);
+    let error = crate::framing::read_uncompressed_pair(&mut bits, &mut mix_u, &mut mix_v, 8, 16)
+        .expect_err("must fail");
+    assert!(matches!(error, AlacError::Malformed(_)), "{error:?}");
 }

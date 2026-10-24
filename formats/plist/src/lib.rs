@@ -166,6 +166,7 @@ pub fn encode_binary_with_limits(
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

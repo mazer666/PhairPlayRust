@@ -14,6 +14,7 @@
 //!
 //! ```
 //! use phairplay_web::server::LOOPBACK_HOST;
+//! use std::str::FromStr;
 //!
 //! assert!(std::net::IpAddr::from_str(LOOPBACK_HOST).expect("a valid address").is_loopback());
 //! ```
@@ -60,6 +61,7 @@ pub async fn serve(state: AppState, port: u16) -> std::io::Result<SocketAddr> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

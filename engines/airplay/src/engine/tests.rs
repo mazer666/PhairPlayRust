@@ -1,9 +1,9 @@
-
+#![allow(clippy::expect_used, clippy::unwrap_used)]
 use super::*;
 use phairplay_core::identity::DeviceIdentity;
+use phairplay_core::media::{NullAudioSink, NullVideoSink};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
-use phairplay_core::media::{NullAudioSink, NullVideoSink};
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
 
@@ -30,8 +30,10 @@ async fn a_new_engine_is_idle() {
 
 #[tokio::test]
 async fn a_started_engine_advertises_and_stops_again() {
-    let mut config = AirPlayConfig::default();
-    config.port = 0;
+    let config = AirPlayConfig {
+        port: 0,
+        ..AirPlayConfig::default()
+    };
     let engine = AirPlayEngine::new(config);
     engine.start(context()).await.expect("start");
     let status = engine.status();
@@ -43,8 +45,10 @@ async fn a_started_engine_advertises_and_stops_again() {
 
 #[tokio::test]
 async fn starting_twice_is_refused() {
-    let mut config = AirPlayConfig::default();
-    config.port = 0;
+    let config = AirPlayConfig {
+        port: 0,
+        ..AirPlayConfig::default()
+    };
     let engine = AirPlayEngine::new(config);
     engine.start(context()).await.expect("start");
     let error = engine.start(context()).await.expect_err("must fail");
@@ -61,29 +65,34 @@ async fn stopping_an_idle_engine_is_refused() {
 
 #[tokio::test]
 async fn a_second_sender_is_rejected_with_service_unavailable() {
-    let mut config = AirPlayConfig::default();
-    config.port = 0;
+    let config = AirPlayConfig {
+        port: 0,
+        ..AirPlayConfig::default()
+    };
     let engine = AirPlayEngine::new(config);
     engine.start(context()).await.expect("start");
     let port = engine.status().tcp_port.expect("port");
 
-    let mut first = TcpStream::connect(("127.0.0.1", port)).await.expect("connect");
+    let mut first = TcpStream::connect(("127.0.0.1", port))
+        .await
+        .expect("connect");
     // The first sender occupies the session.
-    let mut second = TcpStream::connect(("127.0.0.1", port)).await.expect("connect");
+    let mut second = TcpStream::connect(("127.0.0.1", port))
+        .await
+        .expect("connect");
     let mut buffer = [0u8; 128];
-    let read = tokio::time::timeout(
-        Duration::from_secs(2),
-        second.read(&mut buffer),
-    )
-    .await
-    .expect("answer")
-    .expect("read");
+    let read = tokio::time::timeout(Duration::from_secs(2), second.read(&mut buffer))
+        .await
+        .expect("answer")
+        .expect("read");
     let answer = String::from_utf8_lossy(&buffer[..read]).to_string();
     assert!(
         answer.starts_with("RTSP/1.0 503 Service Unavailable"),
         "{answer}"
     );
-    let _ = first.write_all(b"OPTIONS rtsp://x/y RTSP/1.0\r\n\r\n").await;
+    let _ = first
+        .write_all(b"OPTIONS rtsp://x/y RTSP/1.0\r\n\r\n")
+        .await;
     engine.stop().await.expect("stop");
 }
 

@@ -63,7 +63,10 @@ async fn main() -> ExitCode {
 /// The port the server shall bind to.
 fn port() -> Result<u16, String> {
     let mut arguments = std::env::args().skip(1);
-    while let Some(argument) = arguments.next() {
+    // WHY: the loop was a `while let` that never looped — every branch of
+    // the match returns. The argument is read once, and the environment
+    // variable is consulted when there is no argument.
+    if let Some(argument) = arguments.next() {
         match argument.as_str() {
             "--port" | "-p" => {
                 let value = arguments

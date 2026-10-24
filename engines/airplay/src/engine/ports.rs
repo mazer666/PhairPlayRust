@@ -3,12 +3,14 @@
 use std::sync::{Arc, Mutex};
 
 use phairplay_core::media::{AudioSink, EncodedAudioFrame, EncodedVideoFrame, VideoSink};
+use phairplay_core::queue::{AudioFrameQueue, PushOutcome, VideoFrameQueue};
 use tokio::net::{TcpListener, TcpStream};
 
 use crate::limits::AirPlayLimits;
+use crate::queue::Mailbox;
+use crate::rtp::{self, FuAReassembler};
 use crate::rtsp::reader::StreamBuffer;
 use crate::rtsp::router::StreamPortAllocator;
-use crate::rtp::{self, FuAReassembler};
 
 #[derive(Debug)]
 pub struct MirrorPorts {
@@ -63,10 +65,7 @@ impl StreamPortAllocator for MirrorPorts {
         let listener = TcpListener::from_std(standard).ok()?;
         {
             let mut guard = self.streams.lock().ok()?;
-            guard.push(MirrorStream {
-                stream_type,
-                port,
-            });
+            guard.push(MirrorStream { stream_type, port });
         }
         let video_sink = self.video_sink.clone();
         let audio_sink = self.audio_sink.clone();
@@ -81,6 +80,12 @@ impl StreamPortAllocator for MirrorPorts {
 }
 
 /// Reads the interleaved media of one mirrored stream.
+///
+/// WHY the mailbox: the frames travel through a queue that is bounded by a
+///      number of frames *and* by a number of bytes. The reader of the
+///      socket therefore never waits for the decoder of the platform, and
+///      the queue never holds more memory than the configuration allows.
+///      When the budget is reached, the oldest frame is dropped.
 async fn pump_stream(
     socket: TcpStream,
     stream_type: u8,
@@ -90,6 +95,11 @@ async fn pump_stream(
 ) {
     let mut stream = StreamBuffer::new(socket);
     let mut reassembler = FuAReassembler::new();
+    if stream_type == 96 || stream_type == 103 {
+        pump_audio(&mut stream, audio_sink, &limits).await;
+        return;
+    }
+    let (mailbox, delivery) = Mailbox::<VideoFrameQueue>::spawn(video_sink, limits.video_queue);
     loop {
         let frame = match rtp::read_interleaved_frame(
             &mut stream,
@@ -105,17 +115,6 @@ async fn pump_stream(
                 break;
             }
         };
-        if stream_type == 96 || stream_type == 103 {
-            let pts_us = 0;
-            if let Err(error) = audio_sink.submit(EncodedAudioFrame {
-                sequence: phairplay_core::media::next_frame_sequence(),
-                pts_us,
-                data: Arc::new(frame.payload),
-            }) {
-                tracing::warn!(%error, "the audio sink rejected a packet");
-            }
-            continue;
-        }
         let (header, payload) = match rtp::parse_rtp(&frame.payload) {
             Ok(parsed) => parsed,
             Err(error) => {
@@ -128,13 +127,51 @@ async fn pump_stream(
             continue;
         };
         let data = crate::mirror::avcc_to_annex_b(&nal.data);
-        if let Err(error) = video_sink.submit(EncodedVideoFrame {
+        let outcome = mailbox.push(EncodedVideoFrame {
             sequence: phairplay_core::media::next_frame_sequence(),
             pts_us: nal.pts_us,
             data: Arc::new(data),
             pixel_format: None,
-        }) {
-            tracing::warn!(%error, "the video sink rejected a frame");
+        });
+        if let PushOutcome::StoredAfterDrop { dropped } = outcome {
+            tracing::warn!(dropped, "the mirror queue dropped the oldest frames");
         }
     }
+    mailbox.close();
+    let _ = delivery.await;
+}
+
+/// Reads the interleaved media of one mirrored audio stream.
+async fn pump_audio<R: tokio::io::AsyncRead + Unpin>(
+    stream: &mut StreamBuffer<R>,
+    audio_sink: Arc<dyn AudioSink>,
+    limits: &AirPlayLimits,
+) {
+    let (mailbox, delivery) = Mailbox::<AudioFrameQueue>::spawn(audio_sink, limits.audio_queue);
+    loop {
+        let frame = match rtp::read_interleaved_frame(
+            stream,
+            limits.max_rtp_frame_bytes,
+            limits.idle_timeout,
+        )
+        .await
+        {
+            Ok(Some(frame)) => frame,
+            Ok(None) => break,
+            Err(error) => {
+                tracing::warn!(%error, "a mirrored audio stream failed");
+                break;
+            }
+        };
+        let outcome = mailbox.push(EncodedAudioFrame {
+            sequence: phairplay_core::media::next_frame_sequence(),
+            pts_us: 0,
+            data: Arc::new(frame.payload),
+        });
+        if let PushOutcome::StoredAfterDrop { dropped } = outcome {
+            tracing::warn!(dropped, "the mirror queue dropped the oldest packets");
+        }
+    }
+    mailbox.close();
+    let _ = delivery.await;
 }

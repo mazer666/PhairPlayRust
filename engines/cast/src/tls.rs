@@ -13,7 +13,7 @@
 //! EXAMPLE:
 //!
 //! ```
-//! use phairplay_cast::tls::self_signed;
+//! use phairplay_cast::self_signed;
 //!
 //! let (certificate, config) = self_signed(&["localhost".to_string()]).expect("certificate");
 //! assert!(!certificate.as_ref().is_empty());
@@ -83,6 +83,7 @@ pub fn config_from_der(
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]
@@ -106,7 +107,7 @@ mod tests {
         // A second, unrelated key pair: the certificate belongs to the first.
         let params = rcgen::CertificateParams::new(vec!["other".to_string()]).expect("parameters");
         let key_pair = rcgen::KeyPair::generate().expect("key");
-        params
+        let _other = params
             .self_signed(&key_pair)
             .expect("certificate")
             .der()

@@ -92,7 +92,10 @@ fn walk(body: &[u8], start: usize, end: usize, metadata: &mut NowPlaying, depth:
     let mut position = start;
     while position + 8 <= end {
         let tag = &body[position..position + 4];
-        if !tag.iter().all(|byte| byte.is_ascii_graphic() || *byte == b' ') {
+        if !tag
+            .iter()
+            .all(|byte| byte.is_ascii_graphic() || *byte == b' ')
+        {
             return true;
         }
         let length = read_u32(&body[position + 4..position + 8]) as usize;
@@ -114,7 +117,13 @@ fn walk(body: &[u8], start: usize, end: usize, metadata: &mut NowPlaying, depth:
                 metadata.album = decode_text(payload);
             }
         } else if CONTAINER_TAGS.iter().any(|container| *container == tag) {
-            walk(body, payload_start, payload_start + length, metadata, depth + 1);
+            walk(
+                body,
+                payload_start,
+                payload_start + length,
+                metadata,
+                depth + 1,
+            );
         }
         position = payload_start + length;
     }

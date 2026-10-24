@@ -1,4 +1,3 @@
-
 use super::*;
 use phairplay_core::config::LimitsConfig;
 
@@ -19,14 +18,15 @@ fn the_limits_come_from_the_configuration() {
 #[test]
 fn the_message_limit_comes_from_the_protocol_configuration() {
     let mut config = AppConfig::default();
-    config
-        .protocols
-        .insert("airplay".to_string(), phairplay_core::config::ProtocolConfig {
+    config.protocols.insert(
+        "airplay".to_string(),
+        phairplay_core::config::ProtocolConfig {
             enabled: true,
             port: 7000,
             require_pin: false,
             max_message_bytes: 4096,
-        });
+        },
+    );
     let limits = AirPlayLimits::from_config(&config);
     assert_eq!(limits.max_message_bytes, 4096);
     assert_eq!(limits.max_sdp_bytes, 4096);
@@ -35,14 +35,15 @@ fn the_message_limit_comes_from_the_protocol_configuration() {
 #[test]
 fn an_rtp_frame_can_never_exceed_the_message_limit() {
     let mut config = AppConfig::default();
-    config
-        .protocols
-        .insert("airplay".to_string(), phairplay_core::config::ProtocolConfig {
+    config.protocols.insert(
+        "airplay".to_string(),
+        phairplay_core::config::ProtocolConfig {
             enabled: true,
             port: 7000,
             require_pin: false,
             max_message_bytes: 16 * 1024,
-        });
+        },
+    );
     let limits = AirPlayLimits::from_config(&config);
     assert_eq!(limits.max_rtp_frame_bytes, 16 * 1024);
 }
@@ -51,11 +52,13 @@ fn an_rtp_frame_can_never_exceed_the_message_limit() {
 fn a_nonsensical_limit_is_raised_to_a_usable_floor() {
     // A zero would make every request fail; the engine clamps instead of
     // bricking the receiver.
-    let mut config = AppConfig::default();
-    config.limits = LimitsConfig {
-        max_header_count: 0,
-        max_header_bytes: 0,
-        ..LimitsConfig::default()
+    let config = AppConfig {
+        limits: LimitsConfig {
+            max_header_count: 0,
+            max_header_bytes: 0,
+            ..LimitsConfig::default()
+        },
+        ..AppConfig::default()
     };
     let limits = AirPlayLimits::from_config(&config);
     assert_eq!(limits.max_header_count, 1);

@@ -70,13 +70,22 @@ impl ProtocolKind {
     /// WHY: AirPlay requires *two* service types — `_airplay._tcp` for
     /// mirroring and `_raop._tcp` for the audio pipeline — and a receiver that
     /// advertises only the first is invisible to some senders.
+    ///
+    /// DLNA advertises **nothing** over mDNS: a UPnP renderer is found with
+    /// SSDP, and a renderer that also published `_googlecast._tcp` would
+    /// show up in the Chromecast picker of every sender as a device that
+    /// answers no Cast request.
+    ///
+    /// The spellings live in [`crate::config::service_types`], which is the
+    /// single owner of every service type of the workspace.
     #[must_use]
     pub const fn mdns_service_types(self) -> &'static [&'static str] {
+        use crate::config::service_types as types;
         match self {
-            ProtocolKind::AirPlay => &["_airplay._tcp", "_raop._tcp"],
-            ProtocolKind::Miracast => &["_miracast._tcp"],
-            ProtocolKind::Cast => &["_googlecast._tcp"],
-            ProtocolKind::Dlna => &["_googlecast._tcp"],
+            ProtocolKind::AirPlay => &[types::AIRPLAY_TCP, types::RAOP_TCP],
+            ProtocolKind::Miracast => &[types::MIRACAST_TCP],
+            ProtocolKind::Cast => &[types::GOOGLECAST_TCP],
+            ProtocolKind::Dlna => &[],
         }
     }
 
@@ -225,6 +234,7 @@ pub trait ProtocolEngine: Send + Sync + std::fmt::Debug {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]
@@ -256,6 +266,28 @@ mod tests {
         let types = ProtocolKind::AirPlay.mdns_service_types();
         assert!(types.contains(&"_airplay._tcp"));
         assert!(types.contains(&"_raop._tcp"));
+    }
+
+    #[test]
+    fn a_dlna_renderer_advertises_nothing_over_mdns() {
+        // WHY: a UPnP renderer is found with SSDP. Publishing the Cast
+        // service type as well would put the device into the Chromecast
+        // picker of every sender, where it answers no Cast request.
+        assert!(ProtocolKind::Dlna.mdns_service_types().is_empty());
+    }
+
+    #[test]
+    fn every_advertised_type_has_a_single_owner() {
+        // WHY: the spellings live in `config::service_types`; the protocol
+        // table must not spell one of them out a second time.
+        for kind in ProtocolKind::ALL {
+            for service_type in kind.mdns_service_types() {
+                assert!(
+                    crate::config::service_types::is_advertised(service_type),
+                    "{kind:?} advertises the unknown type {service_type}"
+                );
+            }
+        }
     }
 
     #[test]

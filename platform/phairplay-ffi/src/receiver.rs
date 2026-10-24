@@ -279,6 +279,7 @@ fn panic_details(payload: &Box<dyn std::any::Any + Send>) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use crate::test_support::{Must, MustErr};
     use phairplay_core::config::AppConfig;

@@ -6,6 +6,20 @@
 //!
 //! HOW: [`AppConfig`] is deserialised from TOML. Every field has a default, so
 //! a missing key is never an error — only a *wrong* value is.
+//!
+//! ## The modules of this configuration
+//!
+//! | Module | Responsibility |
+//! |---|---|
+//! | [`ports`] | The well-known ports of the receiver protocols. |
+//! | [`service_types`] | The DNS-SD service types the receiver advertises. |
+//! | [`timeouts`] | The protocol-internal deadlines. |
+//! | [`limits`] | The size caps that more than one crate has to know. |
+//! | [`engine_limits`] | The limits of one protocol, resolved out of [`AppConfig`]. |
+//!
+//! Every number that is written down more than once in the workspace has its
+//! single owner in one of these modules. The engine crates keep their own
+//! public names, but the *value* is read from here.
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -14,6 +28,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::ConfigError;
 use crate::protocol::ProtocolKind;
+
+pub mod engine_limits;
+pub mod limits;
+pub mod ports;
+pub mod service_types;
+pub mod timeouts;
+
+pub use engine_limits::EngineLimits;
 
 /// The top-level configuration of the receiver.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -89,6 +111,8 @@ pub struct LimitsConfig {
     pub video_queue_bytes: usize,
     /// The maximum number of audio packets buffered in the sink queue.
     pub audio_queue_packets: usize,
+    /// The maximum total number of bytes buffered in the audio sink queue.
+    pub audio_queue_bytes: usize,
     /// The maximum number of pairing attempts before the sender is locked out.
     pub max_pairing_attempts: u32,
     /// The maximum size of an album artwork payload, in bytes.
@@ -109,6 +133,7 @@ impl Default for LimitsConfig {
             video_queue_frames: 90,
             video_queue_bytes: 64 * 1024 * 1024,
             audio_queue_packets: 200,
+            audio_queue_bytes: 4 * 1024 * 1024,
             max_pairing_attempts: 5,
             max_artwork_bytes: 8 * 1024 * 1024,
             max_photo_bytes: 20 * 1024 * 1024,
@@ -147,6 +172,19 @@ impl Default for PerformanceConfig {
     }
 }
 
+impl PerformanceConfig {
+    /// The idle timeout as a duration.
+    ///
+    /// WHY: the budget is stored in milliseconds because that is what the
+    /// configuration file and the dashboards speak. An engine needs a
+    /// `Duration`, and converting the number in six places is how the six
+    /// places drift apart.
+    #[must_use]
+    pub fn idle_timeout(&self) -> std::time::Duration {
+        std::time::Duration::from_millis(self.idle_timeout_ms)
+    }
+}
+
 impl AppConfig {
     /// The configuration of a protocol, with the default applied when absent.
     #[must_use]
@@ -178,6 +216,18 @@ impl AppConfig {
         if self.limits.video_queue_bytes == 0 {
             return Err(ConfigError::Invalid {
                 field: "limits.video_queue_bytes".into(),
+                reason: "must be greater than zero".into(),
+            });
+        }
+        if self.limits.audio_queue_packets == 0 {
+            return Err(ConfigError::Invalid {
+                field: "limits.audio_queue_packets".into(),
+                reason: "must be greater than zero".into(),
+            });
+        }
+        if self.limits.audio_queue_bytes == 0 {
+            return Err(ConfigError::Invalid {
+                field: "limits.audio_queue_bytes".into(),
                 reason: "must be greater than zero".into(),
             });
         }
@@ -251,6 +301,7 @@ fn parse_protocol_name(name: &str) -> Option<ProtocolKind> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]
@@ -324,7 +375,10 @@ mod tests {
         let config: AppConfig = toml::from_str(text).expect("parse");
         assert_eq!(config.device.name, "Living Room");
         assert_eq!(config.device.model, DeviceConfig::default().model);
-        assert_eq!(config.device.manufacturer, DeviceConfig::default().manufacturer);
+        assert_eq!(
+            config.device.manufacturer,
+            DeviceConfig::default().manufacturer
+        );
         assert!(config.validate().is_ok());
     }
 }

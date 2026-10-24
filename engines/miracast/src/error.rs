@@ -118,11 +118,14 @@ impl MiracastError {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]
     fn every_failure_belongs_to_miracast() {
-        let error = MiracastError::TruncatedMessage { protocol: "miracast" };
+        let error = MiracastError::TruncatedMessage {
+            protocol: "miracast",
+        };
         assert_eq!(error.protocol(), ProtocolKind::Miracast);
     }
 

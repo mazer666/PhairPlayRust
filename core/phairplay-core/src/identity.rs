@@ -90,6 +90,7 @@ pub fn sanitize_service_name(raw: &str, fallback: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
 
     #[test]

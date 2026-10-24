@@ -15,13 +15,30 @@
 //! EXAMPLE:
 //!
 //! ```
+//! use axum::body::Body;
+//! use axum::http::Request;
 //! use phairplay_web::api::router;
 //! use phairplay_web::state::AppState;
+//! use tower::ServiceExt;
 //!
 //! let state = AppState::with_default_configuration()
 //!     .unwrap_or_else(|error| panic!("the state must start: {error}"));
 //! let app = router(state);
-//! assert!(app.is::<axum::routing::get>(()));
+//!
+//! // The dashboard asks the receiver for its state.
+//! let runtime = tokio::runtime::Runtime::new()
+//!     .unwrap_or_else(|error| panic!("the runtime must start: {error}"));
+//! let response = runtime.block_on(async {
+//!     app.oneshot(
+//!         Request::builder()
+//!             .uri("/api/status")
+//!             .body(Body::empty())
+//!             .expect("the request must be buildable"),
+//!     )
+//!     .await
+//!     .expect("the request must be answered")
+//! });
+//! assert_eq!(response.status(), axum::http::StatusCode::OK);
 //! ```
 
 use axum::body::Bytes;
@@ -49,7 +66,6 @@ use crate::state::AppState;
 /// the user needs one program and not two. The API keeps its own paths, and
 /// everything that is not an API path is answered from the directory of the
 /// dashboard.
-#[must_use]
 pub fn router(state: AppState) -> Router {
     let api = Router::new()
         .route("/api/status", get(status))
@@ -206,6 +222,7 @@ async fn disable_protocol(
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
     use axum::body::Body;
     use axum::http::Request;
