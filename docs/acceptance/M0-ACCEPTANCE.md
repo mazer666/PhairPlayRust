@@ -7,6 +7,15 @@
 **Date:** 2026-10-24
 **Reference device (hardware, OS, network):** Linux x86_64, 2 CPUs, 8 GB RAM. **No receiver hardware was available** — see §3 and §9.
 
+**Continuous integration:** the gate was run on the GitHub runners on the
+commit of this record. All four jobs are green — *Quality Gate* (format,
+lint, tests, documentation), *Structure* (crate boundaries, file length,
+licence headers, documentation links), *Licenses* (cargo-deny, pinned) and
+*Security Audit* (cargo-audit). The first run of that gate was **red**, and
+the two defects it found are fixed: the bridge was not built before the
+tests, and the evidence of the audit was kept out of the repository by the
+general rule of the `.gitignore`.
+
 ---
 
 ## 1. Functional
@@ -129,7 +138,7 @@ measured values.
 | The log does not name a peer | **pass** | `phairplay-core` → `privacy` (masking of the name, the address and the socket address) |
 | The dashboard binds to the loopback interface only | **pass** | `phairplay-web` → 16 passed |
 | The dependency policy is satisfied | **pass** | `cargo-deny` → `bans ok, licenses ok, sources ok` |
-| A dependency has no known advisory | **NOT RUN** | `cargo audit` is part of the CI, but it is not installed in this sandbox — the CI job `audit` is the evidence, not this run |
+| A dependency has no known advisory | **pass** | the CI job *Security Audit (cargo-audit)* → success on the GitHub runner |
 
 The threat model and the guarantees are written down in
 [`SECURITY.md`](../../SECURITY.md). The data that the receiver sees, and the
