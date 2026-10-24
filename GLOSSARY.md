@@ -69,6 +69,31 @@ of AirPlay and of Miracast. The methods are `OPTIONS`, `ANNOUNCE`, `SETUP`,
 receiver does not implement HLS as such; it matters here because FairPlay
 DRM is defined for HLS content, and that content is out of scope (`EXC-001`).
 
+**Samsung Smart View** — The screen mirroring of the Galaxy phones and
+tablets: the user opens *Smart View* on the phone and picks the receiver.
+The protocol belongs to the *MultiScreen Framework* (MSF), and the receiver
+announces itself under the service type `_samsungmsf._tcp`. The API of the
+framework listens on the port 8001 — the owner of that number is
+`core/phairplay-core/src/config/ports.rs`.
+
+*What the project implements:* the discovery (the answer to the search of the
+framework), the description document and the handshake of the sender. *What
+it does not implement:* the message format of the channel. That format is
+proprietary and not publicly documented, so a Galaxy device finds the
+receiver and connects to it, but no picture flows yet (`EXC-011`).
+
+**MSF** — *MultiScreen Framework*. The framework behind Samsung Smart View. A
+Galaxy device looks for a receiver with an SSDP search for
+`urn:samsung.com:service:MultiScreenService:1`, reads the description
+document that the answer points at, and posts its own address and its name
+to the receiver. The three steps are documented by Samsung; the message
+format that follows them is not.
+
+**WebSocket** — The protocol that upgrades an HTTP connection into a
+persistent, bidirectional channel. The project uses it twice: for the event
+channel of the dashboard (the live counters) and for the channel of the
+Samsung Smart View API.
+
 ---
 
 ## The negotiation and the media
@@ -144,6 +169,76 @@ the list of the MIME types that the receiver advertises.
 **property list (plist)** — The Apple serialisation format, in an XML and in a
 binary form (`bplist00`). The sender uses it for the pairing, the identity
 and the metadata.
+
+---
+
+## The television and the remote control
+
+**D-pad** — The direction pad of a remote control: the arrow keys *up*,
+*down*, *left* and *right*, plus the button in the middle that the platform
+calls *OK*. A television application is built for the D-pad, not for a mouse.
+
+**Leanback** — The launcher of Android TV. An application that carries the
+`LEANBACK_LAUNCHER` category in its manifest appears in the list of the
+television instead of in the list of the applications of a phone. The
+application also needs a banner (a picture of 320 × 180 dp that the launcher
+scales) and the `uses-feature` of the television. The Android shell of
+PhairPlayRust carries all three, and it stays one application for the phone
+and for the television.
+
+**roving tabindex** — The pattern that makes a group of controls one tab stop
+instead of many. Exactly one element of the group carries `tabindex="0"`, the
+others carry `tabindex="-1"`, and the arrow keys move the focus inside the
+group. The benefit is that a remote control — which usually has no tab key —
+can reach every control of the group with the arrow keys alone.
+
+**focus frame** — The drawn frame around the element that holds the focus.
+The project draws its own frame instead of leaning on the frame of the
+system, because the frame of the system is thin and dark and is nearly
+invisible on a dark surface. The frame of the dashboard and the frame of the
+Android shell are measured against the surface they lie on.
+
+**ten-foot interface** — An interface that is read from three metres away:
+larger text, a visible focus, a state that is carried by a word and a shape
+and not by a colour alone. The shells and the dashboard of PhairPlayRust
+follow this rule.
+
+---
+
+## The device and the headless build
+
+**headless** — A receiver that runs **without a screen**: no window, no
+click, no browser. The program starts the protocols itself at the start of
+the process and reports the outcome of every one of them on the console. On
+a Raspberry Pi or on a NAS the protocol *is* the product — the dashboard is a
+control panel and nothing more.
+
+**device profile** — The configuration of a **class of devices**, not of one
+device: a Raspberry Pi, a NAS, a container, a desktop, or a device nobody
+described yet. A profile is one TOML file in `config/profiles/`, and the name
+of the profile is the name of the file. A profile decides which protocols are
+switched on, what the device announces and what its resource budgets are; it
+never decides the security model.
+
+**the installer** — `deploy/install.sh`: it builds the receiver, installs it
+under a prefix, installs the configuration and the systemd unit, and enables
+the service as an unprivileged user. It prints every command it runs and has
+a `--dry-run` that changes nothing.
+
+**the composition root** — The one place that builds the engines of the
+receiver and hands them to the supervisor: `apps/web/src/receiver.rs`. A
+second registration of the engines would be a second truth about what runs,
+so there is only one.
+
+**the supervisor** — The object of the bridge (`ReceiverCore` in
+`platform/phairplay-ffi`) that starts, stops and watches the engines. The
+engines are handed to it once, in the composition root, and are never talked
+to again: the status of a protocol is read from the supervisor, not from the
+engine.
+
+**the device test plan** — The list of the checks that need a real sender, a
+real television or a real device: `docs/guides/DEVICE_TEST_PLAN.md`. Every
+row of it is **NOT RUN** until somebody executes it on a device.
 
 ---
 

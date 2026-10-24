@@ -180,6 +180,7 @@ export const MESSAGES = {
   "protocol.miracast": "Miracast",
   "protocol.cast": "Google Cast",
   "protocol.dlna": "DLNA / UPnP",
+  "protocol.smartview": "Samsung Smart View",
 
   /* ── The units of the counters ───────────────────────────────────────── */
   "unit.byte": "B",

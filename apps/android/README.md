@@ -29,7 +29,7 @@ no microphone and no contact permission in it (FR-075).
 
 | Permission | Why the receiver needs it |
 |---|---|
-| `INTERNET` | the TCP and UDP sockets of the four protocols |
+| `INTERNET` | the TCP and UDP sockets of the five protocols |
 | `ACCESS_NETWORK_STATE` | the state of the network before a service is advertised |
 | `CHANGE_WIFI_MULTICAST_STATE` | the multicast lock, without which Android drops the packets of the discovery |
 | `WAKE_LOCK` | the processor stays awake while a session runs and the screen is off |

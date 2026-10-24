@@ -5,7 +5,7 @@ AppKit for the item in the menu bar, and the UniFFI bindings of the bridge
 of `platform/phairplay-ffi`.
 
 WHY: The shell is the native face of the receiver on the computer. It
-shows the same four protocols with the same states as the dashboard of
+shows the same five protocols with the same states as the dashboard of
 `apps/web` and as the Android shell, it starts and stops the engines, and
 it keeps running when the window is closed. It never talks to the
 internet: the only thing it opens is a socket to a sender in the local
@@ -32,7 +32,7 @@ not a Mac.
 
 | File of the kit | What it holds |
 |---|---|
-| `ReceiverModel.swift` | the phases of a protocol, the four protocols, the card of a protocol, the state of the receiver |
+| `ReceiverModel.swift` | the phases of a protocol, the five protocols, the card of a protocol, the state of the receiver |
 | `ReceiverMapping.swift` | the translation of the objects of the bridge into the model of the shell |
 | `ReceiverClient.swift` | the client that talks to the bridge and announces the changes of the state |
 | `ReceiverFactory.swift` | the creation of the receiver and of the client |

@@ -52,13 +52,41 @@ here go deeper.
 ### The guides
 
 - [`guides/PROTOCOL_OVERVIEW.md`](guides/PROTOCOL_OVERVIEW.md) — what a sender
-  actually does in each of the four protocols, and where the limits are
+  actually does in each of the five protocols, and where the limits are
+- [`guides/OTHER-DEVICES.md`](guides/OTHER-DEVICES.md) — on which devices the
+  receiver runs and how it gets there: Raspberry Pi, container, NAS, VM,
+  mini PC, desktop, WSL (German)
+- [`guides/OTHER-DEVICES.en.md`](guides/OTHER-DEVICES.en.md) — the same guide
+  in English; both editions are complete
 - [`guides/CONFIGURATION.md`](guides/CONFIGURATION.md) — how the receiver is
   configured, and where every value lives
+- [`guides/DEVICE_TEST_PLAN.md`](guides/DEVICE_TEST_PLAN.md) — the checks that
+  need a real sender, a real television or a real device; every row is NOT
+  RUN until somebody executes it
 - [`guides/HARDENING_CHECKLIST.md`](guides/HARDENING_CHECKLIST.md) — the
   checklist for a new parser, a new listener or a new callback
 - [`guides/TROUBLESHOOTING.md`](guides/TROUBLESHOOTING.md) — the symptom, the
   cause, the check
+
+### The measured evidence — `docs/audit/`
+
+The audit records carry the measured proof of a shell, of an engine or of a
+document. A number in one of them always names the command that produced it.
+
+- [`audit/tv-web-dashboard.md`](audit/tv-web-dashboard.md) — the dashboard as a
+  remote control interface: the keyboard, the focus order, the measured
+  contrast and the layout
+- [`audit/tv-android-shell.md`](audit/tv-android-shell.md) — the Android shell:
+  the compile, the tests, the lint, the order of the focus and the Leanback
+  entry of the manifest
+- [`audit/tv-macos-shell.md`](audit/tv-macos-shell.md) — the macOS shell: the
+  test suite of the kit, the keyboard, the focus frame and the catalogue of
+  the texts
+- [`audit/2026-10-24-baseline.md`](audit/2026-10-24-baseline.md) — the baseline
+  of the first implementation
+- [`audit/other-devices-guide.md`](audit/other-devices-guide.md) — the evidence
+  behind the guide for other devices: the build, the command line, a real
+  start, the dry run of the installer
 
 ### The areas that other gates fill
 
@@ -68,15 +96,14 @@ documentation links to a file that does not exist yet.
 
 - `docs/project/` — the risk register
 - `docs/features/` — the granular feature specifications
-- `docs/audit/` — the audit records
 - `docs/releasing/` — the release process and the build from source
 - `docs/reports/` — the reports of the rounds of work
 - `docs/decisions/` — the decisions of the project owner
 
 The directories that already carry a first file: `docs/adr/` and `docs/cr/`
-(the templates, the records follow), `docs/acceptance/` (the template, the
-milestone records follow), `docs/assets/` (the logo and the icons) and
-`docs/site/` (the landing page).
+(the templates, the records follow), `docs/acceptance/` (the template and the
+record of M0), `docs/audit/` (the audit records), `docs/assets/` (the logo and
+the icons) and `docs/site/` (the landing page).
 
 ## How this set is maintained
 

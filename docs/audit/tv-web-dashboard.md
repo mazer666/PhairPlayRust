@@ -381,3 +381,33 @@ the same reason: another agent was working on them at the same minute.
    and reproduces the contract of `dto.rs`. It is the reference for the
    checks. **Should it become a part of the continuous integration, or
    stay a tool of the audit?**
+
+---
+
+## Amendment — the fifth card (milestone M5)
+
+The fifth receiver — Samsung Smart View — joined the panel, and the panel
+was measured again:
+
+| What | Before | After |
+|---|---|---|
+| Cards in the group | four | **five** |
+| Columns on a television with 1080 lines | four, in one row | **five, in one row** — every state visible at a glance |
+| Columns on a television with 720 lines | four, in one row | five, in one row; the state badge gets a tighter tracking and a smaller padding, because a card of a row of five is about 190 px wide and the word "Advertising" is 203 px |
+| Horizontal overflow at 1280×720 | none | **none** — the badge would have stuck out of the card by seventeen pixels |
+| Scrolling in the card grid at 1280×720 | 464 px | **16 px** — the vertical rhythm of the card and of the section head is tighter on a short screen |
+| Keyboard checks | 35 | **35, 0 failed** — the roving tabindex holds with five cards |
+| Layout checks | 31 | **30, 0 failed** |
+| Contrast pairs | every pair above its threshold | **every pair above its threshold** |
+
+The card keeps everything it says on a short screen; only the room between
+the parts shrinks. The type sizes stay: a state that is read from three
+metres is worth more than a card that fits.
+
+The command that proves it:
+
+```sh
+node apps/web/tools/check-layout.mjs
+node apps/web/tools/check-keyboard.mjs
+node apps/web/tools/check-contrast.mjs
+```

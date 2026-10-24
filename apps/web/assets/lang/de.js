@@ -174,6 +174,7 @@ export const MESSAGES = {
   "protocol.miracast": "Miracast",
   "protocol.cast": "Google Cast",
   "protocol.dlna": "DLNA / UPnP",
+  "protocol.smartview": "Samsung Smart View",
 
   /* ── Die Einheiten der Zähler ────────────────────────────────────────── */
   "unit.byte": "B",

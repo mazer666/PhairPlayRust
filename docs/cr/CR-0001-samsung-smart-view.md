@@ -7,7 +7,7 @@
 
 ## Problem
 
-The receiver speaks four protocols. Samsung Smart View — the screen mirroring
+The receiver speaks four protocols today. Samsung Smart View — the screen mirroring
 of the Galaxy phones and tablets — is not one of them, and a household with a
 Galaxy device cannot send its screen to the receiver.
 
@@ -66,11 +66,11 @@ code, in the dashboard and in the documentation.
 - **The build contract** is not changed: the engine follows the rules that
   already exist (one peer at a time, every read has a deadline, every input
   is length-limited).
-- **The composition root** (`apps/web/src/receiver.rs`) registers the engines
+- **The composition root** (`platform/phairplay-ffi/src/composition.rs`) registers the engines
   of the receiver. The fifth engine is registered there like every other
   one, so the receiver starts it with the others. The **card of the fifth
   protocol in the dashboard is still missing** — the panel of the browser
-  lists four protocols. That is the open point of the milestone M5 in
+  lists five protocols. That is the open point of the milestone M5 in
   [`../../ROADMAP.md`](../../ROADMAP.md).
 
 ## Impacted Platforms

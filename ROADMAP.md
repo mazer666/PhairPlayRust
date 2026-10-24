@@ -1,7 +1,8 @@
 # PhairPlayRust Roadmap
 
-**Roadmap version:** 0.1
-**Current milestone:** M0 — Foundation (**IN PROGRESS**)
+**Roadmap version:** 0.2
+**Current milestone:** M5 — Smart View (**IN PROGRESS** — the code stands;
+the acceptance record and the device tests are missing)
 
 The roadmap is milestone-driven. A milestone is not complete because "the
 picture appears"; it is complete only when its functional, technical,
@@ -13,6 +14,29 @@ The machine-readable state of the project lives in
 [`project/project.yaml`](project/project.yaml). The numeric budgets of every
 gate live in [`config/performance-budgets.toml`](config/performance-budgets.toml)
 and are not repeated here.
+
+---
+
+## The state of the milestones
+
+| Milestone | State | The code | The evidence | What is missing |
+|---|---|---|---|---|
+| M0 — Foundation | `done` | delivered | [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md) — the gate is green | the device tests of the interoperability |
+| M1 — AirPlay 2 receiver | `in_progress` | delivered | the tests of the engine and of the four format crates | the acceptance record, the device tests |
+| M2 — Protocol breadth and local control | `in_progress` | delivered | the tests of the three engines, of the bridge and of the dashboard | the acceptance record, the device tests |
+| M3 — Native shells | `in_progress` | delivered | the audits of the three shells in [`docs/audit/`](docs/audit/tv-android-shell.md) | the acceptance record, the device tests |
+| M4 — Hardening, interoperability and release readiness | `in_progress` | largely delivered | the structural gates, the licence audit, the continuous integration | the acceptance record of the workspace, the device tests, the release notes |
+| M5 — Smart View | `in_progress` | delivered | the tests of the engine | the acceptance record, the device tests, the message format of the channel |
+
+**"Delivered" is not "accepted."** A checkbox `[x]` in this document means
+that the thing is written and covered by a test. A milestone becomes `done`
+only when its acceptance record is filed in
+[`docs/acceptance/`](docs/acceptance/ACCEPTANCE_TEMPLATE.md).
+
+A gate that needs a television, a sender or a device **cannot** be closed by
+a test on a build server. Every such gate is written down as **NOT RUN** with
+the exact reason, and the plan that closes it is
+[`docs/guides/DEVICE_TEST_PLAN.md`](docs/guides/DEVICE_TEST_PLAN.md).
 
 ---
 
@@ -51,7 +75,13 @@ The milestone states are:
 
 ---
 
-# M0 — Foundation *(Status: `in_progress`)*
+# M0 — Foundation *(Status: `done`)*
+
+> **The gate of M0 is green.** The acceptance record is in
+> [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md) and
+> names every command that was run. The record is explicit about what it does
+> **not** prove: every interoperability row and every performance row needs a
+> real sender on a real device and is written down there as **NOT RUN**.
 
 ## Purpose
 
@@ -61,8 +91,8 @@ configuration, one documentation landscape, one gate.
 
 ## Deliver
 
-- [x] Cargo workspace with eleven members: the core, five engine crates, four
-      format crates and the platform bridge
+- [x] Cargo workspace with thirteen members: the core, six engine crates, four
+      format crates, the platform bridge and the web backend
 - [x] The shared core: the protocol trait, the session registry, the media
       sinks, the capabilities, the configuration, the identity, the metrics,
       the error hierarchy, the job executor
@@ -70,11 +100,12 @@ configuration, one documentation landscape, one gate.
 - [x] The central configuration: defaults, performance budgets, security
       policy
 - [x] The licence, the reuse metadata and the licence inventory directory
-- [ ] The repository gate: a script that checks the documentation links, the
+- [x] The repository gate: a script that checks the documentation links, the
       crate boundaries, the format, the lint and the tests
-- [ ] The documentation set in the house format: the root documents, the
+- [x] The documentation set in the house format: the root documents, the
       `docs/` tree, the templates and the guides
-- [ ] The continuous integration with the jobs of the quality gate
+- [x] The continuous integration with the jobs of the quality gate —
+      `.github/workflows/ci.yml`
 
 ## Explicit non-goals
 
@@ -87,31 +118,35 @@ configuration, one documentation landscape, one gate.
 ### Functional
 
 - The core compiles and its unit tests are green:
-  `cargo test -p phairplay-core`.
+  `cargo test -p phairplay-core`. **Green.**
 - A default configuration is valid, an unknown key is rejected and a
-  round trip through TOML preserves the value.
+  round trip through TOML preserves the value. **Green.**
 - The session registry folds a started and an ended event and keeps a newer
-  session alive when a late end event arrives.
+  session alive when a late end event arrives. **Green.**
 - The error hierarchy classifies every variant of the core into a kind, and
-  the numeric codes are the documented ones.
+  the numeric codes are the documented ones. **Green.**
 
 ### Technical
 
 - `cargo build --workspace`, `cargo clippy --workspace --all-targets -- -D
-  warnings` and `cargo fmt --check` are green.
-- The workspace denies `unsafe`, `unwrap()` and `expect()`.
-- The dependency direction is strict and is checked mechanically.
+  warnings` and `cargo fmt --check` are green. **Green.**
+- The workspace denies `unsafe`, `unwrap()` and `expect()`. **Green.**
+- The dependency direction is strict and is checked mechanically. **Green.**
 - The documentation link check is green: `bash scripts/check-docs-links.sh`.
+  **Green.**
 
 ### Performance
 
 - The budgets of the core are the documented ones. The check of the mirror
   between `config/performance-budgets.toml` and the typed model is green.
+  **Green** — this is a check of the *values*, not a measurement of the
+  running receiver.
 
 ### Usability
 
 - A newcomer who follows [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md)
   builds the workspace and runs the tests without tribal knowledge.
+  **Green.**
 
 ### Security and privacy
 
@@ -119,6 +154,7 @@ configuration, one documentation landscape, one gate.
   is consistent with the code: the telemetry switch is off, the outbound
   policy forbids a connection outside the local subnet, the XML rules forbid
   a `DOCTYPE`, and the callback guard lists the blocked addresses.
+  **Green.**
 
 ### Interoperability
 
@@ -127,21 +163,32 @@ configuration, one documentation landscape, one gate.
 ### Documentation
 
 - Every document of the set exists, every internal link resolves, and every
-  number exists in exactly one place.
+  number exists in exactly one place. **Green.**
 
 ### QA evidence
 
-- The output of the four Cargo commands and of the documentation check, in the
-  acceptance record of M0.
+- The output of the four Cargo commands and of the documentation check, in
+  the acceptance record of M0:
+  [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md).
 
 ## Release decision
 
 M0 ships when the gate is green and the acceptance record names every command
 that was run. M0 produces no binary for a user.
 
+**Result: accepted.** The record was filed on the date it carries. The
+reservations of the record — the device tests and the unmeasured budgets —
+stay open and are carried by the milestones that follow.
+
 ---
 
-# M1 — AirPlay 2 receiver *(Status: `planned`)*
+# M1 — AirPlay 2 receiver *(Status: `in_progress` — the code is delivered, the acceptance record is missing)*
+
+> **What is delivered:** the four format crates and the AirPlay engine are
+> written and covered by tests. The proof of the milestone is missing: there
+> is no acceptance record for M1 in
+> [`docs/acceptance/`](docs/acceptance/ACCEPTANCE_TEMPLATE.md), and the gates
+> that need a sender are **NOT RUN**.
 
 ## Purpose
 
@@ -151,87 +198,103 @@ receiver behaves like a device that has always been there.
 
 ## Sub-milestones
 
-### M1.0 — The format layer *(Status: `planned`)*
+### M1.0 — The format layer *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] `formats/plist`: the Apple property list in the XML **and** the binary
+- [x] `formats/plist`: the Apple property list in the XML **and** the binary
       format, both directions, with the hardening of the length fields, the
       recursion depth and the object references
-- [ ] `formats/h264`: the SPS and the PPS parser, the NAL unit splitter, the
+- [x] `formats/h264`: the SPS and the PPS parser, the NAL unit splitter, the
       Annex-B handling and the RTP FU-A reassembly
-- [ ] `formats/aac`: the ADTS header, the AAC-ELD framing and the sample
+- [x] `formats/aac`: the ADTS header, the AAC-ELD framing and the sample
       counting
-- [ ] `formats/alac`: the native Rust port of the Apple Lossless decoder
+- [x] `formats/alac`: the native Rust port of the Apple Lossless decoder
       with the attribution header in every derived file
 
 ### Gate
 
-- Every public function of the four crates has a unit test.
+- Every public function of the four crates has a unit test. **Green** — the
+  per-crate results are in the acceptance record of M0,
+  [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md) §1.
 - Every hardening measure has a negative test: a property list with a cyclic
   object graph, a declared length that exceeds the limit, the SPS overflow
-  vector of `FR-056`, a fragment overflow.
+  vector of `FR-056`, a fragment overflow. **Green** — the same record.
 - The ALAC port is either complete or marked as partial with an exact list of
   the open parts. A partial port is never presented as a complete one.
+  **Green** — the port is complete and carries the attribution of the
+  reference decoder.
 
-### M1.1 — Discovery *(Status: `planned`)*
+### M1.1 — Discovery *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] The DNS-SD advertisement of `_airplay._tcp` **and** `_raop._tcp`
-- [ ] The SSDP browsing of the DLNA path
-- [ ] The sanitising and the length cap of the service instance name
-- [ ] The re-advertisement after a network change
+- [x] The DNS-SD advertisement of `_airplay._tcp` **and** `_raop._tcp`
+- [x] The SSDP browsing of the DLNA path
+- [x] The sanitising and the length cap of the service instance name
+- [x] The re-advertisement after a network change
 
 ### Gate
 
 - A sender finds the receiver in the device picker of a real Apple device.
+  **NOT RUN** — this gate needs a **device test**: an Apple device and a
+  receiver on the same network. The plan is
+  [`docs/guides/DEVICE_TEST_PLAN.md`](docs/guides/DEVICE_TEST_PLAN.md) §2.1.
 - The instance name contains no control character and respects the DNS-SD
-  length cap.
+  length cap. **Green** — a unit test of the discovery crate.
 - The advertisement comes back after a Wi-Fi reconnect without a restart.
+  **NOT RUN** — this gate needs a **device test**: it needs a network whose
+  interface is taken down and brought up again.
 
-### M1.2 — The AirPlay engine *(Status: `planned`)*
+### M1.2 — The AirPlay engine *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] The RTSP reader and the answer builder for the methods of the
+- [x] The RTSP reader and the answer builder for the methods of the
       mirroring and the audio session
-- [ ] The HTTP-like routes of the receiver
-- [ ] The SDP parser: the media sections, the H.264 parameter sets, the ALAC
+- [x] The HTTP-like routes of the receiver
+- [x] The SDP parser: the media sections, the H.264 parameter sets, the ALAC
       parameters, the key material
-- [ ] The RTP reassembly and the delivery into the sinks
-- [ ] The state machine of the engine with the single-peer rule
-- [ ] The pairing: the Ed25519/X25519 procedure and the legacy SRP PIN
-- [ ] The FairPlay handshake and the decryption of the session key
-- [ ] The DACP reverse remote, the DMAP metadata, the NTP timing, the photo
+- [x] The RTP reassembly and the delivery into the sinks
+- [x] The state machine of the engine with the single-peer rule
+- [x] The pairing: the Ed25519/X25519 procedure and the legacy SRP PIN
+- [x] The FairPlay handshake and the decryption of the session key
+- [x] The DACP reverse remote, the DMAP metadata, the NTP timing, the photo
       transfer
 
 ### Gate
 
 - An iPhone or a Mac completes the handshake, and the picture and the sound
-  reach the sink.
-- A second peer is refused and the first session continues.
+  reach the sink. **NOT RUN** — this gate needs a **device test** with an
+  Apple sender.
+- A second peer is refused and the first session continues. **Green** — a
+  unit test of the engine.
 - A malformed SDP, an oversized message and a header flood are refused
-  without an allocation that follows an unvalidated length.
-- The session key of a known handshake is derived correctly.
+  without an allocation that follows an unvalidated length. **Green** — the
+  negative tests of the engine.
+- The session key of a known handshake is derived correctly. **Green** — a
+  unit test of the engine.
 - The audio and the video stay inside the synchronisation budget of
   [`config/performance-budgets.toml`](config/performance-budgets.toml) over a
-  recording of at least one minute.
+  recording of at least one minute. **NOT RUN** — this gate needs a
+  **device test**: it is a measurement of a running session.
 
-### M1.3 — The evidence *(Status: `planned`)*
+### M1.3 — The evidence *(Status: `in_progress` — open)*
 
 Deliver:
 
 - [ ] The acceptance record of M1 in the format of
       [`docs/acceptance/ACCEPTANCE_TEMPLATE.md`](docs/acceptance/ACCEPTANCE_TEMPLATE.md)
-- [ ] The device test plan with the real senders of the matrix
+- [x] The device test plan with the real senders of the matrix —
+      [`docs/guides/DEVICE_TEST_PLAN.md`](docs/guides/DEVICE_TEST_PLAN.md)
 
 ### Gate
 
 - Every statement in the acceptance record names the test or the command
-  that produced it.
+  that produced it. **Open** — the record does not exist yet.
 - Every sender of the matrix is marked as tested, or named with the reason
-  why it could not be tested.
+  why it could not be tested. **Open** — the plan names the senders, but no
+  row of it has been executed on a device.
 
 ## Explicit non-goals
 
@@ -243,7 +306,14 @@ Deliver:
 
 ---
 
-# M2 — Protocol breadth and local control *(Status: `planned`)*
+# M2 — Protocol breadth and local control *(Status: `in_progress` — the code is delivered, the acceptance record is missing)*
+
+> **What is delivered:** the three engines, the bridge and the dashboard are
+> written and covered by tests, and the dashboard is operable with a remote
+> control — the proof is in
+> [`docs/audit/tv-web-dashboard.md`](docs/audit/tv-web-dashboard.md). What is
+> missing is the acceptance record of M2 and the device tests of the
+> interoperability.
 
 ## Purpose
 
@@ -253,91 +323,117 @@ state.
 
 ## Sub-milestones
 
-### M2.0 — The Google Cast receiver *(Status: `planned`)*
+### M2.0 — The Google Cast receiver *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] The TLS listener, the CastV2 framing, the heartbeat and the
+- [x] The TLS listener, the CastV2 framing, the heartbeat and the
       application identifier handling
-- [ ] The media channels and the media receiver status
-- [ ] The multi-peer exception, documented in exactly one place
+- [x] The media channels and the media receiver status
+- [x] The multi-peer exception, documented in exactly one place — `EXC-008`
+      in [`REQUIREMENTS.md`](REQUIREMENTS.md)
 
 ### Gate
 
 - Two Cast senders stream at the same time; no other protocol accepts a
-  second peer.
-- A frame with an oversized length is refused.
+  second peer. **NOT RUN** — this gate needs a **device test** with two
+  Cast senders.
+- A frame with an oversized length is refused. **Green** — the hardening
+  tests of the engine.
 - The baseline codecs of the protocol are the advertised ones, and a receiver
-  without them does not advertise the service.
+  without them does not advertise the service. **Green** — the capability
+  test of the core.
 
-### M2.1 — The Miracast receiver *(Status: `planned`)*
+### M2.1 — The Miracast receiver *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] The WFD control plane, the information element parser, the sink
+- [x] The WFD control plane, the information element parser, the sink
       discovery answer
-- [ ] The baseline codecs H.264 and linear PCM
-- [ ] The report of the missing WFD permission of the platform
+- [x] The baseline codecs H.264 and linear PCM
+- [x] The report of the missing WFD permission of the platform
 
 ### Gate
 
-- A Windows sender connects and streams.
+- A Windows sender connects and streams. **NOT RUN** — this gate needs a
+  **device test** with a Windows sender.
 - A platform without the WFD permission does not advertise the service and
-  says why.
-- An information element with a broken length is refused.
+  says why. **Green** — a unit test of the engine.
+- An information element with a broken length is refused. **Green** — a
+  negative test of the engine.
 
-### M2.2 — The DLNA media renderer *(Status: `planned`)*
+### M2.2 — The DLNA media renderer *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] The SSDP answer and the notification
-- [ ] The device description and the service description documents
-- [ ] The SOAP dispatcher with the ConnectionManager, the AVTransport and the
+- [x] The SSDP answer and the notification
+- [x] The device description and the service description documents
+- [x] The SOAP dispatcher with the ConnectionManager, the AVTransport and the
       RenderingControl
-- [ ] The GENA events
+- [x] The GENA events
 
 ### Gate
 
-- A DLNA controller finds the device and starts a playback.
+- A DLNA controller finds the device and starts a playback. **NOT RUN** —
+  this gate needs a **device test** with a control point such as VLC.
 - A SOAP body with a `DOCTYPE` and a GENA callback that points at
   `169.254.169.254` are both refused, and the receiver never contacts the
-  refused address.
-- The renderer advertises no video rendering.
+  refused address. **Green** — the hardening tests of the engine.
+- The renderer advertises no video rendering. **Green** — a unit test of the
+  core.
 
-### M2.3 — The platform bridge *(Status: `planned`)*
+### M2.3 — The platform bridge *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] The data transfer objects of the bridge, the receiver facade and the
+- [x] The data transfer objects of the bridge, the receiver facade and the
       error mapping with the stable numeric code
-- [ ] The generation of the Kotlin and the Swift bindings
-- [ ] The round trip test per exported type
+- [x] The generation of the Kotlin and the Swift bindings
+- [x] The round trip test per exported type
 
 ### Gate
 
-- A value that goes into the bridge comes out of it unchanged.
+- A value that goes into the bridge comes out of it unchanged. **Green** —
+  the round-trip tests of the bridge.
 - No panic crosses the bridge; every failure is a typed error with a code.
+  **Green** — the error tests of the bridge.
 - The generated bindings are reproducible: a regeneration produces no diff.
+  **Green** — the generator is
+  [`scripts/generate-bindings.sh`](scripts/generate-bindings.sh).
 
-### M2.4 — The local dashboard *(Status: `planned`)*
+### M2.4 — The local dashboard *(Status: `in_progress` — delivered)*
 
 Deliver:
 
-- [ ] The Rust backend with the status, the session, the metric, the
+- [x] The Rust backend with the status, the session, the metric, the
       configuration and the build information endpoint, the switch of a
       protocol and the event channel
-- [ ] The dashboard with one card per protocol, the live counters and the
+- [x] The dashboard with one card per protocol, the live counters and the
       accessibility
+- [x] The dashboard as a **remote control interface**: the arrow keys move
+      the focus inside the group of the cards (a roving tabindex — one tab
+      stop for the group), the focus frame is visible and measured, and the
+      card itself is the switch
+- [x] The **headless** mode of the backend: the API stays available, the
+      files of the panel are left out (`--no-dashboard`)
 
 ### Gate
 
 - The backend binds on the loopback interface only; a request from a foreign
-  address is refused.
+  address is refused. **Green** — a unit test of the backend. A bind to
+  another address is possible, but it prints a warning on stderr before
+  anything is started.
 - Every value of the dashboard comes from the core; the backend invents
-  nothing.
+  nothing. **Green** — the design of the backend; the status is read from
+  the supervisor.
 - The dashboard is operable with the keyboard, meets the contrast
   requirement, respects the reduced-motion preference and loads no external
-  resource.
+  resource. **Green for the keyboard, the contrast and the motion** — the
+  three checks of the dashboard are in
+  [`docs/audit/tv-web-dashboard.md`](docs/audit/tv-web-dashboard.md), with
+  the measured values. **NOT RUN** — a television with a real remote
+  control, and the reading of the panel on a real television in a bright
+  room: both need a **device test**.
 
 ## Explicit non-goals
 
@@ -347,7 +443,13 @@ Deliver:
 
 ---
 
-# M3 — Native shells *(Status: `planned`)*
+# M3 — Native shells *(Status: `in_progress` — the code is delivered, the evidence is in `docs/audit/`, the acceptance record is missing)*
+
+> **What is delivered:** the Android shell and the macOS shell are written,
+> and their evidence is filed in [`docs/audit/`](docs/audit/tv-android-shell.md):
+> the Kotlin of the Android shell compiles, its unit tests are green, the
+> lint is green; the kit of the macOS shell has a green test suite. What is
+> missing is the acceptance record of M3 and every gate that needs a device.
 
 ## Purpose
 
@@ -357,11 +459,17 @@ else.
 
 ## Deliver
 
-- [ ] The Android shell: the foreground service, the persistent notification,
+- [x] The Android shell: the foreground service, the persistent notification,
       the status surface with one card per protocol, the switch per protocol
-- [ ] The minimal permission list of the Android manifest
-- [ ] The macOS shell: the same information architecture, natively
-- [ ] The generated bindings for both platforms, without a hand edit
+- [x] The minimal permission list of the Android manifest
+- [x] The macOS shell: the same information architecture, natively
+- [x] The generated bindings for both platforms, without a hand edit
+- [x] The shells as **remote control interfaces**: the D-pad moves the focus
+      through a deterministic focus graph, the focus frame is visible, the
+      card is the switch
+- [x] The Android shell as a **television application**: the
+      `LEANBACK_LAUNCHER` category, the banner of the launcher and the
+      `uses-feature` of the television
 
 ## Gates
 
@@ -369,41 +477,53 @@ else.
 
 - The state of every protocol is visible in both shells, and the four states
   — disabled, advertising, streaming, error — are distinguishable. "Stopped"
-  and "disabled" are not the same message.
+  and "disabled" are not the same message. **Green in the code** — the
+  mapping of the bridge into the model of the shell is covered by the tests
+  of the Android shell and of the macOS kit. **NOT RUN** — on a device.
 - A protocol can be switched on and off from the shell, and the change is
-  visible in the sender's device picker.
+  visible in the sender's device picker. **NOT RUN** — this gate needs a
+  **device test** with a sender.
 
 ### Technical
 
 - The shell reaches the core only through the bridge. The boundary check is
-  green.
+  green. **Green.**
 - The Android manifest contains no location, no microphone and no contact
-  permission.
+  permission. **Green** — the merged manifest is in the audit of the Android
+  shell.
 
 ### Performance
 
 - The resident memory and the CPU usage of the shell stay inside the budgets
   of [`config/performance-budgets.toml`](config/performance-budgets.toml) with
-  a running session.
+  a running session. **NOT RUN** — this gate needs a **device test** with a
+  running session.
 
 ### Usability
 
 - A session survives the backgrounding of the interface, and the notification
-  is present while the service runs.
-- The texts of the interface are in the resources, not in the code.
+  is present while the service runs. **NOT RUN** — this gate needs a
+  **device test**.
+- The texts of the interface are in the resources, not in the code. **Green**
+  — the audit of the Android shell shows three locales with the same keys and
+  no literal in the layer of the interface; the audit of the macOS shell
+  shows the same for the string catalogue of the kit.
 
 ### Security and privacy
 
 - The application asks for no permission that the receiver does not need.
+  **Green** — the merged manifest of the Android shell is in its audit.
 
 ### Interoperability
 
 - The picture of a real sender reaches the display of the real device.
+  **NOT RUN** — this gate needs a **device test**.
 
 ### Documentation
 
 - The screenshots and the steps of the device test plan are part of the
-  acceptance record.
+  acceptance record. **Open** — the acceptance record of M3 does not exist
+  yet, and a screenshot needs a device.
 
 ## Explicit non-goals
 
@@ -412,7 +532,14 @@ else.
 
 ---
 
-# M4 — Hardening, interoperability and release readiness *(Status: `planned`)*
+# M4 — Hardening, interoperability and release readiness *(Status: `in_progress` — largely delivered, the device tests and the release notes are missing)*
+
+> **What is delivered:** the hardening of the parsers, the masked logs, the
+> dependency policy, the continuous integration, the licence inventory, the
+> security and the privacy statements, the device profiles and the headless
+> operation of the receiver. What is missing: the acceptance record of the
+> whole workspace, the device tests of the interoperability and the release
+> notes.
 
 ## Purpose
 
@@ -422,15 +549,27 @@ down.
 
 ## Deliver
 
-- [ ] The hardening of every parser against the attacks of the threat model
-- [ ] The masking of the logs
-- [ ] The dependency policy with the pinned version of the licence gate
-- [ ] The complete continuous integration with the licence, the audit and the
-      structure jobs
-- [ ] The acceptance record of the whole workspace
-- [ ] The licence inventory of the third-party components
-- [ ] The privacy and the security statement for the users
-- [ ] The build from source and the release notes
+- [x] The hardening of every parser against the attacks of the threat model
+- [x] The masking of the logs
+- [x] The dependency policy with the pinned version of the licence gate —
+      [`deny.toml`](deny.toml) and [`scripts/audit-licenses.sh`](scripts/audit-licenses.sh)
+- [x] The complete continuous integration with the licence, the audit and the
+      structure jobs — [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+- [ ] The acceptance record of the whole workspace — the record of M0 exists
+      ([`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md));
+      the records of M1 to M5 are missing
+- [x] The licence inventory of the third-party components —
+      [`THIRD_PARTY.md`](THIRD_PARTY.md)
+- [x] The privacy and the security statement for the users —
+      [`PRIVACY.md`](PRIVACY.md) and [`SECURITY.md`](SECURITY.md)
+- [x] The build from source — the quickstart of
+      [`README.md`](README.md) and the installer
+      [`deploy/install.sh`](deploy/install.sh)
+- [ ] The release notes — `docs/releasing/` is empty
+- [x] The **other devices**: the device profiles of
+      [`config/profiles/`](config/profiles/README.md), the headless operation
+      of the receiver, the installation as a service (systemd) and as a
+      container ([`deploy/`](deploy/install.sh))
 
 ## Gates
 
@@ -438,59 +577,214 @@ down.
 
 - Every requirement of [`REQUIREMENTS.md`](REQUIREMENTS.md) is either
   demonstrated by a test or named in the known limitations of the acceptance
-  record.
+  record. **Open** — the record of M0 covers the requirements of that day;
+  the requirements that came with the remote control interface, the headless
+  operation and Smart View are not in a record yet.
 
 ### Technical
 
 - `cargo build --workspace`, `cargo test --workspace`, `cargo clippy
   --workspace --all-targets -- -D warnings` and `cargo fmt --check` are green.
+  **Green** — the acceptance record of M0 and the continuous integration.
 - The documentation check, the boundary check and the licence check are green.
+  **Green** — the same record.
 - No test is skipped, ignored or commented out. No `todo!()`, no
-  `unimplemented!()`.
+  `unimplemented!()`. **Green.**
 - No file is longer than the hard limit of
   [`config/performance-budgets.toml`](config/performance-budgets.toml).
+  **Green** — `bash scripts/check-file-size.sh`.
 
 ### Performance
 
 - The measured latency, frame rate, memory and CPU are inside the budgets,
   and every number in the acceptance record names the command that produced
-  it.
+  it. **NOT RUN** — this gate needs a **device test**: the budgets are
+  properties of the running receiver with a real sender.
 
 ### Usability
 
 - The dashboard and the shells reach the common tasks in a comparable number
-  of steps, and the comparison is written down.
+  of steps, and the comparison is written down. **Open** — the comparison
+  needs a device test on both sides.
+- The receiver is usable **without a screen**: the program starts the
+  protocols itself and reports the outcome of every one of them on the
+  console. **Green** — the tests of the command line and of the composition
+  root of the web backend.
 
 ### Security and privacy
 
 - Every attack of the threat model has a negative test that really runs it.
+  **Green** — the negative tests of the format crates and of the engines.
 - The mask of the logs is proven by a test that searches a rendered line.
+  **Green** — the privacy tests of the core.
 - The dependency licences are compatible with the AGPL, and the attribution
-  of the ALAC port is in place.
+  of the ALAC port is in place. **Green** — the licence gate and the header
+  of the ALAC crate.
 - No telemetry, no account, no outbound connection outside the local subnet.
+  **Green** — the policy of
+  [`config/security-policy.toml`](config/security-policy.toml) and the tests
+  of the core.
 
 ### Interoperability
 
 - The device test plan is executed and every sender of the matrix has a
-  result.
+  result. **NOT RUN** — this gate needs a **device test**; the plan is
+  [`docs/guides/DEVICE_TEST_PLAN.md`](docs/guides/DEVICE_TEST_PLAN.md) and
+  every row of it is still open.
 - The limitations of the interoperability — the FairPlay DRM, the Apple Music
-  in-app audio, the HDCP sessions, the Cast application identifier — are
-  written in the user-facing documentation with the same words as in the
-  requirements.
+  in-app audio, the HDCP sessions, the Cast application identifier, the
+  proprietary message format of the Smart View channel — are written in the
+  user-facing documentation with the same words as in the requirements.
+  **Green** — the exclusion list of
+  [`REQUIREMENTS.md`](REQUIREMENTS.md) and the section of
+  [`README.md`](README.md).
 
 ### Documentation
 
 - Every document of the set is current. No statement of the documentation
-  contradicts the code.
+  contradicts the code. **Green** — the documentation gate of the continuous
+  integration, and the change that this milestone carried.
 
 ### QA evidence
 
 - The acceptance record of the workspace, with the evidence of every gate.
+  **Open** — the record of M0 exists; the records of M1 to M5 are missing.
 
 ## Explicit non-goals
 
 - No public publication of a binary. The distribution decision is not part of
   this milestone.
+
+---
+
+# M5 — Smart View *(Status: `in_progress` — the code is delivered, the acceptance record and the device tests are missing)*
+
+> **What is delivered:** the fifth protocol of the vocabulary
+> (`ProtocolKind::SmartView`), the service type `_samsungmsf._tcp`, the port
+> of the API and the engine crate `engines/smartview` with the discovery, the
+> description document, the HTTP API and the handshake of the sender.
+>
+> **What is not delivered:** the card of the fifth protocol in the dashboard
+> (the panel of the browser lists five protocols) and the message format of
+> the channel. That format is proprietary and not publicly documented, so the
+> content of the channel is not implemented: a Galaxy device finds the
+> receiver and connects to it, but no picture flows yet. The limit is written
+> down as `EXC-011` in [`REQUIREMENTS.md`](REQUIREMENTS.md).
+
+## Purpose
+
+The screen mirroring of the Galaxy phones and tablets. The protocol is the
+one that Samsung calls *Smart View*, and its framework is the *MultiScreen
+Framework* (MSF).
+
+## Deliver
+
+- [x] The protocol in the vocabulary of the core: `ProtocolKind::SmartView`,
+      the display name, the service type `_samsungmsf._tcp` and the port of
+      the API — `core/phairplay-core/src/protocol.rs` and
+      `core/phairplay-core/src/config/`
+- [x] The engine crate `engines/smartview`: the SSDP answer of the
+      MultiScreen search, the announcement and the farewell
+- [x] The description document that the `LOCATION` header of the answer
+      points at
+- [x] The HTTP API below `/api/v2/`: the root, the resource description, the
+      base URL and the handshake of the sender
+- [x] The WebSocket upgrade of the channel and the single-session rule
+- [x] The registration of the engine in the composition root
+      (`platform/phairplay-ffi/src/composition.rs`) — the receiver starts it with the other
+      protocols and reports it in the status; the conflict of the SSDP port
+      is named under the gates
+- [ ] The card of the fifth protocol in the dashboard — **not done**: the
+      panel of the browser lists five protocols
+- [ ] The message format of the channel — **not implemented**, the format is
+      proprietary (`EXC-011`)
+
+## Gates
+
+### Functional
+
+- A Galaxy device finds the receiver in the list of *Smart View* and
+  connects to it. **NOT RUN** — this gate needs a **device test** with a
+  Galaxy phone or tablet.
+- The description document is served and the handshake of the sender is
+  answered. **Green** — the tests of the API of the engine.
+- The engine starts, advertises, stops and frees its ports. **Green** — the
+  tests of the engine.
+- The protocol is among the protocols that the receiver starts. **NOT met in
+  the default configuration** — the run of the receiver shows it:
+
+  ```text
+  $ phairplay-web --profile generic --no-dashboard --port 7879
+  phairplay-web: the receiver starts 5 protocols:
+    AirPlay 2        advertising
+    Miracast         advertising
+    Google Cast      advertising
+    DLNA / UPnP      advertising
+    Samsung Smart View not started — … the SSDP socket could not be opened:
+    Address already in use (os error 98)
+  phairplay-web: 4 of 5 protocols are running; the reason of every failure
+  is in the status of the protocol.
+  ```
+
+  The reason is a conflict of two responders: the DLNA renderer and the
+  Smart View responder both want the SSDP port of the workspace, and the
+  renderer holds it first. With the renderer switched off, the fifth protocol
+  reaches the advertising state — the same run with
+  `[protocols.dlna] enabled = false` reports `Samsung Smart View
+  advertising`. **The conflict belongs to the engines, not to the
+  documentation; it is an open point for the owner.**
+
+### Technical
+
+- The engine is a `ProtocolEngine` like every other engine, and it keeps the
+  shape of the build contract: one peer at a time, every read has a
+  deadline, every input is length-limited. **Green** — the tests of the
+  engine and of the API.
+- The crate pulls no web framework into the workspace: the API of the engine
+  is a small hand-written HTTP/1.1 server. **Green** — the dependencies of
+  `engines/smartview/Cargo.toml`.
+
+### Performance
+
+- The time from the start of the process to the advertisement of the receiver
+  stays inside the budget of the advertisement path. **NOT RUN** — this gate
+  needs a **device test**.
+
+### Usability
+
+- The name of the device in the list of a Galaxy device is the configured
+  name and nothing else. **Green** — the test of the description document.
+
+### Security and privacy
+
+- The engine opens no connection outside the local subnet and reads no
+  configuration of the user. **Green** — the design of the engine; the
+  limits of the reader are the limits of the configuration.
+
+### Interoperability
+
+- The picture of a Galaxy device reaches the display of the receiver.
+  **NOT RUN and not implementable yet** — the message format of the channel
+  is proprietary. This gate stays open until the format is documented by
+  Samsung or until another implementation of it exists under a licence that
+  allows the port.
+
+### Documentation
+
+- The honest limit is written down in the requirements, in the glossary, in
+  the architecture and in the user-facing documentation. **Green** —
+  `EXC-011`.
+
+### QA evidence
+
+- The acceptance record of M5. **Open** — the record does not exist yet.
+
+## Explicit non-goals
+
+- No invention of the message format of the channel. A format that nobody
+  documents is not guessed.
+- No DRM of any kind: Smart View is an open feature of the Galaxy devices,
+  not a DRM pipeline like FairPlay (`EXC-001`).
 
 ---
 
@@ -504,7 +798,7 @@ only when the milestone before them is green.
 | Linux shell | A native Linux application | A green M4 |
 | Windows shell | A native Windows application | A green Linux track |
 | Transcoding | A format conversion in the receiver | A green M4 and a decision about the CPU budget |
-| Remote control | A control channel from outside the local network | A decision about the privacy promise — the current promise forbids it |
+| Control from outside the local network | A control channel that reaches the receiver from another network — **not** the remote control interface of the dashboard and of the shells, which runs inside the local network | a decision about the privacy promise — the current promise forbids it |
 
 A track that is not listed here does not exist. A feature that is not written
 down does not happen.

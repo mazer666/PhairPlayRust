@@ -18,7 +18,7 @@ import {
 import { t } from "./i18n.js";
 
 /**
- * The four receivers, in the order the panel shows them.
+ * The receivers, in the order the panel shows them.
  *
  * WHY the names come from the language file: the name of a protocol is
  * shown in the card, in the session list and in the scope of the graph. A
@@ -30,6 +30,7 @@ export const PROTOCOLS = [
   { id: "miracast", name: t("protocol.miracast"), glyph: "#glyph-miracast" },
   { id: "cast", name: t("protocol.cast"), glyph: "#glyph-cast" },
   { id: "dlna", name: t("protocol.dlna"), glyph: "#glyph-dlna" },
+  { id: "smartview", name: t("protocol.smartview"), glyph: "#glyph-smartview" },
 ];
 
 /**

@@ -42,6 +42,7 @@ the document that owns the budget.
 | Time from the start of the application to the first advertisement | The timestamp of the registration of the service | `latency.*`, the advertisement path |
 | Deviation between the audio and the video | The presentation timestamps of the received packets over a recording of at least one minute | `latency.audio_video_sync_ms` |
 | Time between the loss of the network and the recovery of the advertisement | The timestamp of the interface change and the timestamp of the re-registration | `discovery.re_advertise_on_network_change` |
+| Time from the start of the process to the advertisement of the receiver | The timestamp of the start of the process and the timestamp of the registration of the service — this is the path of the **headless** build, where nobody clicks anything | `latency.*`, the advertisement path |
 
 **The rule:** the latency is measured on the path to the *screen*, not on the
 path to the buffer. A receiver that receives fast and displays late has a bad
@@ -80,9 +81,15 @@ that survives a bug. Both are measured.
 | The formats that a reference implementation reads | The corpus tests of the format crates | `formats/*` |
 | The receiver without a component of the vendor of the sender | The fallback behaviour of the Cast engine | the requirements |
 | The deviations from the expectation of the sender | The acceptance record of the milestone | `docs/acceptance/` |
+| The fifth protocol — Samsung Smart View | The search of the MultiScreen Framework, the description document, the handshake of the sender | the requirements, `FR-104` … `FR-107` |
 
 **The rule:** a sender that could not be tested is named with the reason. A
 silent gap in the matrix is a false claim of interoperability.
+
+The fifth protocol carries a limit that is **not** a missing test: the
+message format of the Smart View channel is proprietary and not implemented
+(`EXC-011`). The discovery and the handshake are measured; the picture of a
+Galaxy device is not claimed at all.
 
 ### 2.5 User experience
 
@@ -93,10 +100,18 @@ silent gap in the matrix is a false claim of interoperability.
 | The clarity of the error message | The review of the message against the action the user can take | the error hierarchy |
 | The distinction of the states | "disabled", "advertising", "streaming", "error" — the review of the interface | the shells, the dashboard |
 | The accessibility of the dashboard | The keyboard, the contrast, the reduced motion | the acceptance record |
+| **The operation with a remote control** | The keyboard check of the dashboard: the arrow keys, the tab order of the group, the switch of the card | the audits in `docs/audit/` |
+| **The visibility of the focus** | The measured contrast of the focus frame against the card, against the page and against the halo | the audits in `docs/audit/` |
+| **The operation without a screen** | The report of the start of the receiver: every protocol is named with its state | the acceptance record of the headless build |
 
 **The rule:** the receiver must be understandable without a manual. A user
 who cannot find the switch in five seconds has a usability defect, not a
 documentation defect.
+
+**The rule of the remote control:** a control that a remote control cannot
+reach does not exist. The target of a switch is the card itself, the focus
+frame is drawn by the project and measured, and the state is carried by a
+word and a shape and not by a colour alone.
 
 ### 2.6 Resources
 
@@ -158,3 +173,31 @@ decision of the project owner.
 - the visual similarity to a competitor
 - the presence of a feature that is out of scope, such as a DRM that nobody
   may implement (`EXC-001`)
+
+---
+
+## 6. What the project has measured — and what it has not
+
+The grid above is the target. This section is the honest state of the
+measurements: what a number exists for today, and where it comes from.
+
+| What | Measured | Where the evidence is |
+|---|---|---|
+| The dashboard with the keyboard only | the checks of the keyboard, of the layout and of the contrast — every one of them in a real browser | [`docs/audit/tv-web-dashboard.md`](audit/tv-web-dashboard.md) |
+| The order of the focus of the Android shell | the unit tests of the focus graph | [`docs/audit/tv-android-shell.md`](audit/tv-android-shell.md) |
+| The focus frame and the keyboard of the macOS shell | the test suite of the kit | [`docs/audit/tv-macos-shell.md`](audit/tv-macos-shell.md) |
+| The discovery and the handshake of Samsung Smart View | the tests of the engine, over a real socket | [`docs/audit/smartview-engine-test.log`](audit/smartview-engine-test.log) |
+| The whole workspace | the build, the lint and the test suite | the acceptance record of M0 and [`../project/project.yaml`](../project/project.yaml) |
+
+**What is NOT RUN** — and stays open until somebody measures it on a
+device:
+
+| What | Why it is not measured |
+|---|---|
+| The time to the first picture, the frame rate, the memory and the CPU of the running receiver | a measurement on a build server measures the build server; the budgets live in [`../config/performance-budgets.toml`](../config/performance-budgets.toml) and are proved with a real sender |
+| The interoperability of every protocol | the device test plan needs a sender, a television and a device |
+| The panel on a television in a bright room, and a television with a real remote control | the contrast is measured with the formula of WCAG; the room is not |
+| The picture of a Galaxy device | the message format of the Smart View channel is proprietary and not implemented (`EXC-011`) |
+
+The rule of this section: a number that is not measured is not written down.
+The row above names the *reason* of the gap, not a guess.

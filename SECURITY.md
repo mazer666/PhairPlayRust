@@ -33,6 +33,7 @@ treated as hostile input until a parser has proved otherwise.
 | SOAP / GENA | XML bodies, callback URLs | `DOCTYPE` refused, external entities off, recursion depth bounded, callback URLs restricted to private IPv4 of the local subnet |
 | CastV2 | Length-prefixed frames | A frame that announces more than the limit is refused before a byte is read |
 | WFD | Information elements | Block lengths are checked against the buffer; a block that runs past the end is refused |
+| Smart View | SSDP searches, HTTP requests, WebSocket frames | Bounded reader: request line, header count, header length, body size, frame size; every read has a deadline; one sender at a time |
 
 The rules that implement this live in
 [`docs/design/BUILD-CONTRACT.md`](docs/design/BUILD-CONTRACT.md) §3.3 and §3.4
@@ -60,10 +61,16 @@ fails without it.
   decoder refuses a cyclic object graph; the information-element parser
   refuses a block that runs past the end of the buffer; the SPS parser
   refuses a channel width that does not exist.
-- **One peer at a time.** AirPlay, Miracast and DLNA serve one sender; a
-  second connection is refused with `503 Service Unavailable`. Google Cast is
-  the documented exception — a Cast receiver serves every sender that
-  connects.
+- **One peer at a time.** AirPlay, Miracast, DLNA and Samsung Smart View
+  serve one sender; a second connection is refused — with `503 Service
+  Unavailable` for the streaming protocols and with `409 Conflict` for the
+  Smart View channel. Google Cast is the documented exception — a Cast
+  receiver serves every sender that connects.
+- **The Smart View channel is read, not interpreted.** The message format of
+  the channel is proprietary. The receiver reads the frames with a limit and
+  a deadline and discards their content, so a frame that announces more
+  than the limit and a frame that is not masked both break the channel
+  instead of being read into memory.
 - **No remote reach.** The GENA callback guard accepts only private IPv4
   addresses of the local subnet. `169.254.169.254`, `::1`, link-local
   addresses and IPv6 are refused: a renderer that calls back to a link-local

@@ -129,6 +129,25 @@ is checked against the guard in the same file.
 
 ---
 
+## I want to work on the Samsung Smart View receiver
+
+| Area | Where |
+|---|---|
+| The answer to the search of the MultiScreen Framework | `engines/smartview/src/ssdp.rs` |
+| The description document that the `LOCATION` header points at | `engines/smartview/src/description.rs` |
+| The HTTP API below `/api/v2/` and the handshake of the sender | `engines/smartview/src/api.rs` |
+| The WebSocket upgrade of the channel | `engines/smartview/src/api/channel.rs` |
+| The single-session rule | `engines/smartview/src/session.rs` |
+| The state machine of the engine | `engines/smartview/src/engine.rs` |
+| The service type and the port of the API | `core/phairplay-core/src/config/` |
+
+**The honest limit:** the message format of the Smart View channel is
+proprietary and **not implemented** (`EXC-011`). The crate implements the
+discovery and the handshake — the part that makes a device a Smart View
+target. Nothing in this crate may claim that a picture flows.
+
+---
+
 ## I want to change the discovery
 
 | Area | Where |
@@ -170,6 +189,9 @@ requires a change request and a rebuild of everything that uses it.
 | The generation of the bindings | `scripts/generate-bindings.sh` (delivered with M3) |
 | The HTTP and the WebSocket backend | `apps/web/src/` (M2) |
 | The assets of the dashboard | `apps/web/assets/` (M2) |
+| The command line of the receiver | `apps/web/src/cli.rs` |
+| The composition root: the engines, the start, the report | `apps/web/src/receiver.rs` |
+| The lookup of the device profiles | `apps/web/src/profiles.rs` |
 
 Rules:
 
@@ -177,6 +199,25 @@ Rules:
   different implementation, never a new exported function
 - the generated bindings are never edited by hand
 - the web backend binds on the loopback interface only
+- **the web application talks to the supervisor, never to an engine.** The
+  engines are registered once, in the composition root; a second
+  registration would be a second truth about what runs
+
+---
+
+## I want to run the receiver on a device without a screen
+
+| Area | Where |
+|---|---|
+| The profiles of the classes of devices | `config/profiles/` |
+| The names of the profiles | `core/phairplay-core/src/config/profiles.rs` |
+| The installation as a service | `deploy/install.sh`, `deploy/systemd/` |
+| The container | `deploy/docker/` |
+| The guide for the devices | `docs/guides/OTHER-DEVICES.md` |
+
+The values of a profile live in the file, not in the code: a decision that a
+user can read, change and compare belongs in a file. The name of a profile
+is a word of the product and lives in the core.
 
 ---
 
@@ -189,6 +230,28 @@ Rules:
 
 Product logic normally does **not** belong in a shell. The shell shows the
 state and it switches the protocols; the logic lives in the core.
+
+---
+
+## I want to change the remote control interface
+
+| Area | Where |
+|---|---|
+| The roving tabindex and the movement of the focus in the dashboard | `apps/web/assets/focus-group.js` |
+| The cards and the switch of a protocol | `apps/web/assets/protocol-cards.js` |
+| The frame of the focus and the ten-foot scale | `apps/web/assets/cards.css`, `apps/web/assets/theme.css` |
+| The order of the focus of the Android shell | `apps/android/app/src/main/java/org/phairplay/receiver/ui/TvFocus.kt` |
+| The frame of the focus of the Android shell | `apps/android/app/src/main/java/org/phairplay/receiver/ui/TvFocusFrame.kt` |
+| The Leanback entry of the Android manifest | `apps/android/app/src/main/AndroidManifest.xml` |
+| The keys and the focus of the macOS shell | `apps/macos/Sources/PhairPlayMacKit/ShellKeyboard.swift`, `ShellFocus.swift` |
+| The checks that prove the operation | `apps/web/tools/check-keyboard.mjs`, `check-layout.mjs`, `check-contrast.mjs` |
+
+The rules of this surface: the card of a protocol is the switch, the focus is
+drawn by the project and measured, the state is carried by a word and a shape
+and not by a colour alone, and the group of the cards leaves itself at its
+edge — a remote control has no tab key.
+
+The evidence of a change is in [`docs/audit/`](docs/audit/tv-web-dashboard.md).
 
 ---
 
@@ -211,8 +274,13 @@ reports a failure; it never reports a success without doing the work.
    `core/phairplay-core/src/protocol.rs`.
 3. A new service type in the discovery engine and in
    `config/app-defaults.toml`.
-4. An ADR, because a protocol is an architectural addition.
-5. A requirement, a milestone slot and a device test plan entry.
+4. The registration of the engine in the composition root,
+   `apps/web/src/receiver.rs`.
+5. An ADR, because a protocol is an architectural addition.
+6. A requirement, a milestone slot and a device test plan entry.
+7. A change request in `docs/cr/` — the fifth protocol is the proof of the
+   shape of such a request:
+   [`docs/cr/CR-0001-samsung-smart-view.md`](docs/cr/CR-0001-samsung-smart-view.md).
 
 The core does not change. If a new protocol forces a change in the core, the
 protocol abstraction is wrong — that is a finding for the architect, not a

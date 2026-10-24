@@ -69,7 +69,7 @@ receiver.
 
 - It binds to the **loopback interface only**. It is reachable from the
   machine, and from nowhere else. It is not a service on your network.
-- It shows the state of the four receivers, the running sessions and the
+- It shows the state of the five receivers, the running sessions and the
   live counters.
 - It sends nothing to the browser except the state that the browser asks
   for, over the loopback connection.

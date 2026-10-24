@@ -1,6 +1,6 @@
 # PhairPlayRust Product Requirements
 
-**Requirements baseline:** 0.1
+**Requirements baseline:** 0.2
 **Status:** Product baseline accepted
 **Rule:** Requirements are the source of truth for behaviour. The code does not silently redefine them.
 
@@ -112,15 +112,15 @@ the web backend. The `NetworkError::PeerOutsideSubnet` variant in
 and the web backend binds to the loopback interface only
 (`config/app-defaults.toml`, section `[web]`).
 
-### FR-006 — One product, four protocols, one shared core
-AirPlay 2, Miracast, Google Cast and DLNA/UPnP are implemented as four
-engines that share one core. The protocol-specific code lives in the engine
-crates; the vocabulary lives in `core/phairplay-core`.
+### FR-006 — One product, five protocols, one shared core
+AirPlay 2, Miracast, Google Cast, DLNA/UPnP and Samsung Smart View are
+implemented as five engines that share one core. The protocol-specific code
+lives in the engine crates; the vocabulary lives in `core/phairplay-core`.
 
 **How to Verify:** `cargo tree --workspace` shows that every engine depends on
 `phairplay-core` and that no engine depends on another engine.
-**Pass Condition:** The four engines exist as separate crates, none of them
-depends on another, and all four implement
+**Pass Condition:** The five engines exist as separate crates, none of them
+depends on another, and all five implement
 `phairplay_core::protocol::ProtocolEngine`.
 
 ### FR-007 — Honest capability advertisement
@@ -153,7 +153,10 @@ running AirPlay engine.
 
 ### FR-009 — Every protocol advertises itself under a stable service type
 The discovery layer advertises `_miracast._tcp` for Miracast,
-`_googlecast._tcp` for Google Cast and answers SSDP for DLNA/UPnP.
+`_googlecast._tcp` for Google Cast and answers SSDP for DLNA/UPnP. The
+Samsung Smart View receiver answers the search of the MultiScreen Framework
+and belongs to the family of the service types as well —
+`_samsungmsf._tcp`.
 
 **How to Verify:** Inspect the service type table in
 `core/phairplay-core/src/protocol.rs` and the registration path in
@@ -920,10 +923,13 @@ without a reload.
 
 ### FR-084 — The dashboard is accessible
 The dashboard is operable with the keyboard, has a visible focus, meets the
-contrast requirement and respects the reduced-motion preference.
+contrast requirement and respects the reduced-motion preference. The keyboard
+operation is the operation of a remote control: the arrow keys move the focus
+inside the group of the cards, and the group is one tab stop (`FR-096`).
 
-**How to Verify:** The assets of the dashboard in `apps/web/assets` and the
-accessibility section of the acceptance record.
+**How to Verify:** The assets of the dashboard in `apps/web/assets`, the three
+checks in `apps/web/tools` and the accessibility section of the acceptance
+record.
 **Pass Condition:** Every control is reachable with the keyboard, the text
 contrast is at least the required ratio and the animation is suppressed when
 the user asked for it.
@@ -1045,7 +1051,230 @@ contains no line break.
 
 ---
 
-# 12. Explicitly excluded scope
+# 12. The interface as a remote control
+
+The dashboard and the native shells are built for a television and for a
+remote control, not for a mouse. A remote control has an arrow pad, an *OK*
+button and — usually — no tab key at all.
+
+### FR-096 — The group of the cards is one tab stop, and the arrow keys move inside it
+The cards of the receivers form one group in the tab order: exactly one card
+carries the focus, and the arrow keys move it to the neighbouring card. At the
+edge of the group an arrow key leaves the group and reaches the next control
+of the page — a remote control without a tab key would otherwise come to a
+dead end at the last card.
+
+**How to Verify:** `node apps/web/tools/check-keyboard.mjs` drives a real
+Chromium with the keyboard only — the pointer is never used. The check
+asserts that exactly one card is in the tab order, that every arrow key
+reaches the card the eye expects, and that the arrow key at the edge reaches
+the control behind the group. The raw output is in
+[`docs/audit/tv-web-dashboard-keyboard.log`](docs/audit/tv-web-dashboard-keyboard.log),
+the report in [`docs/audit/tv-web-dashboard.md`](docs/audit/tv-web-dashboard.md).
+**Pass Condition:** The check reports no failure, exactly one card of the
+group is in the tab order, and every arrow key at the edge of the group
+leaves the group instead of staying where it is.
+
+### FR-097 — The focus is visible and measured
+Every focusable surface of the dashboard and of the native shells carries a
+**drawn** focus frame. The frame of the system is not enough: it is thin, it
+is dark, and it is nearly invisible on a dark surface. The frame of the
+project is measured against the surface it lies on and against the page, and
+it appears at once — a focus that fades in over a fraction of a second is a
+focus the user does not see.
+
+**How to Verify:** `node apps/web/tools/check-contrast.mjs` computes the
+contrast of the ring of the focus with the formula of WCAG in both themes,
+and `node apps/web/tools/check-layout.mjs` measures the width of the ring
+and the reduced motion. The measured pairs are in
+[`docs/audit/tv-web-dashboard.md`](docs/audit/tv-web-dashboard.md) §4. The
+Android shell measures its frame against the card and against the screen in
+§8.1 of
+[`docs/audit/tv-android-shell.md`](docs/audit/tv-android-shell.md).
+**Pass Condition:** The ring of the focus is at least 3 px wide, reaches the
+contrast of 3:1 that WCAG asks for against the card and against the page in
+both themes, is not animated into existence, and stays visible under
+`prefers-reduced-motion`.
+
+### FR-098 — The card is the switch
+The card of a protocol **is** the control that switches the protocol. A
+switch of a few pixels in the corner of a card is a target that nobody hits
+with a remote control, so there is no second, smaller control to reach
+first: *OK*, *Enter* and *Space* act on the card that holds the focus.
+
+**How to Verify:** The keyboard check of the dashboard asserts that *Enter*
+and *Space* switch the receiver and that the switch calls the real endpoint
+of the receiver (`POST /api/protocols/<id>/enable`). The Android shell
+proves the order of the focus with `TvFocusGraphTest`, the macOS shell with
+`ShellKeyboardTests.testTheSpaceKeySwitchesTheFocusedProtocol` — the
+evidence is in [`docs/audit/tv-android-shell.md`](docs/audit/tv-android-shell.md)
+and in [`docs/audit/tv-macos-shell.md`](docs/audit/tv-macos-shell.md).
+**Pass Condition:** The protocol is switched by the card alone, the state of
+the card changes after the key press, and the state survives the next
+reading of the API.
+
+### FR-099 — The Android shell is an application of the television
+The Android shell is a real television application: its manifest carries the
+`LEANBACK_LAUNCHER` category, the banner that the launcher of the television
+scales, and the `uses-feature` of the television. The shell stays one
+application for the telephone and for the television.
+
+**How to Verify:** The merged manifest of the build carries the category, the
+banner and the `uses-feature` — the excerpt is in
+[`docs/audit/tv-android-shell.md`](docs/audit/tv-android-shell.md) §8.5.
+**Pass Condition:** The merged manifest carries `LEANBACK_LAUNCHER`, a
+banner and `android.software.leanback`, and the application appears in the
+list of the television. The appearance in the list needs a **device test**
+and is **NOT RUN** in this repository.
+
+---
+
+# 13. The headless build
+
+A receiver that runs on a device without a screen — a Raspberry Pi, a NAS, a
+container on a server — must not wait for a click in a browser. The program
+is the product there.
+
+### FR-100 — The receiver starts the protocols itself
+`phairplay-web` starts every protocol that the configuration enables at the
+start of the process. The start is a **total judgement**: every protocol of
+the core gets an outcome — started, failed or switched off — and a protocol
+that cannot start (a container without multicast, a device without a
+Wi-Fi Direct radio) is reported with its reason and does **not** stop the
+other protocols.
+
+**How to Verify:** The tests `every_protocol_is_answered_for` and
+`a_protocol_that_is_switched_off_is_not_started` in
+`apps/web/src/receiver.rs`, and the report that the program prints at the
+start (`phairplay-web --profile generic` names every protocol with its
+state).
+**Pass Condition:** The report of the start names every protocol of
+`ProtocolKind::ALL`; a protocol that is switched off is not started and says
+why; a protocol that fails does not stop the others.
+
+### FR-101 — The configuration of the receiver is read from a file
+The receiver reads its configuration from a TOML file. The file is laid over
+the base of the configuration, so that what the file names wins and what it
+does not mention keeps the value of the base. A file that cannot be read,
+that is not valid TOML or that does not fit the model is refused with a
+message that names the file and the reason.
+
+**How to Verify:** The tests `a_file_lays_over_the_profile`,
+`a_broken_configuration_file_names_the_file_and_the_reason` and
+`a_missing_configuration_file_names_the_file` in
+`apps/web/src/receiver.rs`; the test of the core that refuses an unknown
+key.
+**Pass Condition:** A file that names a value overrides the base, a file
+that does not mention a value leaves it alone, and a broken file is refused
+with a message that names the file and the reason.
+
+### FR-102 — The receiver knows the profiles of the classes of devices
+The receiver knows the profiles of the classes of devices it runs on: a
+single-board computer, a NAS, a container, a desktop, and the neutral
+fallback. The name of a profile is the name of its file, a profile is a
+complete configuration that can be handed to `--config` unchanged, and a
+profile that nobody knows is refused with the list of the known ones.
+
+**How to Verify:** `phairplay-web --help` names every profile and its
+sentence; the test `every_profile_of_the_repository_is_found_and_loaded` in
+`apps/web/src/profiles.rs` loads every profile of
+[`config/profiles/`](config/profiles/README.md) and validates it; the test
+`an_unknown_profile_is_refused` in `apps/web/src/cli.rs`.
+**Pass Condition:** Every profile of the directory is loadable, valid and
+named in the help of the program; an unknown name is refused with the list of
+the known names.
+
+### FR-103 — A control panel in the network is announced
+The dashboard binds to the loopback interface by default. A `--bind` to
+another address is possible — a user may want to reach the panel from
+another machine — but it is a different security model, so the program warns
+about it on stderr **before** it starts anything.
+
+**How to Verify:** The test `the_default_interface_is_the_loopback_interface`
+in `apps/web/src/cli.rs` and the warning that `phairplay-web --bind
+0.0.0.0` prints on stderr.
+**Pass Condition:** Without an option the dashboard binds to the loopback
+interface; with a foreign address the warning names the address and appears
+before the first protocol is started.
+
+---
+
+# 14. The Samsung Smart View receiver
+
+Samsung Smart View is the screen mirroring of the Galaxy phones and tablets.
+Its framework is the MultiScreen Framework (MSF). The project implements the
+discovery and the handshake; the limit of the channel is written down as
+`EXC-011`.
+
+### FR-104 — The receiver answers the search of the MultiScreen Framework
+A Galaxy device finds a receiver with an SSDP search for
+`urn:samsung.com:service:MultiScreenService:1`. The receiver answers it with
+an HTTP answer that carries the `LOCATION` header of the description
+document, and it announces itself — and takes itself away again — with the
+`NOTIFY` messages of the framework.
+
+**How to Verify:** The tests of the crate `engines/smartview`:
+`a_search_for_the_multi_screen_service_is_answered`,
+`the_search_target_is_the_one_samsung_documents`,
+`the_answer_carries_the_location_and_the_target` and
+`the_announcement_announces_the_receiver_and_its_leaving` — and, over a real
+socket, `a_search_for_the_multi_screen_service_is_answered_over_the_network`
+and `the_announcement_reaches_the_multicast_group`. The output of the run is
+in [`docs/audit/smartview-engine-test.log`](docs/audit/smartview-engine-test.log).
+The engine is registered with the supervisor in the composition root
+(`apps/web/src/receiver.rs`), so the receiver starts it with the other
+protocols.
+**Pass Condition:** The search of the framework is answered with the target
+of the framework and a `LOCATION` that points at the description document; a
+search for another service is not answered; the announcement reaches the
+multicast group of the network; the protocol is among the protocols that the
+receiver starts and reports in its status. The SSDP port of the workspace is
+shared with the DLNA renderer: the conflict is named in
+[`ROADMAP.md`](ROADMAP.md) (M5), and a protocol that cannot open its socket
+is reported with the reason instead of disappearing from the status.
+
+### FR-105 — The receiver serves the description document and the API of the framework
+The description document that the `LOCATION` header points at is served, and
+so is the API below `/api/v2/`: the root of the API, the description of the
+resources, the base URL, the handshake of the sender and the WebSocket
+upgrade of the channel.
+
+**How to Verify:** The tests of the API of the crate `engines/smartview`:
+`the_api_root_names_the_service_and_the_base_url`,
+`the_description_document_is_served_as_xml`,
+`the_handshake_records_the_announced_peer` and
+`the_websocket_upgrade_is_accepted`.
+**Pass Condition:** The description document names the display name, the
+model and the base URL of the receiver; the handshake records the peer that
+announced itself; the upgrade is answered with the accept key of RFC 6455.
+
+### FR-106 — The Smart View receiver serves one sender at a time
+The channel of the Smart View receiver accepts one sender. A second channel
+is refused, and the first one keeps its slot.
+
+**How to Verify:** The test
+`a_second_channel_is_refused_and_the_first_one_keeps_the_slot` and the test
+`a_peer_that_opened_a_channel_is_counted` of the crate `engines/smartview`.
+**Pass Condition:** The second channel is refused, the session of the first
+sender is not disturbed, and the status of the protocol reports one peer.
+
+### FR-107 — The receiver never claims a picture that it cannot deliver
+The state of the Smart View protocol reports the session of the sender, but
+the receiver never claims to deliver a picture over the channel: the message
+format of the channel is proprietary and not implemented. The limit is
+written down — in the requirements, in the glossary, in the architecture and
+in the user-facing documentation — with the same words.
+
+**How to Verify:** The exclusion `EXC-011` of this document, the section
+"The honest limit" of the module documentation of `engines/smartview` and
+the entry of the glossary.
+**Pass Condition:** No document, no status and no log claims that a picture
+of a Galaxy device flows; the limit is stated with the same words in every
+place that names the protocol.
+
+---
+
+# 15. Explicitly excluded scope
 
 These are product boundaries, not open defects. Each one is stated in the
 user-facing documentation with the same words.
@@ -1098,11 +1327,25 @@ The end-to-end test of the Google Cast path needs an application identifier
 that is registered with Google. The project does not ship one and does not
 fake one.
 
+### EXC-011 — The message format of the Samsung Smart View channel
+The channel of the Samsung Smart View protocol carries its messages in a
+format that Samsung does not document; the Smart View SDK realises it as
+closed `.jar` libraries. The **discovery** of a receiver and the **handshake**
+of the sender are implemented and covered by tests; **the content of the
+channel is not implemented**. A Galaxy device finds the receiver, connects to
+it and establishes the channel — but no picture flows over it yet.
+
+This is a limit of the format, not a DRM: Smart View is an open feature of
+the Galaxy devices, and nothing in this project invents a restriction that
+the protocol does not have. The limit stays until the format is documented by
+Samsung or until another implementation exists under a licence that allows
+the port. A format that nobody documents is not guessed.
+
 ---
 
-# 13. Non-functional requirements
+# 16. Non-functional requirements
 
-## 13.1 Performance and resources
+## 16.1 Performance and resources
 
 ### NFR-PERF-001 — Time to the first picture
 The receiver presents the first decoded frame to the output surface within the
@@ -1180,7 +1423,7 @@ negative tests of the engines.
 **Pass Condition:** A silent peer is disconnected within the configured
 timeout and the slot is free again.
 
-## 13.2 Security
+## 16.2 Security
 
 ### NFR-SEC-001 — Every network input is untrusted
 Every byte that arrives over a socket is untrusted. A length limit, a
@@ -1241,7 +1484,7 @@ missing is an error, not a panic.
 **Pass Condition:** The lint is green, and every error path of the bridge
 returns a typed error instead of panicking.
 
-## 13.3 Privacy
+## 16.3 Privacy
 
 ### NFR-PRIV-001 — Zero telemetry
 The receiver collects nothing and sends nothing to any host outside the local
@@ -1280,7 +1523,7 @@ shells.
 **Pass Condition:** The only user input is the display name of the receiver
 and the settings of the protocols.
 
-## 13.4 Interoperability
+## 16.4 Interoperability
 
 ### NFR-INT-001 — The protocols are tested against real senders
 Every protocol is tested with the senders that exist in the market: an Apple
@@ -1321,7 +1564,7 @@ expectation.
 **Pass Condition:** Every protocol has a data-flow description, and every
 documented deviation is also visible in the acceptance record.
 
-## 13.5 Release and quality
+## 16.5 Release and quality
 
 ### NFR-REL-001 — The gate is green
 The continuous integration runs the format check, the lint check, the test

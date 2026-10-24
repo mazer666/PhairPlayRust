@@ -350,7 +350,7 @@ acceptance document has to prove with a command and its output.
 
 Owns:
 
-- the sender matrix of the four protocols
+- the sender matrix of the five protocols
 - the cross-viewer and cross-sender tests
 - the standards conformance
 - the differences between the behaviour of a sender and the expectation of

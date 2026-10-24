@@ -61,7 +61,7 @@ The concrete crates of the workspace are:
 | Layer | Crate | Package | May depend on (workspace) |
 |---|---|---|---|
 | apps | `apps/web` | `phairplay-web` | `core`, `platform` |
-| platform | `platform/phairplay-ffi` | `phairplay-ffi` | `core` |
+| platform | `platform/phairplay-ffi` | `phairplay-ffi` | `core`, `engines/*` (amended by ADR-0006) |
 | core | `core/phairplay-core` | `phairplay-core` | — |
 | engines | `engines/discovery` | `phairplay-discovery` | `core` |
 | engines | `engines/airplay` | `phairplay-airplay` | `core`, `formats/*` |
@@ -119,7 +119,7 @@ of the workspace is a finding as well: it would escape the gate.
   configuration file and may not open a socket. A format crate that needs
   one of the three is not a format crate.
 - The core may not know the name of a protocol. `ProtocolKind` is the
-  closed set of the four protocols, and it lives in the core because the
+  closed set of the protocols, and it lives in the core because the
   session registry and the dashboard have to speak about all of them.
 - The shell may not talk to an engine directly. Every call goes through
   `platform/phairplay-ffi` or through the local web backend.

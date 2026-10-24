@@ -16,7 +16,34 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
 
 ### Added
 
-- **The four protocol engines**, with the control plane of each protocol and
+- **The fifth protocol: Samsung Smart View** — the MultiScreen Framework of
+  the Galaxy phones and tablets. The engine announces the receiver with the
+  search of the framework, serves the description document and the HTTP API
+  below `/api/v2/`, answers the handshake of the sender and accepts the
+  WebSocket upgrade of the channel. **The message format of the channel is
+  proprietary and is not implemented** — the limit is written down as
+  `EXC-011` in [`REQUIREMENTS.md`](REQUIREMENTS.md). The crate is
+  `engines/smartview`; the vocabulary of the core knows the new kind, its
+  service type and its port.
+- **The receiver runs headless.** `phairplay-web` starts the protocols that
+  the configuration enables at the start of the process, reads its
+  configuration from a file, knows the **device profiles** of
+  [`config/profiles/`](config/profiles/README.md) and has a complete command
+  line (`--config`, `--profile`, `--port`, `--bind`, `--no-dashboard`,
+  `--version`, `--help`). A bind address outside the loopback interface is
+  announced with a warning before anything is started.
+- **The installation as a service and as a container** — a systemd unit that
+  runs the receiver as its own unprivileged user, an installer and a compose
+  file that shares the network of the host, because a bridge network routes
+  neither the mDNS nor the SSDP multicast.
+- **The interface as a remote control.** The dashboard and the native shells
+  are operated with the arrow keys: the group of the receiver cards is one
+  tab stop with a roving tabindex, the focus frame is drawn by the project
+  and measured, the card itself is the switch, and the Android shell is a
+  real television application with the `LEANBACK_LAUNCHER` category. The
+  measured evidence is in [`docs/audit/`](docs/audit/tv-web-dashboard.md).
+- **The four receiver engines** (AirPlay 2, Miracast, Google Cast,
+  DLNA/UPnP), with the control plane of each protocol and
   the tests that prove it: AirPlay 2 (RTSP, SDP, RTP, HomeKit-style and
   legacy PIN pairing, FairPlay session keys, DACP, DMAP), Miracast (the WFD
   RTSP control plane and the information element), Google Cast (the CastV2
@@ -32,6 +59,20 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
 - **The native shells** for Android and macOS, and the binding generator.
 - **The gates**: the structural checks, the licence audit with a *pinned*
   cargo-deny, the continuous integration, and the acceptance record.
+
+### Changed
+
+- The **dashboard is a television interface** and not a page for a mouse:
+  the cards are one tab stop, the arrow keys move the focus, the edge of the
+  group leads out of it, and a reading of the API that is older than the last
+  change of the user no longer switches a card back.
+- The **receiver starts itself**. The start of the process is the start of
+  the protocols; the report of the start names every protocol with its state
+  and with the reason of a failure.
+- The **documentation** was brought back to the state of the code: the
+  milestones, the requirements, the architecture, the glossary and the
+  machine-readable state of the project name what is delivered and what is
+  still NOT RUN.
 
 ### Fixed
 

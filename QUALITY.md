@@ -83,12 +83,21 @@ Questions:
 - Is the number of actions competitive?
 - Is the exit and the recovery path obvious?
 - Does the interface distinguish "stopped" from "disabled"?
+- **Can the common path be reached with the arrow keys alone?** A remote
+  control has no tab key, and a control that a remote control cannot reach
+  does not exist.
+- **Is the focus visible and measured?** The focus frame of the project is
+  measured against the surface it lies on.
+- **Can the receiver be operated without a screen?** The start of the
+  process is the start of the protocols.
 
 Evidence:
 
 - the walkthrough of the task with the step count
 - the visual review
 - the accessibility review
+- the keyboard check of the dashboard and the tests of the focus order of the
+  native shells — the audits in [`docs/audit/`](docs/audit/tv-web-dashboard.md)
 - the comparison with the reference products of
   [`docs/BEST_IN_CLASS.md`](docs/BEST_IN_CLASS.md)
 
@@ -125,6 +134,9 @@ Questions:
 - Does the receiver work without a component of the vendor of the sender?
 - Are the standards used correctly?
 - Is the unsupported data refused instead of being silently mangled?
+- **Is a limit of the protocol named instead of hidden?** A proprietary
+  message format that is not implemented is an exclusion in the requirements
+  — not a gap that a status message hides.
 
 Evidence:
 

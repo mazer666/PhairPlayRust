@@ -1,6 +1,6 @@
 # PhairPlayRust Architecture
 
-**Document version:** 0.1
+**Document version:** 0.2
 **Status:** Accepted architecture baseline
 **Change rule:** Material changes require an ADR (`docs/adr/`) and, if
 requirements are affected, a Change Request (`docs/cr/`).
@@ -18,7 +18,7 @@ binding for every crate.
 
 The architecture must support all of these at the same time:
 
-1. four receiver protocols on one shared core
+1. five receiver protocols on one shared core
 2. a protocol engine that is testable without a network and without a decoder
 3. native macOS and Android shells that share the logic
 4. a local dashboard that reads the same state as the native shells
@@ -26,8 +26,12 @@ The architecture must support all of these at the same time:
 6. a receiver that never talks to anything but the local network
 7. a port that is bounded by an item count **and** by a byte budget
 8. errors that reach the native side as a stable numeric code
-9. a design that can take a fifth protocol without touching the core
+9. a design that takes a new protocol without touching the core — the fifth
+   protocol, Samsung Smart View, is the proof of that rule
 10. no hidden lock-in on a single decoder or on a single platform
+11. a receiver that runs without a screen: the program itself starts the
+    protocols, the configuration comes from a file and the control panel is
+    optional
 
 ---
 
@@ -46,6 +50,8 @@ The architecture must support all of these at the same time:
 ┌───────────▼───────────▼──────────────────────▼───────────────────────┐
 │  platform/phairplay-ffi            apps/web (Rust backend)          │
 │  the only door from the native side into the core                    │
+│  the composition root of the receiver — the one place that          │
+│  knows which engines exist                                          │
 └───────────┬──────────────────────────────────────────────────────────┘
             │
 ┌───────────▼──────────────────────────────────────────────────────────┐
@@ -55,7 +61,8 @@ The architecture must support all of these at the same time:
 └───────────┬──────────────────────────────────────────────────────────┘
             │
 ┌───────────▼──────────────────────────────────────────────────────────┐
-│  engines/          airplay · miracast · cast · dlna · discovery     │
+│  engines/   airplay · miracast · cast · dlna · smartview ·         │
+│             discovery                                                 │
 │  the protocol state machines                                          │
 └───────────┬──────────────────────────────────────────────────────────┘
             │
@@ -65,7 +72,7 @@ The architecture must support all of these at the same time:
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Four rules are never broken:
+Five rules are never broken:
 
 1. **The shell never talks to an engine.** Every call goes through the bridge
    in `platform/phairplay-ffi` or through the local web backend.
@@ -75,6 +82,8 @@ Four rules are never broken:
    platform-neutral description; the platform decodes.
 4. **A format crate never knows that a protocol exists.** It transforms bytes
    into bytes.
+5. **The web application never talks to an engine.** It talks to the
+   supervisor, which owns the engines — see §3.4.
 
 The dependency direction is therefore strict:
 
@@ -99,12 +108,14 @@ any other crate of the workspace.
 | Crate | Package name | Depends on (workspace crates) | Owns |
 |---|---|---|---|
 | `core/phairplay-core` | `phairplay-core` | — | The shared vocabulary |
-| `platform/phairplay-ffi` | `phairplay-ffi` | `core` | The bridge and the data transfer objects |
+| `platform/phairplay-ffi` | `phairplay-ffi` | `core`, `engines/*` | The bridge, the data transfer objects and the composition root of the receiver |
+| `apps/web` | `phairplay-web` | `core`, `platform/phairplay-ffi` | The backend of the dashboard, the command line and the configuration of the receiver |
 | `engines/discovery` | `phairplay-discovery` | `core` | DNS-SD advertisement, SSDP browsing |
 | `engines/airplay` | `phairplay-airplay` | `core`, `formats/{plist,h264,aac,alac}` | The AirPlay 2 receiver |
 | `engines/miracast` | `phairplay-miracast` | `core`, `formats/h264` | The Miracast sink |
 | `engines/cast` | `phairplay-cast` | `core`, `formats/plist` | The Google Cast receiver |
 | `engines/dlna` | `phairplay-dlna` | `core` | The UPnP / DLNA media renderer |
+| `engines/smartview` | `phairplay-smartview` | `core` | The Samsung Smart View receiver: the discovery, the description document and the API of the MultiScreen Framework |
 | `formats/plist` | `phairplay-plist` | — | Apple property lists, XML and binary |
 | `formats/h264` | `phairplay-h264` | — | SPS/PPS, NAL units, RTP FU-A |
 | `formats/aac` | `phairplay-aac` | — | ADTS, AAC-ELD framing |
@@ -136,6 +147,13 @@ The dependency graph of the workspace:
         │            └────────────┘ └─────────┘                   │
         │                                                            │
         └──────────────► formats/* (no workspace dependency) ◄───────┘
+
+ ┌──────────────┐
+ │ engines/     │  the fifth protocol: the discovery of the MultiScreen
+ │ smartview    │  Framework, the description document, the API and the
+ └──────┬───────┘  handshake — no dependency on a format crate
+        │
+        └──────────────► core/phairplay-core
 ```
 
 The four format crates have **no** dependency on a crate of the workspace. That
@@ -218,11 +236,77 @@ The decoder itself is a **platform** concern: MediaCodec on Android,
 VideoToolbox and AudioToolbox on Apple platforms, a software decoder in the
 browser. The core knows nothing about it.
 
+### 3.4 The composition root and the supervisor
+
+The receiver has exactly **one** place that builds the engines and hands
+them over: the composition root, `platform/phairplay-ffi/src/composition.rs`.
+It
+
+1. builds the engine of every protocol and registers it with the
+   supervisor;
+2. starts every protocol that the configuration enables and reports the
+   outcome of every one of them.
+
+The configuration is built one layer above it, in
+`apps/web/src/receiver.rs`: the device profile is the base and the
+configuration file of the user is laid over it.
+
+```text
+  main.rs
+     │  cli::parse        the command line: --config, --profile, --port,
+     ▼                     --bind, --no-dashboard, --version, --help
+  receiver::configuration   the profile as the base, the file laid over it
+     │
+     ▼
+  phairplay_ffi::composition::build ──► ReceiverCore (the supervisor)
+     │                   ▲
+     │                   │  register_engine — once, here
+     │                   │
+     └── AirPlayEngine, MiracastEngine, CastEngine, DlnaEngine,
+         SmartViewEngine
+```
+
+**Why the composition root lives in the bridge and not in an application.**
+The native shells reach the receiver through the bridge. If the composition
+root lived in the web backend, the shells would find an empty supervisor and
+every attempt to start a protocol would be answered with *"no engine
+implementation is registered for the protocol"*. The bridge is the one place
+that both kinds of client go through, so it is the one place that may know
+the engines. See
+[ADR-0006](docs/adr/ADR-0006-the-composition-root-lives-in-the-bridge.md).
+
+The engine of the fifth protocol is registered like every other engine: the
+composition root builds it, hands it to the same supervisor, and the start of
+the process starts it with the others. The core needed no new module and the
+bridge needed no new exported type for it — that is the proof of the rule
+that a new protocol does not touch the core.
+
+**The rule: an application speaks only through the supervisor, never
+directly with the engines.** The web backend asks the supervisor for the
+status of a protocol, asks it to start a protocol and asks it to stop one;
+it never calls an engine, and it never holds a reference to an engine. The
+consequences are:
+
+- the status that the dashboard shows and the status that the native shells
+  show come from the same place, so they cannot drift apart;
+- a second registration of the engines — a second truth about what runs —
+  is impossible, because the registration happens in exactly one function;
+- the engines know nothing of the bridge and nothing of the web, so they
+  stay testable without a network and without a decoder.
+
+The start is a **total judgement**: a protocol that cannot start — a container
+without multicast, a device without a Wi-Fi Direct radio — is reported with
+its reason and does not stop the other protocols. The receiver runs with the
+protocols that work.
+
+The same rule holds for the native shells: they reach the core through the
+bridge (`ReceiverCore`), never through an engine.
+
 ---
 
 ## 4. The data flow of a session
 
-The following flow is common to all four protocols; the differences are in
+The following flow is common to all five protocols; the differences are in
 the handshake and in the transport.
 
 ```text
@@ -369,6 +453,47 @@ Details:
 - the XML rules forbid a `DOCTYPE` and external entities;
 - the renderer serves audio and pictures. It does not render a live video
   stream (`FR-050`).
+
+### 4.5 Samsung Smart View
+
+```text
+  Galaxy phone / tablet
+       │
+       │  SSDP: M-SEARCH for urn:samsung.com:service:MultiScreenService:1
+       │  →  HTTP/1.1 200 OK with a LOCATION header
+       ▼
+  ┌─────────────┐   HTTP: /description.xml, /api/v2/…
+  │  MultiScreen│◄──────────────────────────────────────────┐
+  │  API        │   the handshake: the sender posts its MAC,   │
+  └──────┬──────┘   its address and its name                  │
+         │  WebSocket: the channel of the session              │
+         ▼                                                     │
+  ┌─────────────┐                       ┌──────────────┐      │
+  │  channel    │──────────────────────►│ media sinks  │      │
+  └─────────────┘                       └──────────────┘      │
+                                                            │
+  The message format of the channel is not implemented. ──────┘
+```
+
+Details:
+
+- the discovery is **SSDP**, not DNS-SD: the framework of Samsung searches
+  for its own service target and expects an answer with a `LOCATION` header.
+  The service type `_samsungmsf._tcp` is part of the vocabulary of the core
+  and belongs to the same family of names as the other protocols;
+- the description document and the API are served by the engine itself: a
+  small hand-written HTTP/1.1 server, so that the crate pulls no web
+  framework into the workspace;
+- the channel accepts one sender at a time; a second channel is refused and
+  the first one keeps its slot;
+- the responder of the engine and the responder of the DLNA renderer want the
+  **same SSDP port**. In the default configuration the renderer holds it
+  first, and the Smart View responder cannot open its socket — the run of
+  the receiver shows it, and the milestone M5 in
+  [`ROADMAP.md`](ROADMAP.md) carries the conflict as an open point;
+- **the message format of the channel is proprietary and not implemented**
+  (`EXC-011`). The engine reports the session of the sender, but it never
+  claims to deliver a picture that it cannot deliver.
 
 ---
 
@@ -553,7 +678,7 @@ forwarded to the display layer, which owns the presentation state.
   config/app-defaults.toml  ─┐
   config/performance-*.toml ─┼─►  AppConfig  ─►  the engines read their limits
   config/security-policy.toml ┘        │
-                                      └──►  the bridge and the shells
+  config/profiles/<name>.toml ─┘      └──►  the bridge and the shells
 ```
 
 The configuration is loaded once into one typed model. The engines read their
@@ -566,6 +691,17 @@ same change.
 semantically wrong. A missing key is never an error, because every field has
 a default; an unknown key is always an error, because a typo in a
 configuration must not be silently ignored.
+
+**The device profile is a layer above the model.** A profile under
+[`config/profiles/`](config/profiles/README.md) is a complete configuration
+for a class of devices — a single-board computer, a NAS, a container, a
+desktop, a device nobody described yet. The profile is the base of the
+configuration of the receiver, and the file that the user names with
+`--config` is laid over it: what the file names wins, what it does not
+mention keeps the value of the profile. The *names* of the profiles live in
+the core (`config::profiles::DeviceProfile`), because a name is a word of the
+product; the *values* live in the files, because a decision that a user can
+read and change belongs in a file.
 
 ---
 
@@ -637,12 +773,19 @@ Three rules of the build contract bind every level:
 
 | To add … | Touch … | Never … |
 |---|---|---|
-| A fifth protocol | A new crate in `engines/`, an entry in `ProtocolKind`, a service type in the discovery engine | the core |
+| A sixth protocol | A new crate in `engines/`, an entry in `ProtocolKind`, a service type in the discovery engine, the registration in the composition root | the core |
 | A new codec | A new crate in `formats/`, an entry in `VideoCodec` or `AudioCodec` | the engine |
 | A new platform | A shell in `apps/`, the platform traits in the core | the engines |
 | A new setting | `config/*.toml` and the typed model in the core | a literal in a shell |
+| A new device class | A profile in `config/profiles/`, an entry in `DeviceProfile` | a special case in the code |
 | A new error kind | The hierarchy in `core/phairplay-core/src/error.rs` | a parallel enum in an engine |
 | A new background job | A job in the executor of the core | a new thread pool |
+
+The fifth protocol — Samsung Smart View — is the proof of the first row: a
+new crate in `engines/`, an entry in `ProtocolKind`, a service type and a port
+in the configuration of the core. The core needed no new module and the
+bridge needed no new exported type; the engine is a `ProtocolEngine` like
+every other engine.
 
 ---
 
@@ -662,3 +805,5 @@ Three rules of the build contract bind every level:
 | [`config/`](config/README.md) | The numbers, the defaults, the policy |
 | [`project/project.yaml`](project/project.yaml) | The machine-readable state |
 | [`docs/`](docs/README.md) | The detailed living documentation |
+| [`docs/audit/`](docs/audit/tv-web-dashboard.md) | The measured evidence of a shell or of an engine |
+| [`docs/guides/`](docs/guides/PROTOCOL_OVERVIEW.md) | The guides for a reader and for an operator |

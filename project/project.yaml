@@ -1,30 +1,63 @@
 project:
   name: PhairPlayRust
   baseline_version: "0.1"
-  product_status: "m0-implemented-awaiting-device-tests"
-  current_milestone: "M0"
-  current_milestone_name: "Foundation"
-  current_submilestone: "M0.0"
-  completed_milestones: []
-  completed_submilestones: []
-  in_progress_submilestones:
-    - "M0.0"
   # The state of the code and the state of the evidence are two different
-  # things. The code of the four engines, the four format crates, the bridge
-  # and the dashboard is written and tested. What is missing is the evidence
-  # that only hardware can produce: the device test plan.
+  # things. The code of the five engines, the four format crates, the
+  # bridge, the dashboard and the headless receiver is written and tested.
+  # What is missing is the evidence that only a device can produce: the
+  # device test plan, and the acceptance records of the milestones M1 to M5.
+  product_status: "m5-code-delivered-awaiting-acceptance-records-and-device-tests"
+  current_milestone: "M5"
+  current_milestone_name: "Smart View"
+  current_submilestone: null
+  completed_milestones:
+    - "M0"
+  completed_submilestones: []
+  in_progress_submilestones: []
+  # The milestones whose code is delivered and whose acceptance record is
+  # missing. The narrative is in ROADMAP.md.
+  milestones_awaiting_acceptance_record:
+    - "M1"
+    - "M2"
+    - "M3"
+    - "M4"
+    - "M5"
   verification:
     workspace_builds: true
     lint_clean: true
     format_clean: true
-    tests_passed: 1054
+    tests_passed: 1224
     tests_failed: 0
+    tests_ignored: 0
     structural_gates_green: true
     licence_gate_green: true
     documentation_links_green: true
     device_tests: "not-run"
     performance_budgets_measured: "not-run"
     acceptance_record: "docs/acceptance/M0-ACCEPTANCE.md"
+    # The budgets are not repeated here: the owner of every number is the
+    # file of the configuration. A copy of a budget in a second place is a
+    # budget that drifts.
+    budgets: "config/performance-budgets.toml"
+    # The counters of the checks that are not Cargo tests. Every number names
+    # the file that carries the evidence.
+    shell_checks:
+      dashboard_keyboard_checks: 35
+      dashboard_layout_checks: 31
+      dashboard_measured_contrast_pairs: 38
+      android_shell_unit_tests: 39
+      android_shell_focus_order_tests: 12
+      macos_shell_unit_tests: 101
+      macos_shell_focus_tests: 12
+      smartview_engine_tests: 103
+    sources:
+      tests: "cargo build -p phairplay-ffi && cargo test --offline --workspace --no-fail-fast"
+      build: "cargo check --offline --workspace"
+      dashboard: "docs/audit/tv-web-dashboard.md"
+      android: "docs/audit/tv-android-shell.md"
+      macos: "docs/audit/tv-macos-shell.md"
+      smartview: "docs/audit/smartview-engine-test.log"
+      device_tests: "docs/guides/DEVICE_TEST_PLAN.md"
   license: "AGPL-3.0-or-later"
   contribution_model: "DCO"
   # The last time this file was written by hand. The state of the project
@@ -32,7 +65,7 @@ project:
   state_updated: "2026-10-24"
 
 product:
-  summary: "A free, open-source, privacy-first receiver for AirPlay 2, Miracast, Google Cast and DLNA/UPnP on the local network."
+  summary: "A free, open-source, privacy-first receiver for AirPlay 2, Miracast, Google Cast, DLNA/UPnP and Samsung Smart View on the local network."
   principles:
     - "no account"
     - "no telemetry"
@@ -40,6 +73,8 @@ product:
     - "no cloud dependency"
     - "local network only"
     - "honest limits, documented from the first line"
+    - "operable with a remote control"
+    - "runs without a screen"
   explicit_boundaries:
     - id: "EXC-001"
       subject: "FairPlay DRM content"
@@ -64,30 +99,36 @@ product:
       statement: "Accepted by the handshake, not played back."
     - id: "EXC-008"
       subject: "Several peers on a single-session protocol"
-      statement: "AirPlay, Miracast and DLNA serve one peer at a time. Google Cast is the documented exception."
+      statement: "AirPlay, Miracast, DLNA and Smart View serve one peer at a time. Google Cast is the documented exception."
     - id: "EXC-009"
       subject: "Transcoding"
       statement: "The receiver decodes what it advertised. It does not transcode a format into another one."
     - id: "EXC-010"
       subject: "Google Cast application identifier"
       statement: "The end-to-end test needs an identifier that is registered with Google. The project does not ship one and does not fake one."
+    - id: "EXC-011"
+      subject: "The message format of the Samsung Smart View channel"
+      statement: "Proprietary and not publicly documented. The discovery and the handshake are implemented; the content of the channel is not."
 
 platforms:
   phase_1:
     android:
       minimum_api_family: "Android 13+"
       primary_abi: "arm64-v8a"
-      status: "planned"
+      status: "implemented"
       milestone: "M3"
+      note: "The Kotlin compiles, the unit tests are green and the lint is green — docs/audit/tv-android-shell.md. The APK is NOT RUN: the NDK of the version that the Android Gradle plugin wants is not installed here."
     macos:
       minimum: "13"
       architecture: "arm64"
-      status: "planned"
+      status: "implemented"
       milestone: "M3"
+      note: "The kit of the shell has a green test suite — docs/audit/tv-macos-shell.md. The SwiftUI part is NOT RUN: this machine has no macOS SDK."
   phase_2:
     linux:
-      status: "planned"
+      status: "headless-receiver-available"
       entry_condition: "a green M4"
+      note: "The receiver runs headless on Linux — deploy/. A native Linux shell is a later track."
     windows:
       status: "planned"
       entry_condition: "a green Linux track"
@@ -100,18 +141,21 @@ architecture:
   android_ui: "Kotlin + Jetpack Compose"
   macos_ui: "SwiftUI + AppKit"
   dashboard: "Rust HTTP/WebSocket backend with static assets, loopback only"
+  composition_root: "apps/web/src/receiver.rs"
+  supervisor: "platform/phairplay-ffi — ReceiverCore"
   engines:
     airplay: "engines/airplay"
     miracast: "engines/miracast"
     cast: "engines/cast"
     dlna: "engines/dlna"
+    smartview: "engines/smartview"
     discovery: "engines/discovery"
   formats:
     plist: "formats/plist"
     h264: "formats/h264"
     aac: "formats/aac"
     alac: "formats/alac"
-  dependency_direction: "apps/* -> platform/* -> core/* ; engines/* -> core/*, formats/* ; formats/* -> nothing"
+  dependency_direction: "apps/* -> platform/*, core/* ; engines/* -> core/*, formats/* ; formats/* -> nothing"
   build_contract: "docs/design/BUILD-CONTRACT.md"
 
 protocols:
@@ -147,6 +191,15 @@ protocols:
     max_concurrent_peers: 1
     note: "The renderer serves audio and pictures."
     milestone: "M2"
+  - name: "smartview"
+    display_name: "Samsung Smart View"
+    service_types: ["_samsungmsf._tcp"]
+    discovery: "ssdp"
+    carries_video: false
+    carries_audio: false
+    max_concurrent_peers: 1
+    note: "The discovery and the handshake are implemented; the message format of the channel is proprietary and not implemented (EXC-011). The engine is registered with the supervisor. In the default configuration the DLNA renderer holds the SSDP port first, so the Smart View responder cannot open its socket — the run is quoted in ROADMAP.md (M5)."
+    milestone: "M5"
 
 milestones:
   M0: "Foundation"
@@ -154,21 +207,32 @@ milestones:
   M2: "Protocol breadth and local control"
   M3: "Native shells"
   M4: "Hardening, interoperability and release readiness"
+  M5: "Smart View"
 
 documentation:
-  requirements_version: "0.1"
-  architecture_version: "0.1"
-  roadmap_version: "0.1"
+  requirements_version: "0.2"
+  architecture_version: "0.2"
+  roadmap_version: "0.2"
   quality_version: "0.1"
   index: "docs/README.md"
   policy: "docs/DOCUMENTATION_POLICY.md"
   link_check: "scripts/check-docs-links.sh"
+  audits: "docs/audit"
+  guides: "docs/guides"
+  change_requests: "docs/cr"
 
 configuration:
   defaults: "config/app-defaults.toml"
   budgets: "config/performance-budgets.toml"
   policy: "config/security-policy.toml"
+  profiles: "config/profiles"
   typed_model: "core/phairplay-core/src/config.rs"
+
+deployment:
+  service: "deploy/systemd/phairplayrust.service"
+  installer: "deploy/install.sh"
+  container: "deploy/docker"
+  device_profiles: "config/profiles"
 
 gates:
   documentation_links:
@@ -176,17 +240,21 @@ gates:
     state: "implemented"
   crate_boundaries:
     command: "bash scripts/check-crate-boundaries.sh"
-    state: "planned"
+    state: "implemented"
+  file_size:
+    command: "bash scripts/check-file-size.sh"
+    state: "implemented"
   quality:
     commands:
       - "cargo fmt --all --check"
       - "cargo clippy --workspace --all-targets -- -D warnings"
       - "cargo test --workspace"
       - "cargo doc --workspace --no-deps"
-    state: "planned"
+    state: "implemented"
 
 continuous_integration:
-  state: "planned"
-  workflows: []
+  state: "implemented"
+  workflows:
+    - ".github/workflows/ci.yml"
   secrets: "none"
   publishes_anything: false

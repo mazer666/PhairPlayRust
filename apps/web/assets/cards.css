@@ -42,24 +42,25 @@
   }
 }
 
-/* WHY the wide step is at 1600 px and not at 1920 px: a card of a four
+/* WHY the wide step is at 1600 px and not at 1920 px: a card of a five
    column row carries a name of 28 px and the switch next to it. Below
    1600 px the two would collide and the name would break in the middle of
-   a word. From 1600 px on, the four receivers stand in one row — the four
+   a word. From 1600 px on, the five receivers stand in one row — the five
    states are visible at a glance, without scrolling. */
 @media (min-width: 100rem) {
   .protocol-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
 /* WHY the second step: a television with 720 lines has 60 lines less than
-   one with 1080. A 2 × 2 grid of cards does not fit on such a screen, so
-   the four receivers stand in one row there and all four states are
-   visible without scrolling. */
+   one with 1080. Five cards in one row do not fit on such a screen — the
+   name and the switch of a card collide, and the grid overflows sideways by
+   seventeen pixels. Three columns and two rows fit: every state is visible
+   at a glance, and the grid does not move sideways. */
 @media (max-height: 46rem) and (min-width: 75rem) {
   .protocol-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
@@ -386,5 +387,40 @@
   .card:focus-visible,
   .protocol-grid:focus-within .card[data-roving-active="true"] {
     transform: none;
+  }
+}
+
+/* WHY the state badge gets tighter on a television with 720 lines: in a row
+   of five the card is about 190 px wide, and the word "Advertising" is 203
+   px in a badge with a wide letter spacing and a generous padding. The
+   badge would therefore stick out of the card by seventeen pixels. The word
+   stays on one line — it is the state of the receiver, and it has to be
+   read at a glance — so the tracking and the padding are what shrink.
+   WHY at the end of the file: a rule of the same specificity that comes
+   later wins, and the badge is defined below the grid. */
+@media (max-height: 46rem) and (min-width: 75rem) {
+  .state {
+    padding-inline: var(--space-2);
+    letter-spacing: 0.04em;
+  }
+}
+
+/* WHY the tighter card on a television with 720 lines: the vertical room
+   is the scarce resource there. The card keeps everything it says — the
+   name, the state, the reason, the ports, the three counters — and gives
+   up the room between them. The type sizes stay as they are: a state that
+   is read from three metres is worth more than a card that fits. */
+@media (max-height: 46rem) and (min-width: 75rem) {
+  .card {
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .card__state {
+    padding-top: var(--space-3);
+  }
+
+  .counters {
+    padding-top: var(--space-3);
   }
 }
