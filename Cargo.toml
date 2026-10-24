@@ -1,0 +1,79 @@
+[workspace]
+resolver = "2"
+members = [
+    "core/phairplay-core",
+    "engines/discovery",
+    "engines/airplay",
+    "engines/miracast",
+    "engines/cast",
+    "engines/dlna",
+    "formats/plist",
+    "formats/h264",
+    "formats/aac",
+    "formats/alac",
+    "platform/phairplay-ffi",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/mazer666/PhairPlayRust"
+rust-version = "1.85"
+
+[workspace.dependencies]
+# Shared serialisation and data-transfer primitives.
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+thiserror = "2.0"
+
+# Error handling and logging.
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Async runtime and networking.
+tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "sync", "time", "macros"] }
+tokio-util = { version = "0.7", features = ["codec"] }
+futures = "0.3"
+async-trait = "0.1"
+bytes = "1"
+
+# Cryptography: pairing, FairPlay session keys, transport encryption.
+sha2 = "0.10"
+hmac = "0.12"
+hkdf = "0.12"
+rand = "0.8"
+curve25519-dalek = { version = "4", features = ["static_secrets"] }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rsa = { version = "0.9", features = ["sha1"] }
+aes = "0.8"
+ctr = "0.9"
+cbc = "0.1"
+base64 = "0.22"
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+
+# Service discovery.
+mdns-sd = "0.11"
+if-addrs = "0.13"
+
+# Platform bridge.
+uniffi = { version = "0.29", features = ["cli"] }
+
+# The declarations of the C library of the system. Used where the kernel reports
+# something the standard library of Rust does not offer — the peak memory of the
+# process, for example. The crate is already in the tree of the workspace (through
+# `rustix` and `getrandom`) and is already in the licence inventory of the
+# third-party components.
+libc = "0.2"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"

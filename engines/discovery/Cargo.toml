@@ -1,0 +1,17 @@
+[package]
+name = "phairplay-discovery"
+description = "Service discovery for the PhairPlayRust receiver stack: mDNS advertisement and SSDP browsing."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+phairplay-core = { path = "../../core/phairplay-core" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+
+[lints]
+workspace = true

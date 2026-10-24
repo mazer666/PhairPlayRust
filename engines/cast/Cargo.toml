@@ -1,0 +1,18 @@
+[package]
+name = "phairplay-cast"
+description = "The Google Cast receiver engine of PhairPlayRust."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+phairplay-core = { path = "../../core/phairplay-core" }
+phairplay-plist = { path = "../../formats/plist" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+
+[lints]
+workspace = true

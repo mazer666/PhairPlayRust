@@ -1,0 +1,17 @@
+[package]
+name = "phairplay-ffi"
+description = "The UniFFI bridge between the PhairPlayRust core and the native shells."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+phairplay-core = { path = "../../core/phairplay-core" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+
+[lints]
+workspace = true

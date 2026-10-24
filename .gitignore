@@ -1,0 +1,27 @@
+# Rust
+/target
+**/*.rs.bk
+
+# Native shells
+apps/android/.gradle
+apps/android/build
+apps/android/app/build
+apps/android/local.properties
+apps/macos/.build
+apps/macos/Package.resolved
+
+# Web dashboard
+apps/web/node_modules
+apps/web/dist
+apps/web/.vite
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local artefacts
+*.log
+.env
+.env.*

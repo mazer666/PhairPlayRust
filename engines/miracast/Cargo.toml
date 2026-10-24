@@ -1,0 +1,18 @@
+[package]
+name = "phairplay-miracast"
+description = "The Miracast (Wi-Fi Display) sink engine of PhairPlayRust."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+phairplay-core = { path = "../../core/phairplay-core" }
+phairplay-h264 = { path = "../../formats/h264" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+
+[lints]
+workspace = true

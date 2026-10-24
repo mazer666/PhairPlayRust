@@ -1,0 +1,21 @@
+[package]
+name = "phairplay-airplay"
+description = "The AirPlay 2 receiver engine of PhairPlayRust."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+phairplay-core = { path = "../../core/phairplay-core" }
+phairplay-plist = { path = "../../formats/plist" }
+phairplay-h264 = { path = "../../formats/h264" }
+phairplay-aac = { path = "../../formats/aac" }
+phairplay-alac = { path = "../../formats/alac" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+
+[lints]
+workspace = true

@@ -1,0 +1,10 @@
+version = 1
+SPDX-PackageName = "PhairPlayRust"
+SPDX-PackageSupplier = "PhairPlayRust Contributors"
+SPDX-PackageDownloadLocation = "https://github.com/mazer666/PhairPlayRust"
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 PhairPlayRust Contributors"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
