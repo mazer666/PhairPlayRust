@@ -5,6 +5,12 @@
     WHY: every text the user can read lives here and nowhere else. A text
     that is written into the source of a screen cannot be translated, and
     it cannot be reviewed by somebody who does not read Kotlin.
+
+    The strings of the dashboard are written for a television: they are
+    read from three metres, with a remote control in the hand. Every text
+    that a user has to *act* on is therefore a full sentence, and the
+    texts of the state of a protocol are short enough to be read at a
+    glance.
 -->
 <resources>
 
@@ -12,12 +18,13 @@
 
     <!-- The head of the dashboard. -->
     <string name="dashboard_title">Receiver</string>
-    <string name="dashboard_device">Device: %1$s</string>
+    <string name="dashboard_device_unknown">Waiting for the name of the device</string>
     <string name="dashboard_version">Version %1$s</string>
-    <string name="dashboard_receiver_running">The receiver is running.</string>
-    <string name="dashboard_receiver_stopped">The receiver is not running.</string>
-    <string name="dashboard_start_receiver">Start the receiver</string>
-    <string name="dashboard_stop_receiver">Stop the receiver</string>
+    <string name="dashboard_receiver_running">The receiver is running</string>
+    <string name="dashboard_receiver_stopped">The receiver is not running</string>
+    <string name="dashboard_receiver_waiting">The receiver is starting</string>
+    <string name="dashboard_dpad_help">Use the arrow keys to choose, press OK to switch</string>
+    <string name="dashboard_waiting_protocols">The protocols appear as soon as the receiver has answered.</string>
 
     <!-- The card of one protocol. -->
     <string name="protocol_card_ports">TCP %1$s · UDP %2$s</string>
@@ -29,6 +36,9 @@
     </plurals>
     <string name="protocol_switch_on">Switch %1$s on</string>
     <string name="protocol_switch_off">Switch %1$s off</string>
+    <string name="protocol_switched_on">On</string>
+    <string name="protocol_switched_off">Off</string>
+    <string name="protocol_card_description">%1$s, %2$s</string>
 
     <!-- The state of a protocol. -->
     <string name="protocol_state_disabled">Disabled in the settings</string>
@@ -50,17 +60,12 @@
 
     <!-- The view of the running session. -->
     <string name="now_playing_title">Now playing</string>
-    <string name="now_playing_empty">No sender is connected.</string>
     <string name="now_playing_sender_unknown">Unknown sender</string>
     <string name="now_playing_video_unknown">No video</string>
     <string name="now_playing_audio_unknown">No audio</string>
-    <string name="now_playing_video_format">Video: %1$s</string>
-    <string name="now_playing_audio_format">Audio: %1$s</string>
-    <string name="now_playing_uptime">Running for %1$s</string>
-    <string name="now_playing_title_unknown">Unknown title</string>
-    <string name="now_playing_artist_unknown">Unknown artist</string>
-    <string name="now_playing_album_unknown">Unknown album</string>
     <string name="now_playing_artwork">The artwork of the sender</string>
+    <string name="now_playing_chip_duration">Duration %1$s</string>
+    <string name="now_playing_formats">%1$s · %2$s</string>
 
     <!-- The notification of the foreground service. -->
     <string name="notification_channel_name">Receiver</string>
@@ -76,8 +81,6 @@
     <string name="failure_dismiss">Dismiss</string>
 
     <!-- The platform of the device. -->
-    <string name="capability_missing_miracast">This device has no Wi-Fi Direct radio. Miracast cannot work here.</string>
-    <string name="capability_missing_multicast">This device does not allow multicast. The discovery of the protocols cannot work here.</string>
 
     <!-- The names of the protocols. -->
     <string name="protocol_airplay">AirPlay 2</string>

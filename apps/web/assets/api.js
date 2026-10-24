@@ -15,13 +15,21 @@ import {
   normalizeSessions,
   normalizeStatus,
 } from "./normalize.js";
+import { t } from "./i18n.js";
 
-/** The four receivers, in the order the panel shows them. */
+/**
+ * The four receivers, in the order the panel shows them.
+ *
+ * WHY the names come from the language file: the name of a protocol is
+ * shown in the card, in the session list and in the scope of the graph. A
+ * name that is written in the markup of one panel and in the code of
+ * another drifts apart.
+ */
 export const PROTOCOLS = [
-  { id: "airplay", name: "AirPlay 2", glyph: "#glyph-airplay" },
-  { id: "miracast", name: "Miracast", glyph: "#glyph-miracast" },
-  { id: "cast", name: "Google Cast", glyph: "#glyph-cast" },
-  { id: "dlna", name: "DLNA / UPnP", glyph: "#glyph-dlna" },
+  { id: "airplay", name: t("protocol.airplay"), glyph: "#glyph-airplay" },
+  { id: "miracast", name: t("protocol.miracast"), glyph: "#glyph-miracast" },
+  { id: "cast", name: t("protocol.cast"), glyph: "#glyph-cast" },
+  { id: "dlna", name: t("protocol.dlna"), glyph: "#glyph-dlna" },
 ];
 
 /**

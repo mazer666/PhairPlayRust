@@ -1,0 +1,113 @@
+### check-keyboard.mjs
+The dashboard against the mock receiver
+  ok   the group holds four cards
+  ok   exactly one card is in the tab order (tabindex: 0, -1, -1, -1)
+  ok   every card is a button
+  ok   every card carries a name for the screen reader
+  ok   1920x1080: the grid shows 4 column(s) and 1 row(s)
+  ok   1920x1080: ArrowRight moves the focus to card-miracast
+  ok   1920x1080: ArrowLeft moves the focus to card-airplay
+  ok   1920x1080: ArrowDown leaves the group and reaches metric-fps
+  ok   1920x1080: Home jumps to the first card of the group
+  ok   1920x1080: End jumps to the last card of the group
+  ok   1280x900: the grid shows 2 column(s) and 2 row(s)
+  ok   1280x900: ArrowRight moves the focus to card-miracast
+  ok   1280x900: ArrowLeft moves the focus to card-airplay
+  ok   1280x900: ArrowDown moves the focus to card-cast
+  ok   1280x900: ArrowUp moves the focus to card-airplay
+  ok   1280x900: Home jumps to the first card of the group
+  ok   1280x900: End jumps to the last card of the group
+  ok   the tab key leaves the group and reaches metric-fps
+  ok   the arrow key at the edge of the group reaches metric-fps
+  ok   Enter switches the receiver (aria-pressed false → true, POST /api/protocols/cast/enable)
+  ok   the switch calls the API of the receiver (POST /api/protocols/cast/enable)
+  ok   the space key switches the receiver (aria-pressed true → false)
+  ok   the next reading of the API keeps the state of the card (false)
+  ok   a receiver that cannot be reached shows a banner
+  ok   Escape closes the banner
+  ok   the closed banner does not come back with the next reading of the API
+  ok   dark: the focus ring is 3 px wide
+  ok   dark: the focus ring carries 9.96:1 against the card
+  ok   dark: the focus ring carries 10.65:1 against the page
+  FAIL dark: the focused card does not become brighter (brightness(1))
+  ok   light: the focus ring is 3 px wide
+  ok   light: the focus ring carries 8.46:1 against the card
+  ok   light: the focus ring carries 7.62:1 against the page
+  ok   light: the focused card becomes brighter (brightness(1.06))
+  ok   no error in the console while the panel runs
+
+34 checks passed, 1 failed
+
+Problems:
+  - dark: the focused card does not become brighter (brightness(1))
+
+### check-layout.mjs
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 127.0.0.1:8096
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '127.0.0.1',
+  port: 8096
+}
+
+Node.js v22.19.0
+
+### check-contrast.mjs
+The focus ring of the card
+  dark: ring rgb(196, 181, 253) at 3 px — 9.96:1 against the card, 10.65:1 against the page, 10.97:1 against its halo
+  light: ring rgb(75, 49, 190) at 3 px — 8.46:1 against the card, 7.62:1 against the page, 8.46:1 against its halo
+
+The texts of the card
+  dark:
+    ok   the title of the card      15.55:1 (needed 4.5:1)
+    ok   the value of a fact        15.55:1 (needed 4.5:1)
+    ok   the name of a fact         5.40:1 (needed 4.5:1)
+    ok   the reason of the state    8.28:1 (needed 4.5:1)
+    ok   the value of a counter     15.55:1 (needed 4.5:1)
+    ok   the label of the switch    15.55:1 (needed 4.5:1)
+    ok   the note of the section    8.85:1 (needed 4.5:1)
+    ok   the hint for the remote    8.28:1 (needed 4.5:1)
+    ok   the border of the card     9.96:1 (needed 3:1)
+    ok   the badge "streaming"      6.85:1 (needed 4.5:1)
+    ok   the badge "advertising"    5.28:1 (needed 4.5:1)
+    ok   the badge "disabled"       6.49:1 (needed 4.5:1)
+    ok   the badge "error"          5.70:1 (needed 4.5:1)
+  light:
+    ok   the title of the card      18.23:1 (needed 4.5:1)
+    ok   the value of a fact        18.23:1 (needed 4.5:1)
+    ok   the name of a fact         5.84:1 (needed 4.5:1)
+    ok   the reason of the state    7.68:1 (needed 4.5:1)
+    ok   the value of a counter     18.23:1 (needed 4.5:1)
+    ok   the label of the switch    18.23:1 (needed 4.5:1)
+    ok   the note of the section    6.92:1 (needed 4.5:1)
+    ok   the hint for the remote    7.68:1 (needed 4.5:1)
+    ok   the border of the card     8.46:1 (needed 3:1)
+    ok   the badge "streaming"      5.49:1 (needed 4.5:1)
+    ok   the badge "advertising"    5.71:1 (needed 4.5:1)
+    ok   the badge "disabled"       6.61:1 (needed 4.5:1)
+    ok   the badge "error"          5.96:1 (needed 4.5:1)
+
+The focused card, painted with brightness(1.06)
+    ok   dark: the title of the card  17.40:1 (needed 4.5:1)
+    ok   dark: the name of a fact     5.95:1 (needed 4.5:1)
+    ok   dark: the value of a fact    17.40:1 (needed 4.5:1)
+    ok   dark: the badge of the state 7.42:1 (needed 4.5:1)
+    ok   dark: the focus ring         10.95:1 (needed 3:1)
+    ok   light: the title of the card  18.02:1 (needed 4.5:1)
+    ok   light: the name of a fact     5.34:1 (needed 4.5:1)
+    ok   light: the value of a fact    18.02:1 (needed 4.5:1)
+    ok   light: the badge of the state 5.70:1 (needed 4.5:1)
+    ok   light: the focus ring         7.85:1 (needed 3:1)
+
+every measured pair reaches its threshold

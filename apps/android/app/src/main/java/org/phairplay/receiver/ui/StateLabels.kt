@@ -72,6 +72,10 @@ fun ProtocolId.label(): String = stringResource(
 
 /**
  * The colour of the phase of a protocol.
+ *
+ * WHY: The colour is the third sign of the state — the word and the shape
+ * come first, so that the state is also readable without a colour. Every
+ * colour meets the contrast of 4.5:1 against the surface of the card.
  */
 @Composable
 fun ProtocolPhase.tone(): Color = when (this) {

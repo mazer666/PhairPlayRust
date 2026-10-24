@@ -1,0 +1,47 @@
+The focus ring of the card
+  dark: ring rgb(196, 181, 253) at 3 px — 9.96:1 against the card, 10.65:1 against the page, 10.97:1 against its halo
+  light: ring rgb(75, 49, 190) at 3 px — 8.46:1 against the card, 7.62:1 against the page, 8.46:1 against its halo
+
+The texts of the card
+  dark:
+    ok   the title of the card      15.55:1 (needed 4.5:1)
+    ok   the value of a fact        15.55:1 (needed 4.5:1)
+    ok   the name of a fact         5.40:1 (needed 4.5:1)
+    ok   the reason of the state    8.28:1 (needed 4.5:1)
+    ok   the value of a counter     15.55:1 (needed 4.5:1)
+    ok   the label of the switch    15.55:1 (needed 4.5:1)
+    ok   the note of the section    8.85:1 (needed 4.5:1)
+    ok   the hint for the remote    8.28:1 (needed 4.5:1)
+    ok   the border of the card     9.96:1 (needed 3:1)
+    ok   the badge "streaming"      6.85:1 (needed 4.5:1)
+    ok   the badge "advertising"    5.28:1 (needed 4.5:1)
+    ok   the badge "disabled"       6.49:1 (needed 4.5:1)
+    ok   the badge "error"          5.70:1 (needed 4.5:1)
+  light:
+    ok   the title of the card      18.23:1 (needed 4.5:1)
+    ok   the value of a fact        18.23:1 (needed 4.5:1)
+    ok   the name of a fact         5.84:1 (needed 4.5:1)
+    ok   the reason of the state    7.68:1 (needed 4.5:1)
+    ok   the value of a counter     18.23:1 (needed 4.5:1)
+    ok   the label of the switch    18.23:1 (needed 4.5:1)
+    ok   the note of the section    6.92:1 (needed 4.5:1)
+    ok   the hint for the remote    7.68:1 (needed 4.5:1)
+    ok   the border of the card     8.46:1 (needed 3:1)
+    ok   the badge "streaming"      5.49:1 (needed 4.5:1)
+    ok   the badge "advertising"    5.71:1 (needed 4.5:1)
+    ok   the badge "disabled"       6.61:1 (needed 4.5:1)
+    ok   the badge "error"          5.96:1 (needed 4.5:1)
+
+The focused card, painted with brightness(1.06)
+    ok   dark: the title of the card  17.40:1 (needed 4.5:1)
+    ok   dark: the name of a fact     5.95:1 (needed 4.5:1)
+    ok   dark: the value of a fact    17.40:1 (needed 4.5:1)
+    ok   dark: the badge of the state 7.42:1 (needed 4.5:1)
+    ok   dark: the focus ring         10.95:1 (needed 3:1)
+    ok   light: the title of the card  18.02:1 (needed 4.5:1)
+    ok   light: the name of a fact     5.34:1 (needed 4.5:1)
+    ok   light: the value of a fact    18.02:1 (needed 4.5:1)
+    ok   light: the badge of the state 5.70:1 (needed 4.5:1)
+    ok   light: the focus ring         7.85:1 (needed 3:1)
+
+every measured pair reaches its threshold

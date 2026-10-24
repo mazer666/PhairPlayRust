@@ -54,6 +54,20 @@
   --accent-soft: rgba(167, 139, 250, 0.16);
   --on-accent: #ffffff;
 
+  /* ── Focus ───────────────────────────────────────────────────────────
+   * The focus ring of the panel. Two colours, because a ring has to carry
+   * against every background it can appear on: the ring itself and a halo
+   * that separates it from the card.
+   *
+   * WHY the ring is not the accent in the light theme: the accent of the
+   * light theme is a mid violet; on a white card it does not carry the
+   * 3:1 of WCAG 1.4.11 that a focus indicator has to reach. The dark
+   * theme uses a light violet, the light theme a deep one — each of them
+   * measured against the card it is drawn on.
+   */
+  --focus-ring: #c4b5fd;
+  --focus-halo: #05060a;
+
   /* ── Semantic state ──────────────────────────────────────────────────
    * Each state has a text colour, a soft wash and a shape. State is never
    * carried by colour alone — the label and the glyph carry it too.
@@ -82,6 +96,21 @@
   --text-md: 1.0625rem; /* 17 px — card titles                   */
   --text-lg: 1.375rem; /* 22 px — section titles                */
   --text-xl: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem); /* hero     */
+
+  /* ── The ten-foot scale ───────────────────────────────────────────────
+   * The panel is watched from a sofa. The three steps below are the
+   * smallest sizes that a card may use: the name of the receiver, its
+   * state and the details. The lower bound of every one of them is the
+   * value that is measured; the upper bound keeps the card calm on a
+   * very large screen.
+   */
+  --text-tv-detail: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16 px */
+  --text-tv-state: clamp(1.25rem, 1.1rem + 0.55vw, 1.5rem); /* 20 px */
+  --text-tv-title: clamp(1.375rem, 1.15rem + 0.8vw, 1.75rem); /* 22 px */
+  /* WHY a fourth step: the name of a value ("Port", "Peers", "Frames") is
+     the smallest text of a card. At 12 px it is unreadable from a sofa, at
+     14 px it is a caption and not a phone note. */
+  --text-tv-label: clamp(0.875rem, 0.85rem + 0.15vw, 1rem); /* 14 px */
   --leading-tight: 1.15;
   --leading-normal: 1.55;
   --tracking-wide: 0.08em;
@@ -140,6 +169,12 @@
   --accent-strong: #4b31be;
   --accent-soft: rgba(90, 63, 208, 0.12);
   --on-accent: #ffffff;
+
+  /* WHY the ring of the light theme is the deep accent: it has to carry
+   * 3:1 against a white card. The halo is white and separates the ring
+   * from the card without drawing a second, weaker line. */
+  --focus-ring: #4b31be;
+  --focus-halo: #ffffff;
 
   --success: #0a6b42;
   --success-soft: rgba(10, 107, 66, 0.12);

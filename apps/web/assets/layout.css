@@ -1,0 +1,186 @@
+/*
+ * PhairPlayRust — the layout of the dashboard: the shell, the sections, the
+ * banner of a problem and the hint for the remote control.
+ *
+ * WHY: the panel is read on a television from a distance. The shell keeps
+ * the content in the middle of the screen, the sections give every block a
+ * heading and a note, and the banner and the hint are the two things the
+ * user has to be told about — the first when something is wrong, the second
+ * when the panel is operated without a mouse.
+ * HOW: every colour comes from theme.css, every size from the ten-foot
+ * scale of the same file.
+ */
+
+/* ── The shell and the sections ─────────────────────────────────────── */
+
+.shell {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+.section {
+  margin-top: var(--space-7);
+}
+
+.section:first-child {
+  margin-top: 0;
+}
+
+.section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.section__title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.section__note {
+  color: var(--text-muted);
+  /* WHY the ten-foot size: the note explains what the four states below
+     mean. A note of thirteen pixels is a caption of a telephone, and the
+     user on the sofa reads the note before the cards. */
+  font-size: var(--text-tv-label);
+  max-width: 62ch;
+}
+
+/* WHY the short screens: a television with 720 lines has 60 lines less
+   than one with 1080. The panel tightens its vertical rhythm there, so
+   that the four receivers stay in the first screen as far as possible. */
+@media (max-height: 46rem) {
+  .shell {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-6);
+  }
+
+  .section {
+    margin-top: var(--space-5);
+  }
+
+  .section__note {
+    font-size: var(--text-tv-label);
+  }
+}
+
+/* ── The banner of a problem ────────────────────────────────────────── */
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-tv-detail);
+}
+
+.banner[hidden] {
+  display: none;
+}
+
+.banner__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The button that closes the banner. It is a button and not a small cross:
+   a television is operated with a remote control, and a cross of eight
+   pixels is not a target that a remote control can hit. */
+.banner__dismiss {
+  flex: 0 0 auto;
+  padding: var(--space-1) var(--space-3);
+  color: var(--danger);
+  background: transparent;
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: 560;
+  cursor: pointer;
+}
+
+.banner__dismiss:hover {
+  background: var(--danger-soft);
+}
+
+/* The hint for the operation with a remote control.
+ *
+ * WHY it is a line and not an overlay: an overlay covers the cards, and
+ * the cards are the content. The hint sits above the grid, it never takes
+ * the focus, and it disappears as soon as a mouse is plugged in.
+ */
+.remote-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-tv-detail);
+}
+
+.remote-hint[hidden] {
+  display: none;
+}
+
+/* A small arrow, drawn with the border of a box — the icon vocabulary of
+   the project is drawn, not imported. */
+.remote-hint__glyph {
+  position: relative;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+}
+
+.remote-hint__glyph::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 20;
+  padding: var(--space-2) var(--space-4);
+  color: var(--on-accent);
+  background: var(--accent-strong);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--duration-base) var(--ease);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+

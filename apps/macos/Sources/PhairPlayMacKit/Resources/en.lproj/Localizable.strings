@@ -12,6 +12,27 @@
 "dashboard.version" = "Version %@";
 "dashboard.running" = "The receiver is running.";
 "dashboard.stopped" = "The receiver is not running.";
+"dashboard.protocols" = "Protocols";
+
+"shortcut.tab.title" = "Tab";
+"shortcut.tab.detail" = "next card";
+"shortcut.shiftTab.title" = "Shift+Tab";
+"shortcut.shiftTab.detail" = "previous card";
+"shortcut.arrows.title" = "Arrow keys";
+"shortcut.arrows.detail" = "move in the grid";
+"shortcut.space.title" = "Space";
+"shortcut.space.detail" = "switch the protocol";
+"shortcut.escape.title" = "Esc";
+"shortcut.escape.detail" = "close this message";
+
+"status.running" = "Running";
+"status.running.detail" = "The receiver is visible to the senders of the local network.";
+"status.starting" = "Starting";
+"status.starting.detail" = "The services are starting or stopping.";
+"status.stopped" = "Stopped";
+"status.stopped.detail" = "No service is running. Switch a protocol on to receive a stream.";
+"status.error" = "Error";
+"status.error.detail" = "No service is running and at least one of them failed. The reason is in the card of the protocol.";
 
 "protocol.airplay" = "AirPlay 2";
 "protocol.miracast" = "Miracast";
@@ -38,9 +59,12 @@
 "protocol.ports" = "TCP %@ · UDP %@";
 "protocol.ports.tcp" = "TCP %@";
 "protocol.ports.none" = "No port is bound";
+"protocol.ports.unknown" = "—";
 "protocol.peers.one" = "%@ sender";
 "protocol.peers.many" = "%@ senders";
 "protocol.switch.on" = "Switch %@ on";
+"protocol.switch.state.on" = "On";
+"protocol.switch.state.off" = "Off";
 "protocol.switch.off" = "Switch %@ off";
 
 "nowplaying.title" = "Now playing";

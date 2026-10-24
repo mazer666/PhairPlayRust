@@ -20,17 +20,17 @@ final class StatusItemController {
     /// The item in the menu bar.
     private let item: NSStatusItem
 
-    /// The client that carries the state of the receiver.
-    private let client: ReceiverClient
+    /// The store that carries the state of the receiver.
+    private let store: ReceiverStore
 
     /// The subscription of the state of the receiver.
     private var subscription: AnyCancellable?
 
-    /// Creates the item for a client.
+    /// Creates the item for a store.
     ///
-    /// - Parameter client: the client that carries the state.
-    init(client: ReceiverClient) {
-        self.client = client
+    /// - Parameter store: the store that carries the state.
+    init(store: ReceiverStore) {
+        self.store = store
         self.item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.item.button?.image = NSImage(
             systemSymbolName: "airplayvideo",
@@ -38,7 +38,7 @@ final class StatusItemController {
         )
         self.item.button?.toolTip = ReceiverStrings.text("menu.title")
         rebuild()
-        self.subscription = client.$state
+        self.subscription = store.$state
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.rebuild() }
     }
@@ -46,7 +46,7 @@ final class StatusItemController {
     /// Builds the menu of the item out of the state of the receiver.
     private func rebuild() {
         let menu = NSMenu()
-        let state = client.state
+        let state = store.state
 
         let title = NSMenuItem(
             title: ReceiverStrings.text("menu.title"),
@@ -70,7 +70,7 @@ final class StatusItemController {
 
         for card in state.protocols {
             let item = NSMenuItem(
-                title: "\(ReceiverStrings.text("protocol.\(card.protocolId.rawValue)")) — \(ReceiverStrings.text("protocol.state.\(card.phase.rawValue)"))",
+                title: "\(ShellFormatting.protocolName(card.protocolId)) — \(ShellFormatting.stateText(card.phase))",
                 action: nil,
                 keyEquivalent: ""
             )
@@ -101,12 +101,11 @@ final class StatusItemController {
 
     /// Asks the receiver for the truth again.
     @objc private func refreshState() {
-        client.refresh()
+        store.refresh()
     }
 
     /// Ends the application.
     @objc private func quit() {
-        client.stop()
         NSApplication.shared.terminate(nil)
     }
 }

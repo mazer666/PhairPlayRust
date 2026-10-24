@@ -57,7 +57,7 @@ object ReceiverDefaults {
             val separator = line.indexOf('=')
             if (separator <= 0) {
                 throw IllegalArgumentException(
-                    "line ${number.number + 1} of the defaults is not a key and a value: $line",
+                    "line ${number.index + 1} of the defaults is not a key and a value: $line",
                 )
             }
             val key = line.substring(0, separator).trim()

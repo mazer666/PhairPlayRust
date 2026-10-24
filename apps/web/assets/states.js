@@ -8,45 +8,55 @@
  * A user must never have to guess which one they are looking at, so every
  * state carries a sentence that explains it.
  * HOW: the states are the ones of `phairplay_core::protocol::ProtocolState`
- * plus the `disabled` case that the `enabled` flag produces.
+ * plus the `disabled` case that the `enabled` flag produces. The wording
+ * comes from the language file, so the panel speaks the language of the
+ * user.
  */
 
-/** @type {Record<string, {tone: string, label: string, reason: string}>} */
-export const STATE_VIEW = {
-  idle: { tone: "disabled", label: "Idle", reason: "The receiver is loaded but not started." },
-  starting: {
-    tone: "transition",
-    label: "Starting",
-    reason: "Binding sockets and registering the network service.",
-  },
-  advertising: {
-    tone: "advertising",
-    label: "Advertising",
-    reason: "Visible to senders on the local network, waiting for a connection.",
-  },
-  streaming: {
-    tone: "streaming",
-    label: "Streaming",
-    reason: "A sender is connected and the stream is running.",
-  },
-  stopping: {
-    tone: "transition",
-    label: "Stopping",
-    reason: "The peer connection is being torn down.",
-  },
-  stopped: {
-    tone: "disabled",
-    label: "Stopped",
-    reason: "Enabled in the configuration, but the service is not running.",
-  },
-  failed: { tone: "error", label: "Error", reason: "The receiver could not be started." },
-  disabled: {
-    tone: "disabled",
-    label: "Disabled",
-    reason: "Switched off in the configuration — the service is not advertised.",
-  },
-  unknown: { tone: "disabled", label: "Unknown", reason: "The receiver did not report a state." },
+import { t } from "./i18n.js";
+
+/**
+ * The tone of the badge for every state of the core.
+ *
+ * WHY the tone is a table and not a part of the language: the tone is a
+ * design decision — a colour and a shape — and the wording is a text. Only
+ * the wording is translated.
+ *
+ * @type {Record<string, string>}
+ */
+const STATE_TONE = {
+  idle: "disabled",
+  starting: "transition",
+  advertising: "advertising",
+  streaming: "streaming",
+  stopping: "transition",
+  stopped: "disabled",
+  failed: "error",
+  disabled: "disabled",
+  unknown: "disabled",
 };
+
+/**
+ * The badge of every state, with the wording of the current language.
+ *
+ * @type {Record<string, {tone: string, label: string, reason: string}>}
+ */
+export const STATE_VIEW = {};
+
+/**
+ * Fills the vocabulary with the wording of the language that is spoken.
+ */
+function fillVocabulary() {
+  for (const [state, tone] of Object.entries(STATE_TONE)) {
+    STATE_VIEW[state] = {
+      tone,
+      label: t(`state.${state}.label`),
+      reason: t(`state.${state}.reason`),
+    };
+  }
+}
+
+fillVocabulary();
 
 /**
  * Resolves the badge of a receiver.

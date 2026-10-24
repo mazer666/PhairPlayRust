@@ -4,7 +4,8 @@ import PhairPlayMacKit
 /// The life cycle of the application.
 ///
 /// WHAT: the delegate of the application. It owns the client of the
-/// receiver and the item in the menu bar.
+/// receiver, the store that the views observe and the item in the menu
+/// bar.
 ///
 /// WHY: The receiver has to exist before the first window is drawn, and it
 /// has to outlive the window: the user closes the window and the receiver
@@ -21,12 +22,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// view may be created and destroyed while the receiver keeps running.
     let client: ReceiverClient = ReceiverFactory.makeClient()
 
+    /// The store that the views of the shell observe.
+    ///
+    /// WHY: The store is the bridge between the client of the kit and the
+    /// views of SwiftUI. It is created once and lives as long as the
+    /// application, so that the window and the item in the menu bar always
+    /// show the same state.
+    lazy var store = ReceiverStore(client: client)
+
     /// The item in the menu bar.
     private var statusItem: StatusItemController?
 
     /// The application has finished starting.
     func applicationDidFinishLaunching(_ notification: Notification) {
-        statusItem = StatusItemController(client: client)
+        statusItem = StatusItemController(store: store)
         NSApplication.shared.setActivationPolicy(.regular)
         NSApplication.shared.activate(ignoringOtherApps: true)
     }

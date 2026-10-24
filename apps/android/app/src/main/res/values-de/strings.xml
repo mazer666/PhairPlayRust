@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Die Texte der Android-Oberfläche auf Deutsch.
+
+    WHY: die Oberfläche wird mit einer Fernbedienung bedient und aus drei
+    Metern gelesen. Die deutschen Texte sind deshalb vollständige Sätze,
+    wenn der Nutzer etwas tun soll, und die Wörter der Zustände sind so
+    kurz, dass sie auf einen Blick gelesen werden.
+-->
+<resources>
+
+    <string name="app_name">PhairPlayRust</string>
+
+    <!-- Die Kopfzeile des Dashboards. -->
+    <string name="dashboard_title">Empfänger</string>
+    <string name="dashboard_device_unknown">Wartet auf den Namen des Geräts</string>
+    <string name="dashboard_version">Version %1$s</string>
+    <string name="dashboard_receiver_running">Der Receiver läuft</string>
+    <string name="dashboard_receiver_stopped">Der Receiver läuft nicht</string>
+    <string name="dashboard_receiver_waiting">Der Receiver startet</string>
+    <string name="dashboard_dpad_help">Mit den Pfeiltasten wählen, mit OK umschalten</string>
+    <string name="dashboard_waiting_protocols">Die Protokolle erscheinen, sobald der Receiver geantwortet hat.</string>
+
+    <!-- Die Karte eines Protokolls. -->
+    <string name="protocol_card_ports">TCP %1$s · UDP %2$s</string>
+    <string name="protocol_card_ports_tcp_only">TCP %1$s</string>
+    <string name="protocol_card_no_port">Kein Port gebunden</string>
+    <plurals name="protocol_card_peers">
+        <item quantity="one">%1$d Sender</item>
+        <item quantity="other">%1$d Sender</item>
+    </plurals>
+    <string name="protocol_switch_on">%1$s einschalten</string>
+    <string name="protocol_switch_off">%1$s ausschalten</string>
+    <string name="protocol_switched_on">Ein</string>
+    <string name="protocol_switched_off">Aus</string>
+    <string name="protocol_card_description">%1$s, %2$s</string>
+
+    <!-- Der Zustand eines Protokolls. -->
+    <string name="protocol_state_disabled">In den Einstellungen deaktiviert</string>
+    <string name="protocol_state_disabled_reason">Der Dienst wird gar nicht erst angeboten.</string>
+    <string name="protocol_state_not_started">Nicht gestartet</string>
+    <string name="protocol_state_not_started_reason">Das Protokoll ist eingeschaltet, der Dienst lief aber noch nie.</string>
+    <string name="protocol_state_stopped">Dienst gestoppt</string>
+    <string name="protocol_state_stopped_reason">Das Protokoll ist eingeschaltet, der Dienst läuft aber nicht.</string>
+    <string name="protocol_state_starting">Startet</string>
+    <string name="protocol_state_starting_reason">Die Sockets sind gebunden und der Dienst ist registriert.</string>
+    <string name="protocol_state_advertising">Wird angeboten</string>
+    <string name="protocol_state_advertising_reason">Für die Sender im lokalen Netz sichtbar, wartet auf eine Verbindung.</string>
+    <string name="protocol_state_streaming">Stream läuft</string>
+    <string name="protocol_state_streaming_reason">Ein Sender ist verbunden und der Stream läuft.</string>
+    <string name="protocol_state_stopping">Stoppt</string>
+    <string name="protocol_state_stopping_reason">Die Verbindung zum Sender wird geschlossen.</string>
+    <string name="protocol_state_failed">Fehler</string>
+    <string name="protocol_state_failed_reason">Der Receiver konnte nicht gestartet werden.</string>
+
+    <!-- Die Ansicht der laufenden Sitzung. -->
+    <string name="now_playing_title">Läuft gerade</string>
+    <string name="now_playing_sender_unknown">Unbekannter Sender</string>
+    <string name="now_playing_video_unknown">Kein Video</string>
+    <string name="now_playing_audio_unknown">Kein Ton</string>
+    <string name="now_playing_artwork">Das Cover des Senders</string>
+    <string name="now_playing_chip_duration">Dauer %1$s</string>
+    <string name="now_playing_formats">%1$s · %2$s</string>
+
+    <!-- Die Benachrichtigung des Vordergrunddienstes. -->
+    <string name="notification_channel_name">Empfänger</string>
+    <string name="notification_channel_description">Zeigt, dass der Receiver läuft und welcher Sender verbunden ist.</string>
+    <string name="notification_title">PhairPlayRust-Empfänger</string>
+    <string name="notification_text_idle">Wartet auf einen Sender</string>
+    <string name="notification_text_session">%1$s sendet</string>
+    <string name="notification_action_stop">Stoppen</string>
+
+    <!-- Der Fehler der Brücke. -->
+    <string name="failure_title">Der Receiver hat ein Problem gemeldet</string>
+    <string name="failure_code">Code %1$d</string>
+    <string name="failure_dismiss">Ausblenden</string>
+
+    <!-- Die Plattform des Geräts. -->
+
+    <!-- Die Namen der Protokolle. -->
+    <string name="protocol_airplay">AirPlay 2</string>
+    <string name="protocol_miracast">Miracast</string>
+    <string name="protocol_cast">Google Cast</string>
+    <string name="protocol_dlna">DLNA / UPnP</string>
+
+</resources>

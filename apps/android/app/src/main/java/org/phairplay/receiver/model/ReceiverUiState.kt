@@ -45,3 +45,18 @@ data class ReceiverUiState(
         )
     }
 }
+
+/**
+ * The cards of the protocols in the order of the grid of the dashboard.
+ *
+ * WHY: The order of the cards is the order in which the user meets them,
+ * and it must not depend on the order in which the core happens to
+ * answer. The grid of the dashboard therefore always shows AirPlay,
+ * Miracast, Cast and DLNA in this order, and the focus of the remote
+ * control walks through the grid in the same order.
+ *
+ * EXAMPLE: `orderedProtocols(cards)` puts the card of AirPlay in the
+ * upper left corner of the grid.
+ */
+fun orderedProtocols(cards: List<ProtocolCardState>): List<ProtocolCardState> =
+    cards.sortedBy { it.protocol.ordinal }

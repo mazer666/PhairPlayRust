@@ -29,7 +29,7 @@ import uniffi.phairplay_ffi.Receiver
  * EXAMPLE: the service calls `start()` when it comes up, and the activity
  * collects `state` to draw the dashboard.
  */
-class ReceiverHost(context: Context) {
+class ReceiverHost(private val context: Context) {
 
     /** The scope of the controller. */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)

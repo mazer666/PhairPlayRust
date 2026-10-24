@@ -1,0 +1,38 @@
+The dashboard against the mock receiver
+  ok   the group holds four cards
+  ok   exactly one card is in the tab order (tabindex: 0, -1, -1, -1)
+  ok   every card is a button
+  ok   every card carries a name for the screen reader
+  ok   1920x1080: the grid shows 4 column(s) and 1 row(s)
+  ok   1920x1080: ArrowRight moves the focus to card-miracast
+  ok   1920x1080: ArrowLeft moves the focus to card-airplay
+  ok   1920x1080: ArrowDown leaves the group and reaches metric-fps
+  ok   1920x1080: Home jumps to the first card of the group
+  ok   1920x1080: End jumps to the last card of the group
+  ok   1280x900: the grid shows 2 column(s) and 2 row(s)
+  ok   1280x900: ArrowRight moves the focus to card-miracast
+  ok   1280x900: ArrowLeft moves the focus to card-airplay
+  ok   1280x900: ArrowDown moves the focus to card-cast
+  ok   1280x900: ArrowUp moves the focus to card-airplay
+  ok   1280x900: Home jumps to the first card of the group
+  ok   1280x900: End jumps to the last card of the group
+  ok   the tab key leaves the group and reaches metric-fps
+  ok   the arrow key at the edge of the group reaches metric-fps
+  ok   Enter switches the receiver (aria-pressed false → true, POST /api/protocols/cast/enable)
+  ok   the switch calls the API of the receiver (POST /api/protocols/cast/enable)
+  ok   the space key switches the receiver (aria-pressed true → false)
+  ok   the next reading of the API keeps the state of the card (false)
+  ok   a receiver that cannot be reached shows a banner
+  ok   Escape closes the banner
+  ok   the closed banner does not come back with the next reading of the API
+  ok   dark: the focus ring is 3 px wide
+  ok   dark: the focus ring carries 9.96:1 against the card
+  ok   dark: the focus ring carries 10.65:1 against the page
+  ok   dark: the focused card becomes brighter (brightness(1.06))
+  ok   light: the focus ring is 3 px wide
+  ok   light: the focus ring carries 8.46:1 against the card
+  ok   light: the focus ring carries 7.62:1 against the page
+  ok   light: the focused card becomes brighter (brightness(1.06))
+  ok   no error in the console while the panel runs
+
+35 checks passed, 0 failed

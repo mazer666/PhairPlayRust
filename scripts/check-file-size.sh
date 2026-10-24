@@ -183,7 +183,7 @@ done < <(
   find . \
     \( -name target -o -name .git -o -name archive -o -name node_modules -o -name vendor -o -name build \) \
     -prune -o \
-    \( -name '*.rs' -o -name '*.sh' -o -name '*.js' -o -name '*.css' \
+    \( -name '*.rs' -o -name '*.sh' -o -name '*.js' -o -name '*.mjs' -o -name '*.css' \
        -o -name '*.html' -o -name '*.kt' -o -name '*.swift' -o -name '*.py' \) \
     -type f -print | sort
 )

@@ -7,7 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.Icon
+import androidx.core.graphics.drawable.IconCompat
 import org.phairplay.receiver.model.ReceiverUiState
 
 /**
@@ -71,7 +71,7 @@ object ReceiverNotification {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val stopAction = NotificationCompat.Action.Builder(
-            Icon.createWithResource(context, android.R.drawable.ic_menu_close_clear_cancel),
+            IconCompat.createWithResource(context, android.R.drawable.ic_menu_close_clear_cancel),
             context.getString(R.string.notification_action_stop),
             stop,
         ).build()

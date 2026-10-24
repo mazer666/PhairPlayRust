@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The banner of the application on a television.
+
+    WHAT: a 320 x 180 dp picture, as the Leanback launcher of Android TV
+    wants it.
+
+    WHY: without a banner the launcher of the television shows a blank
+    rectangle instead of the application, and the application does not
+    look like an application of the television. The banner is a layer list
+    so that the sign of the shell can be placed in the middle of the dark
+    surface without a second picture file.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@color/banner_background" />
+
+    <item
+        android:width="112dp"
+        android:height="112dp"
+        android:drawable="@drawable/tv_banner_logo"
+        android:gravity="center" />
+
+</layer-list>

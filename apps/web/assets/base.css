@@ -65,9 +65,18 @@ svg {
   display: block;
 }
 
+/* The focus ring of the panel.
+ *
+ * WHY three pixels and a halo: the panel is watched on a television, often
+ * on a screen that is too bright or too dark for the user to adjust. A
+ * two-pixel line of a mid violet disappears on such a screen. The ring is
+ * drawn in the colour of the theme that carries 3:1 against the surface it
+ * is drawn on, and the halo separates it from the surface behind it.
+ */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--focus-halo);
   border-radius: var(--radius-xs);
 }
 
@@ -83,30 +92,6 @@ svg {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
-}
-
-.mono {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-
-.skip-link {
-  position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
-  z-index: 20;
-  padding: var(--space-2) var(--space-4);
-  color: var(--on-accent);
-  background: var(--accent-strong);
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  transform: translateY(-200%);
-  transition: transform var(--duration-base) var(--ease);
-}
-
-.skip-link:focus {
-  transform: translateY(0);
 }
 
 /* ── Header ─────────────────────────────────────────────────────────── */

@@ -41,8 +41,7 @@
     notifications, and the shell uses that one notification for everything
     it has to say.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -51,11 +50,16 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
-    <!-- The Wi-Fi Direct radio of Miracast. -->
+    <!--
+        The Wi-Fi Direct radio of Miracast. The flag `neverForLocation`
+        says that the application does not derive the location of the user
+        from the permission, so that no location permission is needed at
+        all. The permission exists since Android 13, and the shell runs
+        on Android 13 and later — there is nothing to mark.
+    -->
     <uses-permission
         android:name="android.permission.NEARBY_WIFI_DEVICES"
-        android:usesPermissionFlags="neverForLocation"
-        tools:targetApi="tiramisu" />
+        android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
@@ -70,9 +74,22 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+    <!--
+        The television. The flag `required="false"` says that the shell
+        also runs on a telephone and on a tablet: the same application is
+        the dashboard of the television and the dashboard of the phone.
+        Without this entry the Leanback launcher of the television does
+        not know that the application can be shown on a screen that is
+        read from a distance.
+    -->
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+
     <application
         android:name=".ReceiverApplication"
         android:allowBackup="false"
+        android:banner="@drawable/app_banner"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
@@ -84,14 +101,23 @@
 
         <activity
             android:name=".MainActivity"
+            android:banner="@drawable/app_banner"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="true"
-            android:label="@string/app_name"
             android:launchMode="singleTask"
             android:theme="@style/Theme.PhairPlay">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
+                <!--
+                    The Leanback launcher of a television. Without this
+                    category the application does not appear in the list
+                    of the applications of the television at all — it is
+                    the entry that makes the shell a television
+                    application and not only a telephone application.
+                -->
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
 

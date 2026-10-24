@@ -20,6 +20,40 @@
 import Foundation
 import PackageDescription
 
+// The window of the shell is written in SwiftUI, the item in the menu bar
+// in AppKit, and the life cycle of the application in AppKit as well.
+// These frameworks exist only on macOS, so the target of the application
+// belongs to the package only when the package is built on macOS.
+//
+// WHY: The logic of the shell — the state of the receiver, the wording of
+// the states, the order of the focus and the handling of the keys — lives
+// in the kit `PhairPlayMacKit`, which imports nothing but Foundation. The
+// kit and its tests are therefore built and tested on every system, and
+// only the part that needs the SDK of macOS needs a Mac. A build on Linux
+// says exactly that it cannot build the application, instead of failing
+// with an error about a missing framework.
+#if os(macOS)
+let applicationTargets: [Target] = [
+    .executableTarget(
+        name: "PhairPlayMacApp",
+        dependencies: ["PhairPlayMacKit"],
+        path: "Sources/PhairPlayMacApp",
+        swiftSettings: [
+            .swiftLanguageMode(.v5)
+        ]
+    )
+]
+let applicationProducts: [Product] = [
+    .executable(
+        name: "PhairPlayMacApp",
+        targets: ["PhairPlayMacApp"]
+    )
+]
+#else
+let applicationTargets: [Target] = []
+let applicationProducts: [Product] = []
+#endif
+
 // The root of the repository and the directory of the build of the Rust
 // side. The environment variable lets a build outside the repository point
 // at another build directory.
@@ -60,12 +94,8 @@ let package = Package(
         .library(
             name: "PhairPlayMacKit",
             targets: ["PhairPlayMacKit"]
-        ),
-        .executable(
-            name: "PhairPlayMacApp",
-            targets: ["PhairPlayMacApp"]
-        ),
-    ],
+        )
+    ] + applicationProducts,
     targets: [
         // The C header of the bridge. The module map inside the directory
         // gives the module the name that the generated Swift file imports.
@@ -101,16 +131,6 @@ let package = Package(
                 .swiftLanguageMode(.v5)
             ]
         ),
-        // The application: SwiftUI for the window, AppKit for the item in
-        // the menu bar and for the life cycle of the application.
-        .executableTarget(
-            name: "PhairPlayMacApp",
-            dependencies: ["PhairPlayMacKit"],
-            path: "Sources/PhairPlayMacApp",
-            swiftSettings: [
-                .swiftLanguageMode(.v5)
-            ]
-        ),
         .testTarget(
             name: "PhairPlayMacKitTests",
             dependencies: ["PhairPlayMacKit"],
@@ -118,6 +138,6 @@ let package = Package(
             swiftSettings: [
                 .swiftLanguageMode(.v5)
             ]
-        ),
-    ]
+        )
+    ] + applicationTargets
 )

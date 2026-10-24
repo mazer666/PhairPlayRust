@@ -6,7 +6,8 @@
  * a user asks when something unexpected appears on the screen. The list
  * answers it with the address, the negotiated media and the running time.
  * HOW: plain DOM nodes built from the normalised session model. The sender
- * name is never trusted as markup — it is written as text.
+ * name is never trusted as markup — it is written as text. The wording comes
+ * from the language file.
  *
  * WHY the counters carry the protocol name: the server reports the counters
  * per protocol, not per session (`SessionDto` has no counters of its own).
@@ -15,6 +16,7 @@
 
 import { PROTOCOLS } from "./api.js";
 import { formatBytes, formatCount, formatDuration } from "./format.js";
+import { t } from "./i18n.js";
 
 /**
  * Describes the media of one session.
@@ -28,7 +30,7 @@ export function sessionDetails(session) {
   if (session.video) details.push(session.video);
   if (session.audio) details.push(session.audio);
   const running = sessionRunningTime(session);
-  if (running !== null) details.push(`running ${formatDuration(running)}`);
+  if (running !== null) details.push(t("session.running", { duration: formatDuration(running) }));
   return details;
 }
 
@@ -66,12 +68,12 @@ function buildSession(session, counters) {
 
   const name = document.createElement("div");
   name.className = "session__name";
-  name.textContent = session.senderName || "Unknown sender";
+  name.textContent = session.senderName || t("session.unknownSender");
   item.append(name);
 
   const tag = document.createElement("span");
   tag.className = "tag";
-  tag.textContent = protocol ? protocol.name : session.protocol || "unknown";
+  tag.textContent = protocol ? protocol.name : session.protocol || t("session.unknownProtocol");
   item.append(tag);
 
   const meta = document.createElement("div");
@@ -93,9 +95,9 @@ function buildSession(session, counters) {
   }
   const lines = counter
     ? [
-        `${formatCount(counter.videoFrames)} frames`,
-        `${formatBytes(counter.bytesReceived)} received`,
-        `${formatCount(counter.packetsLost)} packets lost`,
+        t("session.frames", { count: formatCount(counter.videoFrames) }),
+        t("session.received", { size: formatBytes(counter.bytesReceived) }),
+        t("session.lost", { count: formatCount(counter.packetsLost) }),
       ]
     : [];
   for (const text of lines) {
@@ -120,12 +122,15 @@ export function renderSessions(sessions, counters = {}) {
   if (!sessions || sessions.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = "Nothing is streaming at the moment.";
+    empty.textContent = t("session.empty");
     list.append(empty);
-    count.textContent = "No sender is connected.";
+    count.textContent = t("session.none");
     return;
   }
-  count.textContent = `${sessions.length} session${sessions.length === 1 ? "" : "s"} streaming.`;
+  count.textContent =
+    sessions.length === 1
+      ? t("session.count", { count: sessions.length })
+      : t("session.countPlural", { count: sessions.length });
   for (const session of sessions) {
     list.append(buildSession(session, counters));
   }

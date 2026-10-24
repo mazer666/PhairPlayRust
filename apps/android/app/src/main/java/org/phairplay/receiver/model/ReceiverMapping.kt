@@ -119,7 +119,7 @@ fun FfiAppConfig.withProtocolEnabled(bridgeName: String, enabled: Boolean): FfiA
     val entry = existing ?: FfiProtocolConfig(
         name = bridgeName,
         enabled = enabled,
-        port = 0,
+        port = 0u,
         requirePin = false,
         maxMessageBytes = DEFAULT_MAX_MESSAGE_BYTES,
     )

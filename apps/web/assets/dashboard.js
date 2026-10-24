@@ -7,22 +7,27 @@
  * WHY: the panel is the only place where the state of the receiver is
  * visible, so it has to be unambiguous. "Stopped" and "switched off" are
  * different statements and are shown as different things, and a receiver
- * that cannot be reached says so instead of showing zeroes.
+ * that cannot be reached says so instead of showing zeroes. On a television
+ * the panel is read from three metres away and operated with a remote
+ * control, so the cards are the controls and the focus is always visible.
  * HOW: a poll loop refreshes the REST endpoints, the event channel pushes
  * changes as soon as they happen, and every value is normalised in
- * normalize.js before it reaches this file.
+ * normalize.js before it reaches this file. The wording comes from the
+ * language file, the tab order from the focus group of the cards.
  */
 
 import { PROTOCOLS, ReceiverApi } from "./api.js";
 import { TimeSeriesChart } from "./chart.js";
 import { renderCodecs } from "./codecs.js";
-import { RateTracker } from "./rates.js";
-import { renderSessions } from "./sessions.js";
-import { resolveState } from "./states.js";
 import { formatBytes, formatClock, formatCount, formatDuration, formatFps, formatRate } from "./format.js";
+import { FocusGroup } from "./focus-group.js";
+import { t } from "./i18n.js";
+import { ProtocolCards } from "./protocol-cards.js";
+import { RateTracker } from "./rates.js";
+import { watchRemoteHint } from "./remote-hint.js";
+import { renderSessions } from "./sessions.js";
 
 const api = new ReceiverApi();
-const cards = new Map();
 const tracker = new RateTracker();
 
 let protocols = new Map();
@@ -31,6 +36,8 @@ let chartScope = "all";
 let connection = "connecting";
 let eventSocket = null;
 let refreshPending = false;
+/** The message the user has closed, so that it does not come back. */
+let dismissed = null;
 
 const chart = new TimeSeriesChart(document.getElementById("chart"), {
   formatValue: (value) => (chart.metric === "bytes" ? formatRate(value) : formatFps(value)),
@@ -38,143 +45,74 @@ const chart = new TimeSeriesChart(document.getElementById("chart"), {
   formatTime: formatClock,
 });
 
+const cards = new ProtocolCards({
+  grid: document.getElementById("protocol-grid"),
+  template: document.getElementById("protocol-card-template"),
+  api,
+  onError: (message) => showBanner(message),
+  onEscape: () => closeBanner(),
+});
+
 /**
- * Reads a named field of an element.
+ * The two buttons of the metric of the graph are one widget for the
+ * keyboard.
  *
- * @param {Element} root
- * @param {string} name
- * @returns {Element|null}
- */
-function field(root, name) {
-  return root.querySelector(`[data-field="${name}"]`);
-}
-
-/**
- * Sets the text of a named field.
+ * WHY a group and not two tab stops: a remote control has no Tab key, and
+ * the two buttons belong together — the left one and the right one of a
+ * pair. The arrow keys move between them, the Tab key reaches the pair as
+ * a whole.
  *
- * @param {Element} root
- * @param {string} name
- * @param {string} value
+ * WHY `activate: false`: the buttons are real buttons. The browser presses
+ * them on Enter and on the space key, and the group must not press them a
+ * second time.
  */
-function setField(root, name, value) {
-  const element = field(root, name);
-  if (element) element.textContent = value;
-}
-
-/**
- * Builds the four receiver cards from the template in the document.
- */
-function buildCards() {
-  const template = document.getElementById("protocol-card-template");
-  const grid = document.getElementById("protocol-grid");
-  const fragment = document.createDocumentFragment();
-  for (const protocol of PROTOCOLS) {
-    const card = template.content.firstElementChild.cloneNode(true);
-    card.dataset.protocol = protocol.id;
-    setField(card, "name", protocol.name);
-    card.querySelector("use").setAttribute("href", protocol.glyph);
-    const reason = field(card, "reason");
-    reason.id = `reason-${protocol.id}`;
-    const toggle = card.querySelector(".switch");
-    toggle.setAttribute("aria-label", `${protocol.name} receiver`);
-    toggle.setAttribute("aria-describedby", reason.id);
-    toggle.addEventListener("click", () => onToggle(protocol.id, toggle));
-    cards.set(protocol.id, card);
-    fragment.append(card);
-  }
-  grid.append(fragment);
-}
-
-/**
- * Paints one receiver card.
- *
- * @param {string} id
- * @param {object} data the normalised status of the receiver
- * @param {object|null} counter the live counters of the receiver
- */
-function renderCard(id, data, counter) {
-  const card = cards.get(id);
-  if (!card || !data) return;
-  const view = resolveState(data);
-  const badge = field(card, "state");
-  badge.dataset.state = view.tone;
-  setField(card, "state-label", view.label);
-  const reason = field(card, "reason");
-  // WHY the class: the server reports a protocol that is enabled but has no
-  // engine as the state `idle` with the reason in `last_error`. The reason
-  // is the failure — it is shown in the colour of a failure.
-  reason.className = data.lastError ? "state__reason state__reason--error" : "state__reason";
-  reason.textContent = data.lastError
-    ? `${view.reason} Last error: ${data.lastError}`
-    : view.reason;
-
-  const port = field(card, "port");
-  port.textContent = data.tcpPort ? String(data.tcpPort) : "—";
-  if (data.udpPort) {
-    const suffix = document.createElement("span");
-    suffix.className = "subtle";
-    suffix.textContent = ` · UDP ${data.udpPort}`;
-    port.append(suffix);
-  }
-
-  setField(card, "peers", formatCount(data.peers));
-
-  const toggle = card.querySelector(".switch");
-  toggle.setAttribute("aria-checked", String(data.enabled));
-  setField(card, "switch-label", data.enabled ? "On" : "Off");
-
-  if (counter) {
-    setField(card, "frames", formatCount(counter.videoFrames));
-    setField(card, "bytes", formatBytes(counter.bytesReceived));
-    const loss = field(card, "loss");
-    loss.textContent = formatCount(counter.packetsLost);
-    loss.dataset.tone = counter.packetsLost > 0 ? "danger" : "";
-  }
-}
-
-/**
- * Switches a receiver on or off and reports the result.
- *
- * @param {string} id
- * @param {HTMLButtonElement} toggle
- */
-async function onToggle(id, toggle) {
-  const data = protocols.get(id);
-  if (!data) return;
-  const wanted = !data.enabled;
-  toggle.disabled = true;
-  try {
-    const status = await api.setProtocolEnabled(id, wanted);
-    // WHY optimistic: the server answers with the status after the action.
-    // It is used right away; the next poll confirms it.
-    data.enabled = wanted;
-    if (status) {
-      Object.assign(data, status);
-    }
-    renderCard(id, data, counters[id]);
-  } catch (error) {
-    showBanner(
-      `The receiver could not be switched ${wanted ? "on" : "off"}: ${error.message}`,
-    );
-  } finally {
-    toggle.disabled = false;
-  }
-}
+const metricGroup = new FocusGroup(document.getElementById("metric-group"), {
+  activate: false,
+});
 
 /**
  * Shows the banner that reports a problem with the local API.
  *
+ * WHY the dismissed text: a message that the user has closed must not come
+ * back on the next reading of the API. The panel reads every two seconds,
+ * and a message that pops up again and again is a message that cannot be
+ * closed — on a television, where the banner is the only thing between the
+ * user and the panel, that would be a dead end. The dismissal is dropped
+ * as soon as a reading succeeds, so a problem that returns is reported
+ * again.
+ *
  * @param {string|null} message
+ * @returns {boolean} whether the banner is shown
  */
 function showBanner(message) {
   const banner = document.getElementById("api-banner");
   const text = document.getElementById("api-banner-text");
-  if (message) {
-    text.textContent = message;
-    banner.hidden = false;
-  } else {
+  if (!message) {
     banner.hidden = true;
+    dismissed = null;
+    return false;
   }
+  if (dismissed === message) return false;
+  text.textContent = message;
+  banner.hidden = false;
+  return true;
+}
+
+/**
+ * Hides the banner and remembers that the user closed it.
+ *
+ * WHY the escape key belongs to the banner: a message that blocks the panel
+ * and cannot be dismissed is a dead end on a television, where there is no
+ * right mouse button to click.
+ *
+ * @returns {boolean} whether a message was closed
+ */
+function closeBanner() {
+  const banner = document.getElementById("api-banner");
+  if (banner.hidden) return false;
+  dismissed = document.getElementById("api-banner-text").textContent;
+  banner.hidden = true;
+  return true;
 }
 
 /**
@@ -183,15 +121,18 @@ function showBanner(message) {
 function renderConnection() {
   const pill = document.getElementById("live-pill");
   const label = document.getElementById("live-label");
-  if (connection === "live" || connection === "polling") {
+  if (connection === "live") {
     pill.dataset.link = "open";
-    label.textContent = connection === "live" ? "Live" : "Polling";
+    label.textContent = t("header.connection.live");
+  } else if (connection === "polling") {
+    pill.dataset.link = "open";
+    label.textContent = t("header.connection.polling");
   } else if (connection === "offline") {
     pill.dataset.link = "lost";
-    label.textContent = "Offline";
+    label.textContent = t("header.connection.offline");
   } else {
     pill.dataset.link = "lost";
-    label.textContent = "Connecting";
+    label.textContent = t("header.connection.connecting");
   }
 }
 
@@ -199,6 +140,9 @@ function renderConnection() {
  * Reads everything that can change and paints it.
  */
 async function refresh() {
+  // WHY the number: the reading below is requested now, and a reading that
+  // is older than the last change of the user must not switch a card back.
+  const revision = cards.revision;
   try {
     const [status, sessions, metrics] = await Promise.all([
       api.status(),
@@ -229,10 +173,7 @@ async function refresh() {
     // The server reports the cumulative counters; the rate of the graph is
     // the difference between two readings.
     tracker.update(metrics.protocols);
-    for (const protocol of PROTOCOLS) {
-      const data = protocols.get(protocol.id);
-      renderCard(protocol.id, data, data.counters);
-    }
+    cards.update(protocols, counters, revision);
     renderSessions(sessions, counters);
     renderChart();
     renderUptime(status.uptimeMs);
@@ -240,10 +181,7 @@ async function refresh() {
     showBanner(null);
   } catch (error) {
     connection = "offline";
-    showBanner(
-      `The dashboard cannot reach the local API (${error.message}). ` +
-        "Start the receiver and reload this page.",
-    );
+    showBanner(t("error.apiUnreachableWithReason", { reason: error.message }));
   }
   renderConnection();
 }
@@ -259,7 +197,7 @@ function renderUptime(uptimeMs) {
   element.textContent =
     typeof uptimeMs === "number" && Number.isFinite(uptimeMs)
       ? formatDuration(uptimeMs / 1000)
-      : "—";
+      : t("value.unknown");
 }
 
 /**
@@ -269,7 +207,7 @@ function renderChart() {
   const summary = chart.render(tracker.samplesFor(chartScope));
   const format = chart.metric === "bytes" ? formatRate : formatFps;
   const write = (id, value) => {
-    document.getElementById(id).textContent = value === null ? "—" : format(value);
+    document.getElementById(id).textContent = value === null ? t("value.unknown") : format(value);
   };
   write("chart-current", summary.current);
   write("chart-max", summary.max);
@@ -287,10 +225,9 @@ function selectMetric(metric) {
   document
     .getElementById("metric-bytes")
     .setAttribute("aria-pressed", String(metric === "bytes"));
-  document.getElementById("chart-note").textContent =
-    metric === "bytes"
-      ? "Bytes per second of the running session, derived from the counters of the receiver."
-      : "Frames per second of the running session, derived from the counters of the receiver.";
+  document.getElementById("chart-note").textContent = t(
+    metric === "bytes" ? "chart.note.bytes" : "chart.note.fps",
+  );
   renderChart();
 }
 
@@ -307,7 +244,7 @@ function toggleTheme() {
     /* A blocked storage must not break the switch. */
   }
   const label = document.getElementById("theme-toggle-label");
-  label.textContent = next === "light" ? "Switch to the dark theme" : "Switch to the light theme";
+  label.textContent = t(next === "light" ? "header.theme.toDark" : "header.theme.toLight");
   document.getElementById("theme-toggle").setAttribute("title", label.textContent);
 }
 
@@ -321,7 +258,7 @@ async function loadBuildInfo() {
     const commit = info.commit ?? info.git_commit ?? info.commit_hash;
     const target = info.target ?? info.target_triple;
     const write = (id, value) => {
-      document.getElementById(id).textContent = value ? String(value) : "—";
+      document.getElementById(id).textContent = value ? String(value) : t("value.unknown");
     };
     write("build-version", version);
     write("build-commit", commit ? String(commit).slice(0, 7) : null);
@@ -341,8 +278,7 @@ async function loadDeviceName() {
     const name = device.name ?? device.device_name;
     if (name) {
       document.getElementById("brand-device").textContent = name;
-      document.getElementById("brand-tagline").textContent =
-        `${name} · AirPlay 2 · Miracast · Google Cast · DLNA — on your network only`;
+      document.getElementById("brand-tagline").textContent = t("brand.taglineWithDevice", { name });
     }
   } catch (error) {
     /* Without a configuration the generic tagline stays. */
@@ -350,22 +286,40 @@ async function loadDeviceName() {
 }
 
 /**
+ * Closes the banner when the user presses the escape key.
+ *
+ * WHY on the document and not only on the banner: the focus can be on a
+ * card, on a button or nowhere at all, and the escape key has to close the
+ * message in every case.
+ *
+ * @param {KeyboardEvent} event
+ */
+function onEscape(event) {
+  if (event.key !== "Escape") return;
+  if (closeBanner()) event.preventDefault();
+}
+
+/**
  * Starts the panel: cards, first reading, poll loop and event channel.
  */
 function start() {
-  buildCards();
+  cards.build();
+  metricGroup.setItems([...document.querySelectorAll("#metric-group [data-focus-item]")]);
   renderConnection();
   renderCodecs();
   loadBuildInfo();
   loadDeviceName();
+  watchRemoteHint(document.getElementById("remote-hint"));
 
   document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+  document.getElementById("banner-dismiss").addEventListener("click", closeBanner);
   document.getElementById("metric-fps").addEventListener("click", () => selectMetric("fps"));
   document.getElementById("metric-bytes").addEventListener("click", () => selectMetric("bytes"));
   document.getElementById("chart-scope").addEventListener("change", (event) => {
     chartScope = event.target.value;
     renderChart();
   });
+  document.addEventListener("keydown", onEscape);
 
   refresh();
   window.setInterval(refresh, 2000);

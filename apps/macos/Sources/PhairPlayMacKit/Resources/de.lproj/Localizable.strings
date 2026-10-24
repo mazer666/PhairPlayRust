@@ -10,6 +10,27 @@
 "dashboard.version" = "Version %@";
 "dashboard.running" = "Der Empfänger läuft.";
 "dashboard.stopped" = "Der Empfänger läuft nicht.";
+"dashboard.protocols" = "Protokolle";
+
+"shortcut.tab.title" = "Tab";
+"shortcut.tab.detail" = "nächste Karte";
+"shortcut.shiftTab.title" = "Shift+Tab";
+"shortcut.shiftTab.detail" = "vorherige Karte";
+"shortcut.arrows.title" = "Pfeiltasten";
+"shortcut.arrows.detail" = "im Raster bewegen";
+"shortcut.space.title" = "Leertaste";
+"shortcut.space.detail" = "Protokoll umschalten";
+"shortcut.escape.title" = "Esc";
+"shortcut.escape.detail" = "Meldung schließen";
+
+"status.running" = "Läuft";
+"status.running.detail" = "Der Empfänger ist für die Sender im lokalen Netz sichtbar.";
+"status.starting" = "Startet";
+"status.starting.detail" = "Die Dienste starten oder stoppen.";
+"status.stopped" = "Gestoppt";
+"status.stopped.detail" = "Es läuft kein Dienst. Schalten Sie ein Protokoll ein, um einen Stream zu empfangen.";
+"status.error" = "Fehler";
+"status.error.detail" = "Es läuft kein Dienst und mindestens einer ist fehlgeschlagen. Der Grund steht in der Karte des Protokolls.";
 
 "protocol.airplay" = "AirPlay 2";
 "protocol.miracast" = "Miracast";
@@ -36,9 +57,12 @@
 "protocol.ports" = "TCP %@ · UDP %@";
 "protocol.ports.tcp" = "TCP %@";
 "protocol.ports.none" = "Kein Port gebunden";
+"protocol.ports.unknown" = "—";
 "protocol.peers.one" = "%@ Sender";
 "protocol.peers.many" = "%@ Sender";
 "protocol.switch.on" = "%@ einschalten";
+"protocol.switch.state.on" = "Ein";
+"protocol.switch.state.off" = "Aus";
 "protocol.switch.off" = "%@ ausschalten";
 
 "nowplaying.title" = "Läuft gerade";

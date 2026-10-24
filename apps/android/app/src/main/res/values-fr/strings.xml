@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Les textes de l'interface Android en français.
+
+    WHY: l'interface se commande à la télécommande et se lit à trois
+    mètres. Les textes français sont donc des phrases complètes quand
+    l'utilisateur doit agir, et les mots des états sont assez courts
+    pour être lus d'un coup d'œil.
+
+    Les apostrophes sont échappées, parce que l'outil de compilation des
+    ressources Android les refuse autrement.
+-->
+<resources>
+
+    <string name="app_name">PhairPlayRust</string>
+
+    <!-- L\'en-tête du tableau de bord. -->
+    <string name="dashboard_title">Récepteur</string>
+    <string name="dashboard_device_unknown">En attente du nom de l\'appareil</string>
+    <string name="dashboard_version">Version %1$s</string>
+    <string name="dashboard_receiver_running">Le récepteur fonctionne</string>
+    <string name="dashboard_receiver_stopped">Le récepteur ne fonctionne pas</string>
+    <string name="dashboard_receiver_waiting">Le récepteur démarre</string>
+    <string name="dashboard_dpad_help">Choisir avec les flèches, appuyer sur OK pour activer</string>
+    <string name="dashboard_waiting_protocols">Les protocoles apparaissent dès que le récepteur a répondu.</string>
+
+    <!-- La carte d\'un protocole. -->
+    <string name="protocol_card_ports">TCP %1$s · UDP %2$s</string>
+    <string name="protocol_card_ports_tcp_only">TCP %1$s</string>
+    <string name="protocol_card_no_port">Aucun port ouvert</string>
+    <plurals name="protocol_card_peers">
+        <item quantity="one">%1$d expéditeur</item>
+        <item quantity="many">%1$d expéditeurs</item>
+        <item quantity="other">%1$d expéditeurs</item>
+    </plurals>
+    <string name="protocol_switch_on">Activer %1$s</string>
+    <string name="protocol_switch_off">Désactiver %1$s</string>
+    <string name="protocol_switched_on">Activé</string>
+    <string name="protocol_switched_off">Désactivé</string>
+    <string name="protocol_card_description">%1$s, %2$s</string>
+
+    <!-- L\'état d\'un protocole. -->
+    <string name="protocol_state_disabled">Désactivé dans les paramètres</string>
+    <string name="protocol_state_disabled_reason">Le service n\'est même pas annoncé.</string>
+    <string name="protocol_state_not_started">Pas démarré</string>
+    <string name="protocol_state_not_started_reason">Le protocole est activé, mais le service n\'a jamais fonctionné.</string>
+    <string name="protocol_state_stopped">Service arrêté</string>
+    <string name="protocol_state_stopped_reason">Le protocole est activé, mais le service ne fonctionne pas.</string>
+    <string name="protocol_state_starting">Démarrage</string>
+    <string name="protocol_state_starting_reason">Les sockets sont ouverts et le service est enregistré.</string>
+    <string name="protocol_state_advertising">Annoncé</string>
+    <string name="protocol_state_advertising_reason">Visible par les expéditeurs du réseau local, en attente d\'une connexion.</string>
+    <string name="protocol_state_streaming">Diffusion</string>
+    <string name="protocol_state_streaming_reason">Un expéditeur est connecté et le flux fonctionne.</string>
+    <string name="protocol_state_stopping">Arrêt</string>
+    <string name="protocol_state_stopping_reason">La connexion à l\'expéditeur est en cours de fermeture.</string>
+    <string name="protocol_state_failed">Erreur</string>
+    <string name="protocol_state_failed_reason">Le récepteur n\'a pas pu démarrer.</string>
+
+    <!-- La vue de la session en cours. -->
+    <string name="now_playing_title">En cours de lecture</string>
+    <string name="now_playing_sender_unknown">Expéditeur inconnu</string>
+    <string name="now_playing_video_unknown">Pas de vidéo</string>
+    <string name="now_playing_audio_unknown">Pas de son</string>
+    <string name="now_playing_artwork">La pochette de l\'expéditeur</string>
+    <string name="now_playing_chip_duration">Durée %1$s</string>
+    <string name="now_playing_formats">%1$s · %2$s</string>
+
+    <!-- La notification du service de premier plan. -->
+    <string name="notification_channel_name">Récepteur</string>
+    <string name="notification_channel_description">Indique que le récepteur fonctionne et quel expéditeur est connecté.</string>
+    <string name="notification_title">Récepteur PhairPlayRust</string>
+    <string name="notification_text_idle">En attente d\'un expéditeur</string>
+    <string name="notification_text_session">%1$s envoie</string>
+    <string name="notification_action_stop">Arrêter</string>
+
+    <!-- L\'échec du pont. -->
+    <string name="failure_title">Le récepteur a signalé un problème</string>
+    <string name="failure_code">Code %1$d</string>
+    <string name="failure_dismiss">Masquer</string>
+
+    <!-- La plateforme de l\'appareil. -->
+
+    <!-- Les noms des protocoles. -->
+    <string name="protocol_airplay">AirPlay 2</string>
+    <string name="protocol_miracast">Miracast</string>
+    <string name="protocol_cast">Google Cast</string>
+    <string name="protocol_dlna">DLNA / UPnP</string>
+
+</resources>

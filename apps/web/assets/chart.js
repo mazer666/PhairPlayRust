@@ -8,8 +8,10 @@
  * stuttering?".
  * HOW: plain SVG built with the DOM, no library, no canvas. The drawing uses
  * the design tokens of theme.css, so the graph follows the theme without a
- * second palette.
+ * second palette. The wording comes from the language file.
  */
+
+import { t } from "./i18n.js";
 
 /** The geometry of the drawing area inside the 640 × 280 view box. */
 const BOX = { width: 640, height: 280, left: 74, right: 18, top: 18, bottom: 30 };
@@ -190,7 +192,7 @@ export class TimeSeriesChart {
       `<g class="chart__grid"><line x1="${BOX.left}" y1="${BOX.top + BOX.height - BOX.top - BOX.bottom}" ` +
       `x2="${BOX.width - BOX.right}" y2="${BOX.top + BOX.height - BOX.top - BOX.bottom}" /></g>` +
       `<text class="chart__empty" x="${BOX.width / 2}" y="${middle}" text-anchor="middle">` +
-      `No measurement yet</text>`
+      `${escapeText(t("chart.empty"))}</text>`
     );
   }
 }

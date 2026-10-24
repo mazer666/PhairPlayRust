@@ -66,7 +66,7 @@ class ReceiverMappingTest {
     @Test
     fun aProtocolThatIsSwitchedOffIsSwitchedOff() {
         val config = configuration(
-            listOf(FfiProtocolConfig("airplay", enabled = false, port = 0, requirePin = false, maxMessageBytes = 1024uL)),
+            listOf(FfiProtocolConfig("airplay", enabled = false, port = 0u, requirePin = false, maxMessageBytes = 1024uL)),
         )
         assertFalse(config.isProtocolEnabled("airplay"))
     }
@@ -74,7 +74,7 @@ class ReceiverMappingTest {
     @Test
     fun switchingAProtocolOffWritesTheSetting() {
         val config = configuration(
-            listOf(FfiProtocolConfig("airplay", enabled = true, port = 7000, requirePin = true, maxMessageBytes = 4096uL)),
+            listOf(FfiProtocolConfig("airplay", enabled = true, port = 7000u, requirePin = true, maxMessageBytes = 4096uL)),
         )
         val updated = config.withProtocolEnabled("airplay", false)
         assertFalse(updated.isProtocolEnabled("airplay"))
@@ -83,7 +83,7 @@ class ReceiverMappingTest {
     @Test
     fun switchingAProtocolOffKeepsTheRestOfTheEntry() {
         val config = configuration(
-            listOf(FfiProtocolConfig("airplay", enabled = true, port = 7000, requirePin = true, maxMessageBytes = 4096uL)),
+            listOf(FfiProtocolConfig("airplay", enabled = true, port = 7000u, requirePin = true, maxMessageBytes = 4096uL)),
         )
         val updated = config.withProtocolEnabled("airplay", false)
         val entry = updated.protocols.first { it.name == "airplay" }
@@ -107,8 +107,8 @@ class ReceiverMappingTest {
     fun switchingAProtocolKeepsTheOtherProtocols() {
         val config = configuration(
             listOf(
-                FfiProtocolConfig("airplay", enabled = true, port = 0, requirePin = false, maxMessageBytes = 1024uL),
-                FfiProtocolConfig("cast", enabled = true, port = 0, requirePin = false, maxMessageBytes = 1024uL),
+                FfiProtocolConfig("airplay", enabled = true, port = 0u, requirePin = false, maxMessageBytes = 1024uL),
+                FfiProtocolConfig("cast", enabled = true, port = 0u, requirePin = false, maxMessageBytes = 1024uL),
             ),
         )
         val updated = config.withProtocolEnabled("cast", false)
@@ -133,7 +133,7 @@ class ReceiverMappingTest {
     @Test
     fun theDescriptionOfTheAudioNamesTheCodecAndTheRate() {
         val format = FfiAudioFormat(
-            codec = FfiAudioCodec.AacLc,
+            codec = FfiAudioCodec.AAC_LC,
             sampleRate = 44100u,
             channels = 2u,
             samplesPerPacket = 1024u,

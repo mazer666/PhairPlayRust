@@ -1,5 +1,6 @@
 package org.phairplay.receiver
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -43,6 +44,17 @@ class ReceiverService : Service() {
     private val host: ReceiverHost
         get() = (application as ReceiverApplication).host
 
+    /**
+     * Starts the receiver and keeps the notification up to date.
+     *
+     * WHY: the notification of a foreground service does not need the
+     * permission `POST_NOTIFICATIONS`: the system shows the notification
+     * of a running foreground service even when the user has withdrawn
+     * the permission for notifications. The shell therefore does not ask
+     * for it (FR-075) — and the check of the lint is silenced here on
+     * purpose.
+     */
+    @SuppressLint("MissingPermission", "NotificationPermission")
     override fun onCreate() {
         super.onCreate()
         ReceiverNotification.createChannel(this)
@@ -72,7 +84,6 @@ class ReceiverService : Service() {
             }
         }
     }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
             stopForeground(STOP_FOREGROUND_REMOVE)

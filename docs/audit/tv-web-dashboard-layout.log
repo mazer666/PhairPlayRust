@@ -1,0 +1,40 @@
+The grid of the receivers
+  ok   no horizontal overflow at 360×800
+  ok   no horizontal overflow at 360×800 with a focused card
+  ok   the grid does not scroll at 360×800 with a focused card
+  ok   the counters of a card stand on one line at 360×800
+  note the four receivers need 1170 px of scrolling at 360×800 (1 column(s), 469–1970 of 800; title 22px, state 20px, detail 16.1px, label 14.14px)
+  ok   no horizontal overflow at 768×1024
+  ok   no horizontal overflow at 768×1024 with a focused card
+  ok   the grid does not scroll at 768×1024 with a focused card
+  ok   the counters of a card stand on one line at 768×1024
+  note the four receivers need 81 px of scrolling at 768×1024 (2 column(s), 297–1105 of 1024; title 24.544px, state 21.824px, detail 17.12px, label 14.752px)
+  ok   no horizontal overflow at 1280×720
+  ok   no horizontal overflow at 1280×720 with a focused card
+  ok   the grid does not scroll at 1280×720 with a focused card
+  ok   the counters of a card stand on one line at 1280×720
+  ok   the four receivers are visible without scrolling at 1280×720 (4 column(s), 205–698 of 720; title 28px, state 24px, detail 18px, label 15.52px)
+  ok   no horizontal overflow at 1920×1080
+  ok   no horizontal overflow at 1920×1080 with a focused card
+  ok   the grid does not scroll at 1920×1080 with a focused card
+  ok   the counters of a card stand on one line at 1920×1080
+  ok   the four receivers are visible without scrolling at 1920×1080 (4 column(s), 247–671 of 1080; title 28px, state 24px, detail 18px, label 16px)
+  ok   no horizontal overflow at 2560×1440
+  ok   no horizontal overflow at 2560×1440 with a focused card
+  ok   the grid does not scroll at 2560×1440 with a focused card
+  ok   the counters of a card stand on one line at 2560×1440
+  ok   the four receivers are visible without scrolling at 2560×1440 (4 column(s), 247–671 of 1440; title 28px, state 24px, detail 18px, label 16px)
+  ok   no horizontal overflow at 3840×2160
+  ok   no horizontal overflow at 3840×2160 with a focused card
+  ok   the grid does not scroll at 3840×2160 with a focused card
+  ok   the counters of a card stand on one line at 3840×2160
+  ok   the four receivers are visible without scrolling at 3840×2160 (4 column(s), 247–671 of 2160; title 28px, state 24px, detail 18px, label 16px)
+
+The hint for the remote control
+  ok   a device without a mouse sees the hint for the arrow keys
+  ok   a device with a mouse does not see the hint
+
+The reduced motion
+  ok   the ring stays, the movement stops (solid 3 px, transform none)
+
+31 checks passed, 0 failed

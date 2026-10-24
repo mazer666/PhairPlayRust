@@ -9,6 +9,8 @@
  * HOW: `Intl` only — the platform ships it, nothing is downloaded.
  */
 
+import { t } from "./i18n.js";
+
 /** @type {Intl.NumberFormat} */
 const plain = new Intl.NumberFormat("en-US");
 
@@ -19,7 +21,7 @@ const plain = new Intl.NumberFormat("en-US");
  * @returns {string} the formatted number, or an em dash when unknown
  */
 export function formatCount(value) {
-  if (typeof value !== "number" || !Number.isFinite(value)) return "—";
+  if (typeof value !== "number" || !Number.isFinite(value)) return t("value.unknown");
   return plain.format(Math.round(value));
 }
 
@@ -33,9 +35,9 @@ export function formatCount(value) {
  * @returns {string}
  */
 export function formatBytes(value) {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return "—";
-  if (value < 1000) return `${Math.round(value)} B`;
-  const units = ["kB", "MB", "GB", "TB", "PB"];
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return t("value.unknown");
+  if (value < 1000) return `${Math.round(value)} ${t("unit.byte")}`;
+  const units = ["unit.kilobyte", "unit.megabyte", "unit.gigabyte", "unit.terabyte", "unit.petabyte"];
   let scaled = value / 1000;
   let unit = 0;
   while (scaled >= 1000 && unit < units.length - 1) {
@@ -43,7 +45,7 @@ export function formatBytes(value) {
     unit += 1;
   }
   const digits = scaled < 10 ? 2 : scaled < 100 ? 1 : 0;
-  return `${scaled.toFixed(digits)} ${units[unit]}`;
+  return `${scaled.toFixed(digits)} ${t(units[unit])}`;
 }
 
 /**
@@ -53,8 +55,8 @@ export function formatBytes(value) {
  * @returns {string}
  */
 export function formatRate(value) {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return "—";
-  return `${formatBytes(value)}/s`;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return t("value.unknown");
+  return `${formatBytes(value)}/${t("unit.second")}`;
 }
 
 /**
@@ -64,8 +66,8 @@ export function formatRate(value) {
  * @returns {string}
  */
 export function formatFps(value) {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return "—";
-  return `${value.toFixed(value < 10 ? 2 : 1)} fps`;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return t("value.unknown");
+  return `${value.toFixed(value < 10 ? 2 : 1)} ${t("unit.fps")}`;
 }
 
 /**
@@ -75,14 +77,14 @@ export function formatFps(value) {
  * @returns {string}
  */
 export function formatDuration(seconds) {
-  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds < 0) return "—";
+  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds < 0) return t("value.unknown");
   const total = Math.floor(seconds);
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
   const rest = total % 60;
-  if (hours > 0) return `${hours}h ${String(minutes).padStart(2, "0")}m`;
-  if (minutes > 0) return `${minutes}m ${String(rest).padStart(2, "0")}s`;
-  return `${rest}s`;
+  if (hours > 0) return `${hours}${t("unit.hour")} ${String(minutes).padStart(2, "0")}${t("unit.minute")}`;
+  if (minutes > 0) return `${minutes}${t("unit.minute")} ${String(rest).padStart(2, "0")}${t("unit.second")}`;
+  return `${rest}${t("unit.second")}`;
 }
 
 /**
@@ -92,9 +94,9 @@ export function formatDuration(seconds) {
  * @returns {string}
  */
 export function formatClock(milliseconds) {
-  if (typeof milliseconds !== "number" || !Number.isFinite(milliseconds)) return "—";
+  if (typeof milliseconds !== "number" || !Number.isFinite(milliseconds)) return t("value.unknown");
   const date = new Date(milliseconds);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return t("value.unknown");
   return date.toLocaleTimeString("en-GB", { hour12: false });
 }
 

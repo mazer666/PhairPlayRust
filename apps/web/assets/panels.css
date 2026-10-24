@@ -39,7 +39,9 @@
 }
 
 .session__name {
-  font-size: var(--text-base);
+  /* WHY the ten-foot size: the name of the sender is the first thing the
+     user looks for — "who is casting to me?". */
+  font-size: var(--text-tv-detail);
   font-weight: 580;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -52,7 +54,7 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-3);
   color: var(--text-muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-tv-label);
 }
 
 .session__stats {
@@ -61,14 +63,14 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  font-size: var(--text-tv-label);
   color: var(--text-subtle);
 }
 
 .empty {
   padding: var(--space-5) 0;
   color: var(--text-muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-tv-label);
   text-align: center;
 }
 
@@ -91,8 +93,10 @@
 }
 
 .segmented button {
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-4);
+  /* WHY the size: the button is a target of the arrow keys and has to be
+     read from a distance. */
+  font-size: var(--text-tv-detail);
   font-weight: 560;
   letter-spacing: var(--tracking-wide);
   color: var(--text-muted);
@@ -117,7 +121,7 @@
 
 .chart__scope {
   margin-left: auto;
-  font-size: var(--text-xs);
+  font-size: var(--text-tv-label);
   color: var(--text-muted);
 }
 
@@ -140,7 +144,9 @@
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-5);
   margin-top: var(--space-3);
-  font-size: var(--text-sm);
+  /* WHY the ten-foot size: the readout answers "is the stream healthy?" —
+     the question the user has while watching. */
+  font-size: var(--text-tv-detail);
   color: var(--text-muted);
 }
 
@@ -207,13 +213,13 @@
 
 .chart__scope select {
   margin-left: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--space-3);
   color: var(--text);
   background: var(--surface-sunken);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-xs);
   font: inherit;
-  font-size: var(--text-xs);
+  font-size: var(--text-tv-detail);
 }
 
 /* ── Codec table ────────────────────────────────────────────────────── */
@@ -223,13 +229,16 @@
   padding: var(--space-2) var(--space-3);
   text-align: left;
   border-bottom: 1px solid var(--border);
-  font-size: var(--text-sm);
+  /* WHY the size: the table is the reference of the product — "what can
+     this receiver play?". It is the last thing on the screen, but it has
+     to be readable on a television as well. */
+  font-size: var(--text-tv-label);
   vertical-align: top;
 }
 
 .codec-table th {
   color: var(--text-subtle);
-  font-size: 0.625rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
@@ -254,7 +263,7 @@
   display: inline-block;
   padding: 1px var(--space-2);
   margin: 0 var(--space-1) var(--space-1) 0;
-  font-size: var(--text-2xs);
+  font-size: var(--text-xs);
   font-family: var(--font-mono);
   color: var(--text);
   background: var(--surface-sunken);
@@ -290,17 +299,12 @@
     padding: var(--space-4);
   }
 
-  .counters {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
+  /* WHY the counters keep their row: the three values of a card have to
+   * stand on one line, so that the eye reads them as a row and not as
+   * three separate numbers. The row of the label is two lines high for
+   * every counter — see cards.css — and "Packet loss" breaks into two
+   * lines instead of being cut. */
   .chart__scope {
     margin-left: 0;
-  }
-}
-
-@media (min-width: 120rem) {
-  .protocol-grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }

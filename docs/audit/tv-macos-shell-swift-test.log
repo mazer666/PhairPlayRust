@@ -1,0 +1,302 @@
+Building for debugging...
+[0/20] Compiling phairplay_ffiFFI shim.c
+[1/20] Write swift-version--3ACD1BCC4CEFF5A2.txt
+[2/20] Copying receiver-defaults.properties
+[3/20] Copying Localizable.strings
+[4/20] Copying Info.plist
+[6/20] Write sources
+[10/22] Compiling PhairPlayFFI phairplay_ffi.swift
+[11/22] Emitting module PhairPlayFFI
+[12/23] Wrapping AST for PhairPlayFFI for debugging
+[14/32] Emitting module PhairPlayMacKit
+[15/39] Compiling PhairPlayMacKit ReceiverClient.swift
+[16/39] Compiling PhairPlayMacKit ReceiverDefaults.swift
+[17/39] Compiling PhairPlayMacKit ReceiverFactory.swift
+[18/39] Compiling PhairPlayMacKit ReceiverMapping.swift
+[19/39] Compiling PhairPlayMacKit ReceiverModel.swift
+[20/39] Compiling PhairPlayMacKit ReceiverPhaseStyle.swift
+[21/39] Compiling PhairPlayMacKit ReceiverStatus.swift
+[22/39] Compiling PhairPlayMacKit ReceiverStrings.swift
+[23/39] Compiling PhairPlayMacKit ShellFocus.swift
+[24/39] Compiling PhairPlayMacKit ShellFormatting.swift
+[25/39] Compiling PhairPlayMacKit ShellKeyboard.swift
+[26/39] Compiling PhairPlayMacKit ShellShortcut.swift
+[27/39] Compiling PhairPlayMacKit ShellTone.swift
+[28/39] Compiling PhairPlayMacKit ShellTypography.swift
+[29/39] Compiling PhairPlayMacKit resource_bundle_accessor.swift
+[30/40] Wrapping AST for PhairPlayMacKit for debugging
+[32/47] Emitting module PhairPlayMacKitTests
+[33/47] Compiling PhairPlayMacKitTests ReceiverDefaultsTests.swift
+[34/47] Compiling PhairPlayMacKitTests ReceiverModelTests.swift
+[35/47] Compiling PhairPlayMacKitTests ReceiverStringsTests.swift
+[36/47] Compiling PhairPlayMacKitTests ShellCatalogueTests.swift
+[37/47] Compiling PhairPlayMacKitTests ShellFocusTests.swift
+[38/47] Compiling PhairPlayMacKitTests ShellFormattingTests.swift
+[39/52] Compiling PhairPlayMacKitTests ShellKeyboardTests.swift
+[40/52] Compiling PhairPlayMacKitTests ShellKitPurityTests.swift
+[41/52] Compiling PhairPlayMacKitTests ShellShortcutTests.swift
+[42/52] Compiling PhairPlayMacKitTests ShellStatusTests.swift
+[43/52] Compiling PhairPlayMacKitTests ShellToneTests.swift
+[44/53] Wrapping AST for PhairPlayMacKitTests for debugging
+[45/53] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/PhairPlayRust/apps/macos/.build/x86_64-unknown-linux-gnu/debug/PhairPlayMacPackageDiscoveredTests.derived/all-discovered-tests.swift
+[46/53] Write sources
+[48/55] Emitting module PhairPlayMacPackageDiscoveredTests
+[49/55] Compiling PhairPlayMacPackageDiscoveredTests PhairPlayMacKitTests.swift
+[50/56] Compiling PhairPlayMacPackageDiscoveredTests all-discovered-tests.swift
+[51/57] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/PhairPlayRust/apps/macos/.build/x86_64-unknown-linux-gnu/debug/PhairPlayMacPackageTests.derived/runner.swift
+[52/57] Write sources
+[53/57] Wrapping AST for PhairPlayMacPackageDiscoveredTests for debugging
+[55/59] Emitting module PhairPlayMacPackageTests
+[56/59] Compiling PhairPlayMacPackageTests runner.swift
+[57/60] Wrapping AST for PhairPlayMacPackageTests for debugging
+[58/60] Write Objects.LinkFileList
+[59/60] Linking PhairPlayMacPackageTests.xctest
+Build complete! (148.00s)
+Test Suite 'All tests' started at 2026-10-24 08:56:46.932
+Test Suite 'debug.xctest' started at 2026-10-24 08:56:47.040
+Test Suite 'ReceiverDefaultsTests' started at 2026-10-24 08:56:47.040
+Test Case 'ReceiverDefaultsTests.testAMissingKeyIsAnErrorAndNotAValueOfTheShell' started at 2026-10-24 08:56:47.040
+Test Case 'ReceiverDefaultsTests.testAMissingKeyIsAnErrorAndNotAValueOfTheShell' passed (0.001 seconds)
+Test Case 'ReceiverDefaultsTests.testAValueThatIsNotANumberIsAnError' started at 2026-10-24 08:56:47.042
+Test Case 'ReceiverDefaultsTests.testAValueThatIsNotANumberIsAnError' passed (0.001 seconds)
+Test Case 'ReceiverDefaultsTests.testTheConfigurationIsBuiltOutOfTheValues' started at 2026-10-24 08:56:47.043
+Test Case 'ReceiverDefaultsTests.testTheConfigurationIsBuiltOutOfTheValues' passed (0.001 seconds)
+Test Case 'ReceiverDefaultsTests.testTheNameOfTheDeviceWinsOverTheNameOfTheFile' started at 2026-10-24 08:56:47.044
+Test Case 'ReceiverDefaultsTests.testTheNameOfTheDeviceWinsOverTheNameOfTheFile' passed (0.001 seconds)
+Test Case 'ReceiverDefaultsTests.testTheReaderKeepsTheValueOfAKey' started at 2026-10-24 08:56:47.045
+Test Case 'ReceiverDefaultsTests.testTheReaderKeepsTheValueOfAKey' passed (0.0 seconds)
+Test Case 'ReceiverDefaultsTests.testTheReaderRefusesALineThatIsNotAKeyAndAValue' started at 2026-10-24 08:56:47.045
+Test Case 'ReceiverDefaultsTests.testTheReaderRefusesALineThatIsNotAKeyAndAValue' passed (0.0 seconds)
+Test Case 'ReceiverDefaultsTests.testTheReaderSkipsTheCommentsAndTheEmptyLines' started at 2026-10-24 08:56:47.045
+Test Case 'ReceiverDefaultsTests.testTheReaderSkipsTheCommentsAndTheEmptyLines' passed (0.0 seconds)
+Test Suite 'ReceiverDefaultsTests' passed at 2026-10-24 08:56:47.046
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'ReceiverModelTests' started at 2026-10-24 08:56:47.046
+Test Case 'ReceiverModelTests.testAProtocolThatIsNotMentionedIsSwitchedOn' started at 2026-10-24 08:56:47.046
+Test Case 'ReceiverModelTests.testAProtocolThatIsNotMentionedIsSwitchedOn' passed (0.001 seconds)
+Test Case 'ReceiverModelTests.testAProtocolThatIsSwitchedOffIsDisabled' started at 2026-10-24 08:56:47.046
+Test Case 'ReceiverModelTests.testAProtocolThatIsSwitchedOffIsDisabled' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testAProtocolThatIsSwitchedOffIsDisabledEvenWhileItStops' started at 2026-10-24 08:56:47.047
+Test Case 'ReceiverModelTests.testAProtocolThatIsSwitchedOffIsDisabledEvenWhileItStops' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testAProtocolThatIsSwitchedOffIsSwitchedOff' started at 2026-10-24 08:56:47.047
+Test Case 'ReceiverModelTests.testAProtocolThatIsSwitchedOffIsSwitchedOff' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testAProtocolThatNeverRanIsNotStarted' started at 2026-10-24 08:56:47.047
+Test Case 'ReceiverModelTests.testAProtocolThatNeverRanIsNotStarted' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testASessionWithoutAVideoHasNoDescription' started at 2026-10-24 08:56:47.048
+Test Case 'ReceiverModelTests.testASessionWithoutAVideoHasNoDescription' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testAStoppedProtocolIsStopped' started at 2026-10-24 08:56:47.048
+Test Case 'ReceiverModelTests.testAStoppedProtocolIsStopped' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testEveryStateOfTheEngineFindsItsPhase' started at 2026-10-24 08:56:47.048
+Test Case 'ReceiverModelTests.testEveryStateOfTheEngineFindsItsPhase' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testOnlyTheStatesThatServeTheNetworkCountAsRunning' started at 2026-10-24 08:56:47.049
+Test Case 'ReceiverModelTests.testOnlyTheStatesThatServeTheNetworkCountAsRunning' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testStoppedAndDisabledAreNotTheSame' started at 2026-10-24 08:56:47.049
+Test Case 'ReceiverModelTests.testStoppedAndDisabledAreNotTheSame' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testSwitchingAProtocolKeepsTheOtherProtocols' started at 2026-10-24 08:56:47.049
+Test Case 'ReceiverModelTests.testSwitchingAProtocolKeepsTheOtherProtocols' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testSwitchingAProtocolOffKeepsTheRestOfTheEntry' started at 2026-10-24 08:56:47.049
+Test Case 'ReceiverModelTests.testSwitchingAProtocolOffKeepsTheRestOfTheEntry' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testSwitchingAProtocolOffWritesTheSetting' started at 2026-10-24 08:56:47.050
+Test Case 'ReceiverModelTests.testSwitchingAProtocolOffWritesTheSetting' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testSwitchingAProtocolOnAddsItWithTheDefaultOfTheCore' started at 2026-10-24 08:56:47.050
+Test Case 'ReceiverModelTests.testSwitchingAProtocolOnAddsItWithTheDefaultOfTheCore' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testTheDescriptionOfTheAudioNamesTheCodecAndTheRate' started at 2026-10-24 08:56:47.050
+Test Case 'ReceiverModelTests.testTheDescriptionOfTheAudioNamesTheCodecAndTheRate' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testTheDescriptionOfTheVideoNamesTheCodecAndTheSize' started at 2026-10-24 08:56:47.051
+Test Case 'ReceiverModelTests.testTheDescriptionOfTheVideoNamesTheCodecAndTheSize' passed (0.0 seconds)
+Test Case 'ReceiverModelTests.testTheRunningTimeIsWrittenWithTwoDigits' started at 2026-10-24 08:56:47.051
+Test Case 'ReceiverModelTests.testTheRunningTimeIsWrittenWithTwoDigits' passed (0.0 seconds)
+Test Suite 'ReceiverModelTests' passed at 2026-10-24 08:56:47.051
+	 Executed 17 tests, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'ReceiverStringsTests' started at 2026-10-24 08:56:47.051
+Test Case 'ReceiverStringsTests.testTheReaderAnswersTheKeyWhenTheTextIsMissing' started at 2026-10-24 08:56:47.051
+Test Case 'ReceiverStringsTests.testTheReaderAnswersTheKeyWhenTheTextIsMissing' passed (0.016 seconds)
+Test Case 'ReceiverStringsTests.testTheReaderAnswersTheTextOfTheCatalogue' started at 2026-10-24 08:56:47.067
+Test Case 'ReceiverStringsTests.testTheReaderAnswersTheTextOfTheCatalogue' passed (0.0 seconds)
+Test Case 'ReceiverStringsTests.testTheReaderFillsEveryPlaceholderOfTheText' started at 2026-10-24 08:56:47.068
+Test Case 'ReceiverStringsTests.testTheReaderFillsEveryPlaceholderOfTheText' passed (0.0 seconds)
+Test Case 'ReceiverStringsTests.testTheReaderLeavesTheTextAloneWhenThereIsNoPlaceholder' started at 2026-10-24 08:56:47.068
+Test Case 'ReceiverStringsTests.testTheReaderLeavesTheTextAloneWhenThereIsNoPlaceholder' passed (0.0 seconds)
+Test Case 'ReceiverStringsTests.testTheReaderReplacesThePlaceholdersFromLeftToRight' started at 2026-10-24 08:56:47.069
+Test Case 'ReceiverStringsTests.testTheReaderReplacesThePlaceholdersFromLeftToRight' passed (0.0 seconds)
+Test Case 'ReceiverStringsTests.testTheReaderUsesTheArgumentsOnlyAsOftenAsThereArePlaceholders' started at 2026-10-24 08:56:47.069
+Test Case 'ReceiverStringsTests.testTheReaderUsesTheArgumentsOnlyAsOftenAsThereArePlaceholders' passed (0.0 seconds)
+Test Suite 'ReceiverStringsTests' passed at 2026-10-24 08:56:47.069
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.018 (0.018) seconds
+Test Suite 'ShellCatalogueTests' started at 2026-10-24 08:56:47.069
+Test Case 'ShellCatalogueTests.testEveryEntryOfTheCatalogueCarriesAText' started at 2026-10-24 08:56:47.069
+Test Case 'ShellCatalogueTests.testEveryEntryOfTheCatalogueCarriesAText' passed (0.018 seconds)
+Test Case 'ShellCatalogueTests.testEveryKeyThatTheKitBuildsExistsInBothCatalogues' started at 2026-10-24 08:56:47.087
+Test Case 'ShellCatalogueTests.testEveryKeyThatTheKitBuildsExistsInBothCatalogues' passed (0.006 seconds)
+Test Case 'ShellCatalogueTests.testEveryKeyThatTheSourcesUseExistsInBothCatalogues' started at 2026-10-24 08:56:47.094
+Test Case 'ShellCatalogueTests.testEveryKeyThatTheSourcesUseExistsInBothCatalogues' passed (0.131 seconds)
+Test Case 'ShellCatalogueTests.testNoViewWritesATextOfItsOwn' started at 2026-10-24 08:56:47.225
+Test Case 'ShellCatalogueTests.testNoViewWritesATextOfItsOwn' passed (0.056 seconds)
+Test Case 'ShellCatalogueTests.testTheEnglishAndTheGermanCatalogueCarryTheSameKeys' started at 2026-10-24 08:56:47.281
+Test Case 'ShellCatalogueTests.testTheEnglishAndTheGermanCatalogueCarryTheSameKeys' passed (0.005 seconds)
+Test Case 'ShellCatalogueTests.testThePlaceholdersOfTheCatalogueAreAllPercentAt' started at 2026-10-24 08:56:47.285
+Test Case 'ShellCatalogueTests.testThePlaceholdersOfTheCatalogueAreAllPercentAt' passed (0.015 seconds)
+Test Suite 'ShellCatalogueTests' passed at 2026-10-24 08:56:47.301
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.231 (0.231) seconds
+Test Suite 'ShellFocusTests' started at 2026-10-24 08:56:47.301
+Test Case 'ShellFocusTests.testAnArrowKeyLeavesTheBannerAndEntersTheGrid' started at 2026-10-24 08:56:47.301
+Test Case 'ShellFocusTests.testAnArrowKeyLeavesTheBannerAndEntersTheGrid' passed (0.001 seconds)
+Test Case 'ShellFocusTests.testTheArrowKeysMoveInsideTheGrid' started at 2026-10-24 08:56:47.302
+Test Case 'ShellFocusTests.testTheArrowKeysMoveInsideTheGrid' passed (0.001 seconds)
+Test Case 'ShellFocusTests.testTheArrowKeysStopAtTheEdgeOfTheGrid' started at 2026-10-24 08:56:47.303
+Test Case 'ShellFocusTests.testTheArrowKeysStopAtTheEdgeOfTheGrid' passed (0.001 seconds)
+Test Case 'ShellFocusTests.testTheRingHoldsNoButtonWithoutAFailure' started at 2026-10-24 08:56:47.304
+Test Case 'ShellFocusTests.testTheRingHoldsNoButtonWithoutAFailure' passed (0.001 seconds)
+Test Case 'ShellFocusTests.testTheRingHoldsOnlyTheProtocolsThatTheBridgeReports' started at 2026-10-24 08:56:47.305
+Test Case 'ShellFocusTests.testTheRingHoldsOnlyTheProtocolsThatTheBridgeReports' passed (0.001 seconds)
+Test Case 'ShellFocusTests.testTheRingHoldsTheButtonOfTheBannerBeforeTheCards' started at 2026-10-24 08:56:47.306
+Test Case 'ShellFocusTests.testTheRingHoldsTheButtonOfTheBannerBeforeTheCards' passed (0.002 seconds)
+Test Case 'ShellFocusTests.testTheRingHoldsTheFourCardsInTheOrderOfTheProduct' started at 2026-10-24 08:56:47.308
+Test Case 'ShellFocusTests.testTheRingHoldsTheFourCardsInTheOrderOfTheProduct' passed (0.001 seconds)
+Test Case 'ShellFocusTests.testTheRingIsEmptyWithoutAnyProtocol' started at 2026-10-24 08:56:47.309
+Test Case 'ShellFocusTests.testTheRingIsEmptyWithoutAnyProtocol' passed (0.013 seconds)
+Test Case 'ShellFocusTests.testTheShiftTabKeyGoesToThePreviousCard' started at 2026-10-24 08:56:47.322
+Test Case 'ShellFocusTests.testTheShiftTabKeyGoesToThePreviousCard' passed (0.04 seconds)
+Test Case 'ShellFocusTests.testTheTabKeyComesBackToTheFirstCardAtTheEnd' started at 2026-10-24 08:56:47.362
+Test Case 'ShellFocusTests.testTheTabKeyComesBackToTheFirstCardAtTheEnd' passed (0.001 seconds)
+Test Case 'ShellFocusTests.testTheTabKeyGoesToTheNextCard' started at 2026-10-24 08:56:47.363
+Test Case 'ShellFocusTests.testTheTabKeyGoesToTheNextCard' passed (0.0 seconds)
+Test Case 'ShellFocusTests.testTheTabKeyStartsAtTheFirstSurfaceWhenNothingHoldsTheFocus' started at 2026-10-24 08:56:47.363
+Test Case 'ShellFocusTests.testTheTabKeyStartsAtTheFirstSurfaceWhenNothingHoldsTheFocus' passed (0.0 seconds)
+Test Suite 'ShellFocusTests' passed at 2026-10-24 08:56:47.364
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.063 (0.063) seconds
+Test Suite 'ShellFormattingTests' started at 2026-10-24 08:56:47.364
+Test Case 'ShellFormattingTests.testEveryPhaseHasAWordAndASentence' started at 2026-10-24 08:56:47.364
+Test Case 'ShellFormattingTests.testEveryPhaseHasAWordAndASentence' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testEveryPhaseHasItsOwnWordAndItsOwnShape' started at 2026-10-24 08:56:47.364
+Test Case 'ShellFormattingTests.testEveryPhaseHasItsOwnWordAndItsOwnShape' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testEveryProtocolHasAName' started at 2026-10-24 08:56:47.365
+Test Case 'ShellFormattingTests.testEveryProtocolHasAName' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testTheFrameOfTheFocusIsVisible' started at 2026-10-24 08:56:47.365
+Test Case 'ShellFormattingTests.testTheFrameOfTheFocusIsVisible' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testTheNameOfTheDeviceAndTheVersionAreWritten' started at 2026-10-24 08:56:47.365
+Test Case 'ShellFormattingTests.testTheNameOfTheDeviceAndTheVersionAreWritten' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testTheNumberOfSendersIsWrittenInTheSentence' started at 2026-10-24 08:56:47.365
+Test Case 'ShellFormattingTests.testTheNumberOfSendersIsWrittenInTheSentence' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testThePortsSayWhenNoPortIsBound' started at 2026-10-24 08:56:47.366
+Test Case 'ShellFormattingTests.testThePortsSayWhenNoPortIsBound' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testThePortsShowAPlaceholderForAMissingTcpPort' started at 2026-10-24 08:56:47.366
+Test Case 'ShellFormattingTests.testThePortsShowAPlaceholderForAMissingTcpPort' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testThePortsShowBothPorts' started at 2026-10-24 08:56:47.366
+Test Case 'ShellFormattingTests.testThePortsShowBothPorts' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testThePortsShowTheTcpPortAlone' started at 2026-10-24 08:56:47.367
+Test Case 'ShellFormattingTests.testThePortsShowTheTcpPortAlone' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testTheRunningTimeIsWrittenWithTwoDigits' started at 2026-10-24 08:56:47.367
+Test Case 'ShellFormattingTests.testTheRunningTimeIsWrittenWithTwoDigits' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testTheTextIsBigEnoughToBeReadFromADistance' started at 2026-10-24 08:56:47.367
+Test Case 'ShellFormattingTests.testTheTextIsBigEnoughToBeReadFromADistance' passed (0.0 seconds)
+Test Case 'ShellFormattingTests.testTheWindowHoldsTwoCardsWithoutAHorizontalScrollBar' started at 2026-10-24 08:56:47.368
+Test Case 'ShellFormattingTests.testTheWindowHoldsTwoCardsWithoutAHorizontalScrollBar' passed (0.0 seconds)
+Test Suite 'ShellFormattingTests' passed at 2026-10-24 08:56:47.368
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'ShellKeyboardTests' started at 2026-10-24 08:56:47.368
+Test Case 'ShellKeyboardTests.testAKeyThatTheShellDoesNotUseIsAnsweredWithNothing' started at 2026-10-24 08:56:47.368
+Test Case 'ShellKeyboardTests.testAKeyThatTheShellDoesNotUseIsAnsweredWithNothing' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheArrowKeysMoveTheFocusInsideTheGrid' started at 2026-10-24 08:56:47.368
+Test Case 'ShellKeyboardTests.testTheArrowKeysMoveTheFocusInsideTheGrid' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheEscapeKeyClosesTheBanner' started at 2026-10-24 08:56:47.368
+Test Case 'ShellKeyboardTests.testTheEscapeKeyClosesTheBanner' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheEscapeKeyDoesNothingWithoutAFailure' started at 2026-10-24 08:56:47.369
+Test Case 'ShellKeyboardTests.testTheEscapeKeyDoesNothingWithoutAFailure' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheKeysOfTheKeyboardAreMapped' started at 2026-10-24 08:56:47.369
+Test Case 'ShellKeyboardTests.testTheKeysOfTheKeyboardAreMapped' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheShiftTabKeyMovesTheFocusToThePreviousCard' started at 2026-10-24 08:56:47.369
+Test Case 'ShellKeyboardTests.testTheShiftTabKeyMovesTheFocusToThePreviousCard' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheSpaceKeyDoesNothingWithoutAFocus' started at 2026-10-24 08:56:47.370
+Test Case 'ShellKeyboardTests.testTheSpaceKeyDoesNothingWithoutAFocus' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheSpaceKeyOnTheBannerClosesIt' started at 2026-10-24 08:56:47.370
+Test Case 'ShellKeyboardTests.testTheSpaceKeyOnTheBannerClosesIt' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheSpaceKeySwitchesTheFocusedProtocol' started at 2026-10-24 08:56:47.370
+Test Case 'ShellKeyboardTests.testTheSpaceKeySwitchesTheFocusedProtocol' passed (0.0 seconds)
+Test Case 'ShellKeyboardTests.testTheTabKeyMovesTheFocusToTheNextCard' started at 2026-10-24 08:56:47.370
+Test Case 'ShellKeyboardTests.testTheTabKeyMovesTheFocusToTheNextCard' passed (0.0 seconds)
+Test Suite 'ShellKeyboardTests' passed at 2026-10-24 08:56:47.371
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.003 (0.003) seconds
+Test Suite 'ShellKitPurityTests' started at 2026-10-24 08:56:47.371
+Test Case 'ShellKitPurityTests.testNoFileOfTheShellIsTooLong' started at 2026-10-24 08:56:47.371
+Test Case 'ShellKitPurityTests.testNoFileOfTheShellIsTooLong' passed (0.115 seconds)
+Test Case 'ShellKitPurityTests.testTheKitImportsNoFrameworkOfTheUserInterface' started at 2026-10-24 08:56:47.486
+Test Case 'ShellKitPurityTests.testTheKitImportsNoFrameworkOfTheUserInterface' passed (0.038 seconds)
+Test Case 'ShellKitPurityTests.testTheKitImportsNothingButFoundationAndTheBindings' started at 2026-10-24 08:56:47.524
+Test Case 'ShellKitPurityTests.testTheKitImportsNothingButFoundationAndTheBindings' passed (0.044 seconds)
+Test Suite 'ShellKitPurityTests' passed at 2026-10-24 08:56:47.569
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.198 (0.198) seconds
+Test Suite 'ShellShortcutTests' started at 2026-10-24 08:56:47.569
+Test Case 'ShellShortcutTests.testEveryGroupCarriesAtLeastOneKey' started at 2026-10-24 08:56:47.569
+Test Case 'ShellShortcutTests.testEveryGroupCarriesAtLeastOneKey' passed (0.0 seconds)
+Test Case 'ShellShortcutTests.testEveryGroupHasANameAndASentence' started at 2026-10-24 08:56:47.569
+Test Case 'ShellShortcutTests.testEveryGroupHasANameAndASentence' passed (0.0 seconds)
+Test Case 'ShellShortcutTests.testEveryGroupHasItsOwnName' started at 2026-10-24 08:56:47.569
+Test Case 'ShellShortcutTests.testEveryGroupHasItsOwnName' passed (0.0 seconds)
+Test Case 'ShellShortcutTests.testEveryKeyOfTheShellBelongsToExactlyOneGroup' started at 2026-10-24 08:56:47.569
+Test Case 'ShellShortcutTests.testEveryKeyOfTheShellBelongsToExactlyOneGroup' passed (0.0 seconds)
+Test Case 'ShellShortcutTests.testEveryKeyOfTheShellIsCoveredByAGroup' started at 2026-10-24 08:56:47.569
+Test Case 'ShellShortcutTests.testEveryKeyOfTheShellIsCoveredByAGroup' passed (0.0 seconds)
+Test Case 'ShellShortcutTests.testTheGroupOfAKeyIsFound' started at 2026-10-24 08:56:47.569
+Test Case 'ShellShortcutTests.testTheGroupOfAKeyIsFound' passed (0.0 seconds)
+Test Case 'ShellShortcutTests.testTheHintNamesEveryGroupInTheOrderOfTheKit' started at 2026-10-24 08:56:47.570
+Test Case 'ShellShortcutTests.testTheHintNamesEveryGroupInTheOrderOfTheKit' passed (0.0 seconds)
+Test Case 'ShellShortcutTests.testTheTextOfAShortcutCarriesItsGroup' started at 2026-10-24 08:56:47.570
+Test Case 'ShellShortcutTests.testTheTextOfAShortcutCarriesItsGroup' passed (0.0 seconds)
+Test Suite 'ShellShortcutTests' passed at 2026-10-24 08:56:47.570
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ShellStatusTests' started at 2026-10-24 08:56:47.570
+Test Case 'ShellStatusTests.testAReceiverThatAdvertisesItselfIsRunning' started at 2026-10-24 08:56:47.570
+Test Case 'ShellStatusTests.testAReceiverThatAdvertisesItselfIsRunning' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testAReceiverThatCarriesAStreamIsRunning' started at 2026-10-24 08:56:47.570
+Test Case 'ShellStatusTests.testAReceiverThatCarriesAStreamIsRunning' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testAReceiverWhoseServiceFailedIsInError' started at 2026-10-24 08:56:47.570
+Test Case 'ShellStatusTests.testAReceiverWhoseServiceFailedIsInError' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testAReceiverWhoseServiceIsStartingIsStarting' started at 2026-10-24 08:56:47.571
+Test Case 'ShellStatusTests.testAReceiverWhoseServiceIsStartingIsStarting' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testAReceiverWhoseServiceIsStoppingIsStarting' started at 2026-10-24 08:56:47.571
+Test Case 'ShellStatusTests.testAReceiverWhoseServiceIsStoppingIsStarting' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testAReceiverWithoutAnyServiceIsStopped' started at 2026-10-24 08:56:47.571
+Test Case 'ShellStatusTests.testAReceiverWithoutAnyServiceIsStopped' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testARunningServiceWinsOverAFailedProtocol' started at 2026-10-24 08:56:47.571
+Test Case 'ShellStatusTests.testARunningServiceWinsOverAFailedProtocol' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testEveryStateHasATone' started at 2026-10-24 08:56:47.571
+Test Case 'ShellStatusTests.testEveryStateHasATone' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testEveryStateHasItsOwnShape' started at 2026-10-24 08:56:47.571
+Test Case 'ShellStatusTests.testEveryStateHasItsOwnShape' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testEveryStateHasItsOwnWord' started at 2026-10-24 08:56:47.571
+Test Case 'ShellStatusTests.testEveryStateHasItsOwnWord' passed (0.0 seconds)
+Test Case 'ShellStatusTests.testOnlyTheErrorIsAProblem' started at 2026-10-24 08:56:47.572
+Test Case 'ShellStatusTests.testOnlyTheErrorIsAProblem' passed (0.001 seconds)
+Test Case 'ShellStatusTests.testTheWordOfAStateIsNoKey' started at 2026-10-24 08:56:47.572
+Test Case 'ShellStatusTests.testTheWordOfAStateIsNoKey' passed (0.001 seconds)
+Test Suite 'ShellStatusTests' passed at 2026-10-24 08:56:47.573
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.003 (0.003) seconds
+Test Suite 'ShellToneTests' started at 2026-10-24 08:56:47.573
+Test Case 'ShellToneTests.testEveryPhaseHasATone' started at 2026-10-24 08:56:47.573
+Test Case 'ShellToneTests.testEveryPhaseHasATone' passed (0.0 seconds)
+Test Case 'ShellToneTests.testEveryStateOfTheReceiverHasATone' started at 2026-10-24 08:56:47.574
+Test Case 'ShellToneTests.testEveryStateOfTheReceiverHasATone' passed (0.0 seconds)
+Test Case 'ShellToneTests.testEveryToneIsAColourOfSixDigits' started at 2026-10-24 08:56:47.574
+Test Case 'ShellToneTests.testEveryToneIsAColourOfSixDigits' passed (0.0 seconds)
+Test Case 'ShellToneTests.testNoTwoTonesCarryTheSameColour' started at 2026-10-24 08:56:47.574
+Test Case 'ShellToneTests.testNoTwoTonesCarryTheSameColour' passed (0.0 seconds)
+Test Case 'ShellToneTests.testTheFailureIsTheOnlyToneThatIsRed' started at 2026-10-24 08:56:47.575
+Test Case 'ShellToneTests.testTheFailureIsTheOnlyToneThatIsRed' passed (0.001 seconds)
+Test Case 'ShellToneTests.testTheRunningStateCarriesTheToneOfAServiceThatAdvertisesItself' started at 2026-10-24 08:56:47.576
+Test Case 'ShellToneTests.testTheRunningStateCarriesTheToneOfAServiceThatAdvertisesItself' passed (0.0 seconds)
+Test Case 'ShellToneTests.testTheTonesOfThePhasesAreTheOnesOfTheProduct' started at 2026-10-24 08:56:47.576
+Test Case 'ShellToneTests.testTheTonesOfThePhasesAreTheOnesOfTheProduct' passed (0.0 seconds)
+Test Suite 'ShellToneTests' passed at 2026-10-24 08:56:47.576
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.003 (0.003) seconds
+Test Suite 'debug.xctest' passed at 2026-10-24 08:56:47.576
+	 Executed 101 tests, with 0 failures (0 unexpected) in 0.534 (0.534) seconds
+Test Suite 'All tests' passed at 2026-10-24 08:56:47.576
+	 Executed 101 tests, with 0 failures (0 unexpected) in 0.534 (0.534) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.
+
+real	2m53.714s
+user	0m23.157s
+sys	0m2.964s

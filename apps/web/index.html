@@ -3,14 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PhairPlayRust — Receiver Dashboard</title>
-    <meta
-      name="description"
-      content="Local control panel for the PhairPlayRust receiver: AirPlay 2, Miracast, Google Cast and DLNA on your own network."
-    />
+    <title data-i18n="app.title"></title>
+    <meta name="description" data-i18n-content="app.description" content="" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="assets/theme.css" />
     <link rel="stylesheet" href="assets/base.css" />
+    <link rel="stylesheet" href="assets/layout.css" />
     <link rel="stylesheet" href="assets/cards.css" />
     <link rel="stylesheet" href="assets/panels.css" />
     <script>
@@ -30,9 +28,16 @@
         document.documentElement.setAttribute("data-theme", theme);
       })();
     </script>
+    <script type="module">
+      // The wording of the panel comes from the language file. The module
+      // script in the head is deferred, so the document is parsed when it
+      // runs and the texts are in place before the first paint.
+      import { startLanguage } from "./assets/i18n.js";
+      startLanguage();
+    </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to the dashboard</a>
+    <a class="skip-link" href="#main" data-i18n="a11y.skipToDashboard"></a>
 
     <!-- Icon vocabulary of the project: four abstract, hand-drawn line glyphs.
          No third-party icon set, no vendor logo. -->
@@ -85,9 +90,7 @@
           </svg>
           <span class="brand__text">
             <span class="brand__name">PhairPlayRust</span>
-            <span class="brand__tagline" id="brand-tagline"
-              >AirPlay 2 · Miracast · Google Cast · DLNA — on your network only</span
-            >
+            <span class="brand__tagline" id="brand-tagline" data-i18n="brand.tagline"></span>
             <span class="visually-hidden" id="brand-device"></span>
           </span>
         </div>
@@ -97,25 +100,25 @@
         <div class="header__tools">
           <p class="live-pill" id="live-pill" data-link="lost" role="status">
             <span class="live-pill__dot" aria-hidden="true"></span>
-            <span id="live-label">Connecting</span>
+            <span id="live-label"></span>
           </p>
 
           <dl class="build-info" id="build-info">
             <div>
-              <dt>Version</dt>
-              <dd id="build-version">—</dd>
+              <dt data-i18n="header.version"></dt>
+              <dd id="build-version"></dd>
             </div>
             <div>
-              <dt>Commit</dt>
-              <dd id="build-commit">—</dd>
+              <dt data-i18n="header.commit"></dt>
+              <dd id="build-commit"></dd>
             </div>
             <div>
-              <dt>Target</dt>
-              <dd id="build-target">—</dd>
+              <dt data-i18n="header.target"></dt>
+              <dd id="build-target"></dd>
             </div>
             <div>
-              <dt>Uptime</dt>
-              <dd id="build-uptime">—</dd>
+              <dt data-i18n="header.uptime"></dt>
+              <dd id="build-uptime"></dd>
             </div>
           </dl>
 
@@ -123,7 +126,7 @@
             class="icon-button"
             id="theme-toggle"
             type="button"
-            title="Switch to the light theme"
+            data-i18n-attr="title:header.theme.toLight"
           >
             <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
@@ -144,7 +147,7 @@
                 stroke-linecap="round"
               />
             </svg>
-            <span class="visually-hidden" id="theme-toggle-label">Switch to the light theme</span>
+            <span class="visually-hidden" id="theme-toggle-label" data-i18n="header.theme.toLight"></span>
           </button>
         </div>
       </div>
@@ -152,25 +155,34 @@
 
     <main class="shell" id="main">
       <p class="banner" id="api-banner" role="alert" hidden>
-        <span id="api-banner-text">
-          The dashboard cannot reach the local API. Start the receiver and reload this page.
-        </span>
+        <span class="banner__text" id="api-banner-text"></span>
+        <button class="banner__dismiss" id="banner-dismiss" type="button" data-i18n="error.dismiss"></button>
       </p>
 
       <section class="section" aria-labelledby="protocols-title">
         <div class="section__head">
-          <h2 class="section__title" id="protocols-title">Receivers</h2>
-          <p class="section__note">
-            Every receiver advertises itself on the local network. The badge states what the
-            service is doing right now — a service that is switched off in the configuration
-            reads <em>Disabled</em>, a service that failed reads <em>Error</em>.
-          </p>
+          <h2 class="section__title" id="protocols-title" data-i18n="section.receivers.title"></h2>
+          <p class="section__note" data-i18n="section.receivers.note"></p>
         </div>
-        <div class="protocol-grid" id="protocol-grid">
+
+        <!-- The hint appears only on a device without a mouse. It is a line
+             of text, not an overlay: it never covers the cards and it never
+             takes the focus. -->
+        <p class="remote-hint" id="remote-hint" role="note" hidden>
+          <span class="remote-hint__glyph" aria-hidden="true"></span>
+          <span data-i18n="remote.hint"></span>
+        </p>
+
+        <div
+          class="protocol-grid"
+          id="protocol-grid"
+          role="group"
+          aria-labelledby="protocols-title"
+          aria-describedby="protocol-group-hint"
+        >
+          <p class="visually-hidden" id="protocol-group-hint" data-i18n="a11y.protocolGroup"></p>
           <noscript>
-            <p class="empty">
-              The live state of the receivers is read from the local API and needs JavaScript.
-            </p>
+            <p class="empty" data-i18n="a11y.noScript"></p>
           </noscript>
         </div>
       </section>
@@ -178,35 +190,51 @@
       <div class="dashboard-grid">
         <section class="panel" aria-labelledby="sessions-title">
           <div class="section__head">
-            <h2 class="section__title" id="sessions-title">Live sessions</h2>
-            <p class="section__note" id="sessions-count">No session is streaming.</p>
+            <h2 class="section__title" id="sessions-title" data-i18n="section.sessions.title"></h2>
+            <p class="section__note" id="sessions-count"></p>
           </div>
-          <div id="sessions-list">
-            <p class="empty" id="sessions-empty">No session is streaming.</p>
-          </div>
+          <div id="sessions-list"></div>
         </section>
 
         <section class="panel" aria-labelledby="chart-title">
           <div class="section__head">
-            <h2 class="section__title" id="chart-title">Throughput</h2>
-            <p class="section__note" id="chart-note">
-              Frames per second of the running session, over the last minutes.
-            </p>
+            <h2 class="section__title" id="chart-title" data-i18n="section.chart.title"></h2>
+            <p class="section__note" id="chart-note" data-i18n="chart.note.fps"></p>
           </div>
 
           <div class="chart__toolbar">
-            <div class="segmented" role="group" aria-label="Metric of the graph">
-              <button type="button" id="metric-fps" aria-pressed="true">Frames / s</button>
-              <button type="button" id="metric-bytes" aria-pressed="false">Throughput</button>
+            <!-- WHY the group: the two buttons are one widget. The arrow
+                 keys move between them, the Tab key reaches the group as a
+                 whole — the same rule as the cards of the receivers. -->
+            <div
+              class="segmented"
+              id="metric-group"
+              role="group"
+              data-i18n-attr="aria-label:chart.groupLabel"
+            >
+              <button
+                type="button"
+                id="metric-fps"
+                data-focus-item
+                aria-pressed="true"
+                data-i18n="chart.metric.fps"
+              ></button>
+              <button
+                type="button"
+                id="metric-bytes"
+                data-focus-item
+                aria-pressed="false"
+                data-i18n="chart.metric.bytes"
+              ></button>
             </div>
             <label class="chart__scope" for="chart-scope">
-              Scope
+              <span data-i18n="chart.scopeLabel"></span>
               <select id="chart-scope">
-                <option value="all">All receivers</option>
-                <option value="airplay">AirPlay 2</option>
-                <option value="miracast">Miracast</option>
-                <option value="cast">Google Cast</option>
-                <option value="dlna">DLNA / UPnP</option>
+                <option value="all" data-i18n="chart.scope.all"></option>
+                <option value="airplay" data-i18n="protocol.airplay"></option>
+                <option value="miracast" data-i18n="protocol.miracast"></option>
+                <option value="cast" data-i18n="protocol.cast"></option>
+                <option value="dlna" data-i18n="protocol.dlna"></option>
               </select>
             </label>
           </div>
@@ -219,41 +247,32 @@
               role="img"
               aria-labelledby="chart-title chart-desc"
             >
-              <desc id="chart-desc">
-                A line graph of the selected metric over the last minutes of the running
-                session. The current value is written out below the graph.
-              </desc>
+              <desc id="chart-desc" data-i18n="chart.description"></desc>
             </svg>
           </div>
 
           <p class="chart__readout" id="chart-readout">
-            <span>Current <b id="chart-current">—</b></span>
-            <span>Peak <b id="chart-max">—</b></span>
-            <span>Average <b id="chart-mean">—</b></span>
+            <span><span data-i18n="chart.readout.current"></span> <b id="chart-current"></b></span>
+            <span><span data-i18n="chart.readout.peak"></span> <b id="chart-max"></b></span>
+            <span><span data-i18n="chart.readout.average"></span> <b id="chart-mean"></b></span>
           </p>
         </section>
       </div>
 
       <section class="section" aria-labelledby="codecs-title">
         <div class="section__head">
-          <h2 class="section__title" id="codecs-title">Codec reference</h2>
-          <p class="section__note" id="codecs-note">
-            The media vocabulary the receivers speak. What the device itself can decode depends
-            on its platform decoders — the receiver advertises that in the network announcement.
-          </p>
+          <h2 class="section__title" id="codecs-title" data-i18n="section.codecs.title"></h2>
+          <p class="section__note" data-i18n="section.codecs.note"></p>
         </div>
         <div class="table-scroll">
           <table class="codec-table">
-            <caption class="visually-hidden">
-              Codecs the PhairPlayRust receivers understand, with their MIME type and the
-              protocols that use them.
-            </caption>
+            <caption class="visually-hidden" data-i18n="table.caption"></caption>
             <thead>
               <tr>
-                <th scope="col">Codec</th>
-                <th scope="col">Type</th>
-                <th scope="col">MIME type</th>
-                <th scope="col">Used by</th>
+                <th scope="col" data-i18n="table.codec"></th>
+                <th scope="col" data-i18n="table.type"></th>
+                <th scope="col" data-i18n="table.mime"></th>
+                <th scope="col" data-i18n="table.usedBy"></th>
               </tr>
             </thead>
             <tbody id="codec-table-body"></tbody>
@@ -263,57 +282,62 @@
     </main>
 
     <footer class="app-footer">
-      <span>PhairPlayRust — AGPL-3.0-or-later. No account, no advertising, no telemetry.</span>
-      <span>The dashboard talks only to the local receiver on this machine.</span>
+      <span data-i18n="footer.license"></span>
+      <span data-i18n="footer.local"></span>
     </footer>
 
+    <!-- The card is the control: it is a button, it carries the state of
+         the receiver in `aria-pressed`, and the switch in its head is the
+         visible state — not a second, tiny target. -->
     <template id="protocol-card-template">
-      <article class="card" data-protocol="">
+      <article
+        class="card"
+        data-protocol=""
+        data-focus-item
+        role="button"
+        tabindex="-1"
+        aria-pressed="false"
+      >
         <div class="card__head">
           <h3 class="card__name">
             <svg class="card__glyph" aria-hidden="true" focusable="false"><use href="" /></svg>
             <span data-field="name"></span>
           </h3>
-          <button
-            class="switch"
-            type="button"
-            role="switch"
-            aria-checked="false"
-            data-action="toggle"
-          >
+          <span class="switch" data-field="switch" aria-hidden="true">
             <span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>
-            <span class="switch__label" data-field="switch-label">Off</span>
-          </button>
+            <span class="switch__label" data-field="switch-label"></span>
+          </span>
         </div>
         <dl class="card__facts">
           <div class="card__fact">
-            <dt>Port</dt>
-            <dd data-field="port">—</dd>
+            <dt data-i18n="card.port"></dt>
+            <dd data-field="port"></dd>
           </div>
           <div class="card__fact">
-            <dt>Peers</dt>
-            <dd data-field="peers">—</dd>
+            <dt data-i18n="card.peers"></dt>
+            <dd data-field="peers"></dd>
           </div>
         </dl>
         <div class="card__state">
           <p class="state" data-field="state" data-state="unknown">
             <span class="state__glyph" aria-hidden="true"></span>
-            <span data-field="state-label">Unknown</span>
+            <span data-field="state-label"></span>
           </p>
           <p class="state__reason" data-field="reason"></p>
+          <p class="visually-hidden" data-field="action"></p>
         </div>
         <div class="counters">
           <div class="counter">
-            <span class="counter__label">Frames</span>
-            <span class="counter__value" data-field="frames">—</span>
+            <span class="counter__label" data-i18n="card.frames"></span>
+            <span class="counter__value" data-field="frames"></span>
           </div>
           <div class="counter">
-            <span class="counter__label">Bytes</span>
-            <span class="counter__value" data-field="bytes">—</span>
+            <span class="counter__label" data-i18n="card.bytes"></span>
+            <span class="counter__value" data-field="bytes"></span>
           </div>
           <div class="counter">
-            <span class="counter__label">Packet loss</span>
-            <span class="counter__value" data-field="loss">—</span>
+            <span class="counter__label" data-i18n="card.loss"></span>
+            <span class="counter__value" data-field="loss"></span>
           </div>
         </div>
       </article>

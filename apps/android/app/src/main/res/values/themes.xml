@@ -6,6 +6,9 @@
     of the platform only has to provide the window background and the
     status bar. Everything else is decided by the Compose theme in
     `ui/Theme.kt`.
+
+    The status bar is drawn with light symbols, because the window of the
+    shell is dark.
 -->
 <resources>
 
@@ -13,7 +16,7 @@
         <item name="android:windowBackground">@color/background</item>
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:navigationBarColor">@color/background</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
 </resources>
