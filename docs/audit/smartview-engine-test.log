@@ -1,0 +1,148 @@
+# The test output of the Smart View engine
+
+$ CARGO_TARGET_DIR=/workspace/target-smartview cargo test --offline -p phairplay-smartview
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.74s
+     Running unittests src/lib.rs (/workspace/target-smartview/debug/deps/phairplay_smartview-07c4652cb0163179)
+
+running 75 tests
+test api::tests::a_control_character_in_the_name_of_the_sender_is_removed ... ok
+test api::tests::a_handshake_without_a_name_is_accepted ... ok
+test api::tests::a_post_that_is_not_a_handshake_is_refused ... ok
+test api::tests::a_request_that_is_not_an_upgrade_is_refused ... ok
+test api::tests::a_second_channel_is_refused_and_the_first_one_keeps_the_slot ... ok
+test api::tests::an_over_long_name_of_the_sender_is_truncated ... ok
+test api::tests::an_unknown_path_is_a_not_found ... ok
+test api::tests::an_upgrade_without_a_key_is_refused ... ok
+test api::tests::the_accept_key_is_the_one_of_rfc_6455 ... ok
+test api::tests::the_answer_of_the_upgrade_carries_the_accept_key ... ok
+test api::tests::the_api_root_names_the_service_and_the_base_url ... ok
+test api::tests::the_base_url_is_answered ... ok
+test api::tests::the_description_document_is_served_as_xml ... ok
+test api::tests::the_handshake_records_the_announced_peer ... ok
+test api::tests::the_handshake_refuses_a_body_that_is_not_json ... ok
+test api::tests::the_limits_are_the_documented_ones ... ok
+test api::tests::the_method_is_parsed_and_spelled_back ... ok
+test api::tests::the_resource_description_lists_the_paths ... ok
+test api::tests::the_websocket_upgrade_is_accepted ... ok
+test description::tests::a_control_character_in_the_name_never_reaches_the_document ... ok
+test description::tests::a_markup_character_in_the_name_is_escaped ... ok
+test description::tests::a_receiver_without_capabilities_lists_none ... ok
+test description::tests::an_ampersand_in_the_base_url_is_escaped ... ok
+test description::tests::the_capabilities_are_listed_as_mime_types ... ok
+test description::tests::the_description_document_is_built_by_the_free_function_too ... ok
+test description::tests::the_document_carries_the_facts_a_sender_reads ... ok
+test description::tests::the_document_names_the_service_it_describes ... ok
+test description::tests::the_escaping_covers_the_five_markup_characters ... ok
+test description::tests::the_text_sanitiser_keeps_the_characters_that_are_allowed ... ok
+test description::tests::the_text_sanitiser_removes_the_characters_that_xml_forbids ... ok
+test engine::tests::a_peer_that_opened_a_channel_is_counted ... ok
+test engine::tests::the_detected_address_is_a_usable_one ... ok
+test engine::tests::the_engine_advertises_after_it_started ... ok
+test engine::tests::the_engine_answers_with_its_configuration ... ok
+test engine::tests::the_engine_can_be_started_again_after_it_was_stopped ... ok
+test engine::tests::the_engine_publishes_the_urls_of_the_discovery ... ok
+test engine::tests::the_engine_refuses_to_start_twice ... ok
+test engine::tests::the_engine_reports_that_it_is_not_running ... ok
+test engine::tests::the_engine_serves_the_description_document ... ok
+test engine::tests::the_engine_starts_in_the_idle_state ... ok
+test engine::tests::the_engine_stops_and_frees_the_ports ... ok
+test engine::tests::the_status_is_readable_while_the_engine_starts ... ok
+test error::tests::a_broken_socket_is_not_the_fault_of_the_peer ... ok
+test error::tests::a_malformed_request_is_the_fault_of_the_peer ... ok
+test error::tests::the_reason_is_part_of_the_message ... ok
+test lifecycle::tests::a_new_lifecycle_is_idle_and_serves_no_port ... ok
+test lifecycle::tests::the_protocol_can_be_disabled ... ok
+test lifecycle::tests::the_reason_of_the_last_failure_is_kept ... ok
+test lifecycle::tests::the_state_is_written_and_read_back ... ok
+test lifecycle::tests::the_tcp_port_is_written_and_read_back ... ok
+test lifecycle::tests::the_udp_port_is_written_and_read_back ... ok
+test session::tests::a_closed_session_frees_the_slot ... ok
+test session::tests::a_late_close_of_an_old_session_does_not_release_the_new_one ... ok
+test session::tests::a_peer_without_an_announcement_still_opens_a_session ... ok
+test session::tests::a_second_peer_is_rejected_and_not_queued ... ok
+test session::tests::a_session_is_opened_for_the_first_peer ... ok
+test session::tests::an_empty_name_falls_back ... ok
+test session::tests::an_empty_registry_has_no_session ... ok
+test session::tests::the_announced_peer_is_used_by_the_session ... ok
+test session::tests::the_log_summary_carries_the_address_and_the_mac ... ok
+test ssdp::tests::a_header_value_is_read_without_its_quotes ... ok
+test ssdp::tests::a_message_that_is_not_a_search_is_not_answered ... ok
+test ssdp::tests::a_message_without_a_target_has_no_target ... ok
+test ssdp::tests::a_search_for_another_service_is_not_answered ... ok
+test ssdp::tests::a_search_for_the_multi_screen_service_is_answered ... ok
+test ssdp::tests::a_search_with_a_broken_length_is_not_answered ... ok
+test ssdp::tests::a_search_with_a_foreign_man_header_is_not_answered ... ok
+test ssdp::tests::a_search_without_a_man_header_is_answered ... ok
+test ssdp::tests::a_truncated_search_is_not_answered ... ok
+test ssdp::tests::the_announcement_announces_the_receiver_and_its_leaving ... ok
+test ssdp::tests::the_answer_carries_the_location_and_the_target ... ok
+test ssdp::tests::the_header_names_are_case_insensitive ... ok
+test ssdp::tests::the_packet_cap_is_the_one_of_the_workspace ... ok
+test ssdp::tests::the_responder_reports_the_port_it_listens_on ... ok
+test ssdp::tests::the_search_target_is_the_one_samsung_documents ... ok
+
+test result: ok. 75 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.33s
+
+     Running tests/control_plane.rs (/workspace/target-smartview/debug/deps/control_plane-74ea50c499104e56)
+
+running 7 tests
+test a_second_sender_is_refused_while_the_channel_is_open ... ok
+test the_api_root_answers_with_the_base_url ... ok
+test the_channel_is_held_open_and_the_sender_is_counted ... ok
+test the_description_document_is_served_at_the_location ... ok
+test the_handshake_of_the_sender_is_accepted ... ok
+test the_upgrade_answer_carries_the_accept_key_of_the_example_of_the_rfc ... ok
+test the_websocket_upgrade_is_answered_with_the_accept_key ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.03s
+
+     Running tests/discovery.rs (/workspace/target-smartview/debug/deps/discovery-662f2131298c8676)
+
+running 5 tests
+test a_search_for_another_service_is_not_answered ... ok
+test a_search_for_the_multi_screen_service_is_answered_over_the_network ... ok
+test a_search_with_a_broken_length_is_not_answered_and_the_responder_survives ... ok
+test the_announcement_of_a_receiver_uses_the_well_known_ssdp_port ... ok
+test the_announcement_reaches_the_multicast_group ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.08s
+
+     Running tests/hardening.rs (/workspace/target-smartview/debug/deps/hardening-59f618b6ede100b8)
+
+running 12 tests
+test a_body_that_is_too_large_is_refused_before_it_is_read ... ok
+test a_chunked_body_is_refused ... ok
+test a_content_length_that_is_not_a_number_is_refused ... ok
+test a_control_character_in_the_name_of_the_device_never_reaches_the_document ... ok
+test a_control_character_in_the_name_of_the_sender_never_reaches_the_answer ... ok
+test a_request_without_a_request_line_is_refused ... ok
+test a_websocket_frame_that_announces_a_gigabyte_is_refused ... ok
+test an_over_long_header_line_is_refused ... ok
+test an_over_long_request_line_is_refused ... ok
+test an_unmasked_websocket_frame_breaks_the_channel ... ok
+test the_receiver_is_still_alive_after_every_refusal ... ok
+test too_many_headers_are_refused ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests phairplay_smartview
+
+running 13 tests
+test engines/smartview/src/api.rs - api (line 24) ... ok
+test engines/smartview/src/api/channel.rs - api::channel (line 21) ... ok
+test engines/smartview/src/api/reader.rs - api::reader (line 16) ... ok
+test engines/smartview/src/api/routes.rs - api::routes (line 21) ... ok
+test engines/smartview/src/api/server.rs - api::server (line 15) ... ok
+test engines/smartview/src/api/types.rs - api::types (line 14) ... ok
+test engines/smartview/src/description.rs - description (line 22) ... ok
+test engines/smartview/src/engine.rs - engine (line 19) ... ok
+test engines/smartview/src/error.rs - error (line 17) ... ok
+test engines/smartview/src/lib.rs - (line 61) ... ok
+test engines/smartview/src/lifecycle.rs - lifecycle (line 13) ... ok
+test engines/smartview/src/session.rs - session (line 18) ... ok
+test engines/smartview/src/ssdp.rs - ssdp (line 24) ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+all doctests ran in 1.59s; merged doctests compilation took 1.39s

@@ -17,7 +17,8 @@ apps/android      Kotlin + Jetpack Compose shell        (UniFFI client)
 apps/macos        SwiftUI + AppKit shell                (UniFFI client)
 apps/web          Dashboard: Rust HTTP/WS server + web UI
 
-platform/phairplay-ffi    UniFFI bridge + DTOs          (depends on core)
+platform/phairplay-ffi    UniFFI bridge + composition root
+                                                (depends on core, engines/*)
 
 core/phairplay-core       Shared vocabulary               (depends on nothing)
 
@@ -26,6 +27,7 @@ engines/airplay           AirPlay 2 receiver             (depends on core, forma
 engines/miracast         Miracast / WFD sink            (depends on core, formats/h264)
 engines/cast              Google Cast receiver           (depends on core, formats/plist)
 engines/dlna              UPnP / DLNA MediaRenderer      (depends on core)
+engines/smartview         Samsung Smart View sink         (depends on core)
 
 formats/plist             Apple property list codec      (depends on nothing)
 formats/h264              H.264 bitstream + RTP FU-A     (depends on nothing)
@@ -33,10 +35,33 @@ formats/aac               ADTS / AAC-ELD framing         (depends on nothing)
 formats/alac              Apple Lossless decoder         (depends on nothing)
 ```
 
-**Dependency rule (hard):** arrows point strictly downwards. A `formats/*`
-crate must not depend on an `engines/*` crate. An `engines/*` crate must not
-depend on `platform/*` or `apps/*`. `core/*` must not depend on any other
-crate in the workspace.
+**Dependency rule (hard):** arrows point strictly downwards, with one
+exception that has its own name.
+
+| From | May depend on |
+|---|---|
+| `apps/web` | `platform/*`, `core/*` |
+| `apps/android`, `apps/macos` | `platform/*`, `core/*` |
+| `platform/*` | `core/*`, `engines/*` |
+| `core/*` | nothing |
+| `engines/*` | `core/*`, `formats/*` |
+| `formats/*` | nothing |
+
+**The exception: the bridge may depend on the engines.** The bridge holds the
+**composition root** — the one place that knows which engines exist and hands
+them to the supervisor. Without it the supervisor is empty, and every
+`start_protocol` is answered with *"no engine implementation is registered
+for the protocol"*. That would leave the native shells able to show a
+dashboard and unable to receive anything. The cost is that the bridge links
+every protocol; the price is paid once, in the binary of the product, and it
+buys a receiver that actually receives. See
+[`ADR-0006`](../adr/ADR-0006-the-composition-root-lives-in-the-bridge.md).
+
+A `formats/*` crate must not depend on an `engines/*` crate. An `engines/*`
+crate must not depend on `platform/*` or `apps/*`. `core/*` must not depend
+on any other crate in the workspace. A native shell must not depend on an
+engine: it reaches the engines through the generated bindings, so that the
+same engine serves the shell and the dashboard.
 
 ---
 

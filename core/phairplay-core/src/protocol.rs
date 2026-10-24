@@ -32,15 +32,18 @@ pub enum ProtocolKind {
     Cast,
     /// DLNA / UPnP MediaRenderer — media playback (Windows "Cast to Device", VLC).
     Dlna,
+    /// Samsung Smart View — the MultiScreen Framework (Galaxy phones and tablets).
+    SmartView,
 }
 
 impl ProtocolKind {
     /// Every protocol, in a stable order.
-    pub const ALL: [ProtocolKind; 4] = [
+    pub const ALL: [ProtocolKind; 5] = [
         ProtocolKind::AirPlay,
         ProtocolKind::Miracast,
         ProtocolKind::Cast,
         ProtocolKind::Dlna,
+        ProtocolKind::SmartView,
     ];
 
     /// The stable lowercase identifier used in configuration, metrics and the API.
@@ -51,6 +54,7 @@ impl ProtocolKind {
             ProtocolKind::Miracast => "miracast",
             ProtocolKind::Cast => "cast",
             ProtocolKind::Dlna => "dlna",
+            ProtocolKind::SmartView => "smartview",
         }
     }
 
@@ -62,6 +66,7 @@ impl ProtocolKind {
             ProtocolKind::Miracast => "Miracast",
             ProtocolKind::Cast => "Google Cast",
             ProtocolKind::Dlna => "DLNA / UPnP",
+            ProtocolKind::SmartView => "Samsung Smart View",
         }
     }
 
@@ -86,6 +91,7 @@ impl ProtocolKind {
             ProtocolKind::Miracast => &[types::MIRACAST_TCP],
             ProtocolKind::Cast => &[types::GOOGLECAST_TCP],
             ProtocolKind::Dlna => &[],
+            ProtocolKind::SmartView => &[types::SAMSUNG_MSF_TCP],
         }
     }
 
@@ -94,7 +100,10 @@ impl ProtocolKind {
     pub const fn carries_video(self) -> bool {
         matches!(
             self,
-            ProtocolKind::AirPlay | ProtocolKind::Miracast | ProtocolKind::Cast
+            ProtocolKind::AirPlay
+                | ProtocolKind::Miracast
+                | ProtocolKind::Cast
+                | ProtocolKind::SmartView
         )
     }
 
@@ -120,6 +129,7 @@ impl std::str::FromStr for ProtocolKind {
             "miracast" | "wfd" | "wifi-display" => Ok(ProtocolKind::Miracast),
             "cast" | "googlecast" | "google-cast" => Ok(ProtocolKind::Cast),
             "dlna" | "upnp" | "mediarenderer" => Ok(ProtocolKind::Dlna),
+            "smartview" | "smart-view" | "samsung" | "msf" => Ok(ProtocolKind::SmartView),
             other => Err(format!("unknown protocol `{other}`")),
         }
     }
@@ -311,10 +321,22 @@ mod tests {
     }
 
     #[test]
+    fn a_smart_view_receiver_advertises_the_multi_screen_service() {
+        // WHY: a Galaxy phone looks for exactly this type when the user
+        // opens Smart View. A receiver that publishes another type is
+        // invisible to every Samsung sender.
+        assert_eq!(
+            ProtocolKind::SmartView.mdns_service_types(),
+            &["_samsungmsf._tcp"]
+        );
+    }
+
+    #[test]
     fn only_streaming_protocols_carry_video() {
         assert!(ProtocolKind::AirPlay.carries_video());
         assert!(ProtocolKind::Miracast.carries_video());
         assert!(ProtocolKind::Cast.carries_video());
+        assert!(ProtocolKind::SmartView.carries_video());
         assert!(!ProtocolKind::Dlna.carries_video());
     }
 }

@@ -35,12 +35,13 @@
 //! let receiver = Receiver::new(FfiAppConfig::from(&AppConfig::default()))
 //!     .unwrap_or_else(|error| panic!("the receiver must start: {error}"));
 //! let status = receiver.status();
-//! assert_eq!(status.len(), 4);
+//! assert_eq!(status.len(), 5);
 //! ```
 
 #![warn(missing_docs)]
 
 pub mod callbacks;
+pub mod composition;
 pub mod dto;
 pub mod error;
 pub mod listener;

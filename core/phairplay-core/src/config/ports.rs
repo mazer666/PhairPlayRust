@@ -39,11 +39,25 @@ pub const MIRACAST_WFD: u16 = 7236;
 /// The TCP port of the Google Cast (CastV2 over TLS) control channel.
 pub const CAST_TLS: u16 = 8009;
 
+/// The port of the Samsung Smart View API.
+///
+/// WHY: a Samsung sender reaches the MultiScreen Framework of a receiver on
+/// this port. It is the port a Samsung television uses, and a receiver that
+/// answers somewhere else is not found.
+pub const SMARTVIEW_API: u16 = 8001;
+
 /// The UDP port of the UPnP / SSDP multicast group.
 pub const SSDP: u16 = 1900;
 
 /// Every well-known port, in a stable order.
-pub const ALL: [u16; 5] = [AIRPLAY_RTSP, AIRPLAY_TIMING, MIRACAST_WFD, CAST_TLS, SSDP];
+pub const ALL: [u16; 6] = [
+    AIRPLAY_RTSP,
+    AIRPLAY_TIMING,
+    MIRACAST_WFD,
+    CAST_TLS,
+    SMARTVIEW_API,
+    SSDP,
+];
 
 /// The default port a protocol listens on.
 ///
@@ -68,6 +82,7 @@ pub const fn default_port(protocol: ProtocolKind) -> Option<u16> {
         ProtocolKind::Miracast => Some(MIRACAST_WFD),
         ProtocolKind::Cast => Some(CAST_TLS),
         ProtocolKind::Dlna => None,
+        ProtocolKind::SmartView => Some(SMARTVIEW_API),
     }
 }
 

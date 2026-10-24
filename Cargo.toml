@@ -7,6 +7,7 @@ members = [
     "engines/miracast",
     "engines/cast",
     "engines/dlna",
+    "engines/smartview",
     "formats/plist",
     "formats/h264",
     "formats/aac",

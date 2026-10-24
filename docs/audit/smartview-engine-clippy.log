@@ -1,0 +1,5 @@
+# The lint output of the Smart View engine
+
+$ CARGO_TARGET_DIR=/workspace/target-smartview cargo clippy --offline -p phairplay-smartview --all-targets -- -D warnings
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.67s

@@ -30,6 +30,8 @@ pub enum FfiProtocolKind {
     Cast,
     /// DLNA / UPnP MediaRenderer — media playback.
     Dlna,
+    /// Samsung Smart View — the MultiScreen Framework.
+    SmartView,
 }
 
 impl FfiProtocolKind {
@@ -42,6 +44,7 @@ impl FfiProtocolKind {
             FfiProtocolKind::Miracast => "miracast",
             FfiProtocolKind::Cast => "cast",
             FfiProtocolKind::Dlna => "dlna",
+            FfiProtocolKind::SmartView => "smartview",
         }
     }
 
@@ -53,6 +56,7 @@ impl FfiProtocolKind {
             FfiProtocolKind::Miracast => "Miracast",
             FfiProtocolKind::Cast => "Google Cast",
             FfiProtocolKind::Dlna => "DLNA / UPnP",
+            FfiProtocolKind::SmartView => "Samsung Smart View",
         }
     }
 }
@@ -64,6 +68,7 @@ impl From<ProtocolKind> for FfiProtocolKind {
             ProtocolKind::Miracast => FfiProtocolKind::Miracast,
             ProtocolKind::Cast => FfiProtocolKind::Cast,
             ProtocolKind::Dlna => FfiProtocolKind::Dlna,
+            ProtocolKind::SmartView => FfiProtocolKind::SmartView,
         }
     }
 }
@@ -75,6 +80,7 @@ impl From<FfiProtocolKind> for ProtocolKind {
             FfiProtocolKind::Miracast => ProtocolKind::Miracast,
             FfiProtocolKind::Cast => ProtocolKind::Cast,
             FfiProtocolKind::Dlna => ProtocolKind::Dlna,
+            FfiProtocolKind::SmartView => ProtocolKind::SmartView,
         }
     }
 }

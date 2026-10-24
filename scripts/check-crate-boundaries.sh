@@ -20,11 +20,24 @@
 #   The workspace has five layers. A crate may only depend on the layers
 #   that are listed next to it:
 #
-#     apps/*      ->  platform/*, core/*
-#     platform/*  ->  core/*
+#     apps/web    ->  platform/*, core/*
+#     apps/shell  ->  platform/*, core/*
+#     platform/*  ->  core/*, engines/*
 #     core/*      ->  (nothing)
 #     engines/*   ->  core/*, formats/*
 #     formats/*   ->  (nothing)
+#
+#   WHY the applications are two rules and not one: the native shells are
+#   *clients* of the bridge. They reach the engines only through it, so
+#   that the same engine serves the shell and the dashboard.
+#
+#   WHY the bridge may depend on the engines: the bridge holds the
+#   **composition root** — the one place that knows which engines exist and
+#   hands them to the supervisor. Without it the supervisor would be empty
+#   and every request would be answered with "no engine implementation is
+#   registered for the protocol" — the shells would start nothing. The cost
+#   is that the bridge links every protocol; the price is paid once, in the
+#   binary of the product, and it buys a receiver that actually receives.
 #
 #   Two rules deserve their own name:
 #
@@ -108,7 +121,8 @@ fail() {
 # directory is not part of one of the five layers.
 layer_of() {
   case "$1" in
-    apps/*) printf 'apps' ;;
+    apps/web) printf 'app-backend' ;;
+    apps/*) printf 'app-shell' ;;
     platform/*) printf 'platform' ;;
     core/*) printf 'core' ;;
     engines/*) printf 'engines' ;;
@@ -126,7 +140,13 @@ dependency_allowed() {
   local from="$1"
   local to="$2"
   case "$from" in
-    apps)
+    app-backend)
+      case "$to" in
+        platform|core|engines) printf 'yes' ;;
+        *) printf 'no' ;;
+      esac
+      ;;
+    app-shell)
       case "$to" in
         platform|core) printf 'yes' ;;
         *) printf 'no' ;;
@@ -134,7 +154,7 @@ dependency_allowed() {
       ;;
     platform)
       case "$to" in
-        core) printf 'yes' ;;
+        core|engines) printf 'yes' ;;
         *) printf 'no' ;;
       esac
       ;;
@@ -177,17 +197,22 @@ forbidden_reason() {
       ;;
     platform)
       case "$to" in
-        engines) printf 'the platform bridge may not depend on a protocol engine' ;;
-        formats) printf 'the platform bridge may not depend on a format crate' ;;
+        formats) printf 'the platform bridge may not depend on a format crate directly' ;;
         apps) printf 'the platform bridge may not depend on an application' ;;
-        *) printf 'the platform bridge may only depend on the core' ;;
+        *) printf 'the platform bridge may only depend on the core and on the engines' ;;
       esac
       ;;
-    apps)
+    app-backend)
       case "$to" in
-        engines) printf 'an application may not depend on a protocol engine' ;;
-        formats) printf 'an application may not depend on a format crate' ;;
-        *) printf 'an application may only depend on the platform bridge and on the core' ;;
+        formats) printf 'the local web backend may not depend on a format crate directly' ;;
+        *) printf 'the local web backend may only depend on the platform bridge, on the core and on the engines' ;;
+      esac
+      ;;
+    app-shell)
+      case "$to" in
+        engines) printf 'a native shell may not depend on a protocol engine — it reaches it through the bridge' ;;
+        formats) printf 'a native shell may not depend on a format crate' ;;
+        *) printf 'a native shell may only depend on the platform bridge and on the core' ;;
       esac
       ;;
     *)
@@ -352,10 +377,22 @@ PY
     'phairplay-core = { path = "../../core/phairplay-core" }' \
     'phairplay-ffi = { path = "../../platform/phairplay-ffi" }'
 
-  run_case "platform -> engines" \
+  # WHY: the bridge may depend on the engines — it holds the composition
+  # root. It may *not* depend on a format crate directly: the formats are
+  # the business of the engines, and the bridge has no business knowing
+  # them.
+  run_case "platform -> formats" \
     "platform/phairplay-ffi/Cargo.toml" \
     "phairplay-core = { path = \"../../core/phairplay-core\" }" \
-    'phairplay-airplay = { path = "../../engines/airplay" }'
+    'phairplay-plist = { path = "../../formats/plist" }'
+
+  # WHY: the local dashboard reaches the engines through the bridge, like
+  # every other client. A dashboard that linked a protocol engine itself
+  # would have a second truth about what the receiver consists of.
+  run_case "app-backend -> formats" \
+    "apps/web/Cargo.toml" \
+    "phairplay-core = { path = \"../../core/phairplay-core\" }" \
+    'phairplay-plist = { path = "../../formats/plist" }'
 
   rm -rf "$sandbox"
 

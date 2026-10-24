@@ -1207,7 +1207,13 @@ name = "phairplay-ffi"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "if-addrs",
+ "phairplay-airplay",
+ "phairplay-cast",
  "phairplay-core",
+ "phairplay-dlna",
+ "phairplay-miracast",
+ "phairplay-smartview",
  "thiserror",
  "tokio",
  "tracing",
@@ -1243,6 +1249,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "phairplay-smartview"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "base64",
+ "if-addrs",
+ "phairplay-core",
+ "serde_json",
+ "sha1 0.10.7",
+ "socket2 0.6.5",
+ "thiserror",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "phairplay-web"
 version = "0.1.0"
 dependencies = [
@@ -1250,12 +1272,8 @@ dependencies = [
  "futures",
  "http-body-util",
  "if-addrs",
- "phairplay-airplay",
- "phairplay-cast",
  "phairplay-core",
- "phairplay-dlna",
  "phairplay-ffi",
- "phairplay-miracast",
  "serde",
  "serde_json",
  "tokio",

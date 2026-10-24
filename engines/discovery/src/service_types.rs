@@ -51,12 +51,13 @@ pub use phairplay_core::config::service_types::RAOP_TCP;
 
 /// The Google Cast service type.
 pub use phairplay_core::config::service_types::GOOGLECAST_TCP;
+pub use phairplay_core::config::service_types::SAMSUNG_MSF_TCP;
 
 /// The Miracast / Wi-Fi Display service type.
 pub use phairplay_core::config::service_types::MIRACAST_TCP;
 
 /// Every service type this crate knows how to advertise.
-pub const ALL_SERVICE_TYPES: [&str; 4] = phairplay_core::config::service_types::ALL;
+pub const ALL_SERVICE_TYPES: [&str; 5] = phairplay_core::config::service_types::ALL;
 
 /// The separator between the MAC prefix and the display name in a RAOP
 /// service instance name.

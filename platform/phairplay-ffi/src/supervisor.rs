@@ -251,6 +251,12 @@ impl ReceiverCore {
         match self.engine(protocol) {
             Some(engine) => {
                 let mut status = engine.status();
+                // WHY: "enabled" is a fact of the *configuration*, not of the
+                // engine. An engine reports what it was told when it was
+                // built, but the configuration is the authority — a protocol
+                // that the user switched off reads *disabled*, whatever the
+                // engine remembers.
+                status.enabled = self.config().is_enabled(protocol);
                 if status.last_error.is_none() {
                     status.last_error = self.last_error(protocol);
                 }

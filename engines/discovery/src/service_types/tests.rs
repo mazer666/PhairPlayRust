@@ -8,7 +8,19 @@ fn the_airplay_pair_is_complete() {
     // some senders — this test pins the pair.
     assert!(is_known_service_type(AIRPLAY_TCP));
     assert!(is_known_service_type(RAOP_TCP));
-    assert_eq!(ALL_SERVICE_TYPES.len(), 4);
+    // WHY: the count is compared with the core, and not with a literal —
+    // a new protocol must not break a test that is about the AirPlay pair.
+    assert_eq!(
+        ALL_SERVICE_TYPES.len(),
+        phairplay_core::config::service_types::ALL.len()
+    );
+}
+
+#[test]
+fn the_smart_view_type_is_known() {
+    // WHY: a Galaxy phone looks for exactly this type. A receiver that does
+    // not publish it is invisible to every Samsung sender.
+    assert!(is_known_service_type(SAMSUNG_MSF_TCP));
 }
 
 #[test]

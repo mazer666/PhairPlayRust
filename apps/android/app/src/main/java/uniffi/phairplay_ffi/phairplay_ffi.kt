@@ -2648,6 +2648,10 @@ data class FfiLimitsConfig (
      */
     var `audioQueuePackets`: kotlin.ULong, 
     /**
+     * The maximum total number of bytes buffered in the audio sink queue.
+     */
+    var `audioQueueBytes`: kotlin.ULong, 
+    /**
      * The maximum number of pairing attempts before the sender is locked out.
      */
     var `maxPairingAttempts`: kotlin.UInt, 
@@ -2685,6 +2689,7 @@ public object FfiConverterTypeFfiLimitsConfig: FfiConverterRustBuffer<FfiLimitsC
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
@@ -2698,6 +2703,7 @@ public object FfiConverterTypeFfiLimitsConfig: FfiConverterRustBuffer<FfiLimitsC
             FfiConverterULong.allocationSize(value.`videoQueueFrames`) +
             FfiConverterULong.allocationSize(value.`videoQueueBytes`) +
             FfiConverterULong.allocationSize(value.`audioQueuePackets`) +
+            FfiConverterULong.allocationSize(value.`audioQueueBytes`) +
             FfiConverterUInt.allocationSize(value.`maxPairingAttempts`) +
             FfiConverterULong.allocationSize(value.`maxArtworkBytes`) +
             FfiConverterULong.allocationSize(value.`maxPhotoBytes`) +
@@ -2710,6 +2716,7 @@ public object FfiConverterTypeFfiLimitsConfig: FfiConverterRustBuffer<FfiLimitsC
             FfiConverterULong.write(value.`videoQueueFrames`, buf)
             FfiConverterULong.write(value.`videoQueueBytes`, buf)
             FfiConverterULong.write(value.`audioQueuePackets`, buf)
+            FfiConverterULong.write(value.`audioQueueBytes`, buf)
             FfiConverterUInt.write(value.`maxPairingAttempts`, buf)
             FfiConverterULong.write(value.`maxArtworkBytes`, buf)
             FfiConverterULong.write(value.`maxPhotoBytes`, buf)
@@ -3487,7 +3494,11 @@ enum class FfiProtocolKind {
     /**
      * DLNA / UPnP MediaRenderer — media playback.
      */
-    DLNA;
+    DLNA,
+    /**
+     * Samsung Smart View — the MultiScreen Framework.
+     */
+    SMART_VIEW;
     companion object
 }
 

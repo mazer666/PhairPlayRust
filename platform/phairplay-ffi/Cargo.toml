@@ -19,9 +19,19 @@ path = "src/bin/uniffi-bindgen.rs"
 
 [dependencies]
 phairplay-core = { path = "../../core/phairplay-core" }
+
+# The composition root lives here: the bridge is the one place that knows
+# which engines exist, because both the native shells and the local dashboard
+# reach the receiver through it.
+phairplay-airplay = { path = "../../engines/airplay" }
+phairplay-cast = { path = "../../engines/cast" }
+phairplay-dlna = { path = "../../engines/dlna" }
+phairplay-miracast = { path = "../../engines/miracast" }
+phairplay-smartview = { path = "../../engines/smartview" }
 uniffi.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
+if-addrs.workspace = true
 tokio = { workspace = true }
 
 [dev-dependencies]

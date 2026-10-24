@@ -1,0 +1,48 @@
+[package]
+name = "phairplay-smartview"
+description = "The Samsung Smart View (MultiScreen Framework) receiver engine of PhairPlayRust."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+phairplay-core = { path = "../../core/phairplay-core" }
+async-trait = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "net", "io-util", "sync", "time", "macros"] }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+if-addrs = { workspace = true }
+# The JSON body of the API. `serde_json` is already a workspace dependency
+# (the dashboard and the bridge use it), so no new third-party code enters
+# the build.
+serde_json = { workspace = true }
+# The base64 of the `Sec-WebSocket-Accept` header. `base64` is already a
+# workspace dependency (the pairing material of the AirPlay engine uses it).
+base64 = { workspace = true }
+# The SHA-1 of the WebSocket handshake nonce.
+#
+# WHY: RFC 6455 defines the `Sec-WebSocket-Accept` header as the base64 of
+# the SHA-1 of the client key and the fixed GUID. SHA-1 is *not* a security
+# claim here — the value only proves that the answer belongs to the request.
+# The crate is already in the tree of the workspace (the `rsa` crate pulls it
+# in through its `sha1` feature), so this adds no new third-party code.
+sha1 = "0.10"
+# The socket options of the multicast socket.
+#
+# WHY: `std::net::UdpSocket` cannot set `SO_REUSEADDR`, and the only way to
+# set it without `unsafe` is a crate that wraps the socket API. `socket2` is
+# already in the tree of the workspace (the Tokio runtime uses it), so this
+# adds no new third-party code either.
+socket2 = "0.6"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+# The end-to-end test of the discovery binds the SSDP port and joins the
+# multicast group. The standard library cannot set `SO_REUSEADDR`, and the
+# crate that wraps the socket API is already a dependency of this crate.
+socket2 = "0.6"
+
+[lints]
+workspace = true

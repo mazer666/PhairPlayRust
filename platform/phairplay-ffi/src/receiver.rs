@@ -20,7 +20,7 @@
 //! let receiver = Receiver::new(FfiAppConfig::from(&AppConfig::default()))
 //!     .unwrap_or_else(|error| panic!("the receiver must start: {error}"));
 //! let status = receiver.status();
-//! assert_eq!(status.len(), 4);
+//! assert_eq!(status.len(), 5);
 //! ```
 
 use std::sync::Arc;
@@ -55,6 +55,11 @@ impl std::fmt::Debug for Receiver {
 impl Receiver {
     /// Creates a receiver with the given configuration.
     ///
+    /// WHY the engines are registered here: a receiver without engines is a
+    /// receiver that cannot receive. The native shells reach the receiver
+    /// only through this constructor, so this is the one place where the
+    /// composition root has to run for them.
+    ///
     /// # Errors
     /// Returns [`FfiError`] when the configuration is invalid or when the
     /// runtime of the bridge cannot be created.
@@ -63,7 +68,7 @@ impl Receiver {
         guard(|| {
             let core = AppConfig::try_from(&config)?;
             Ok(Arc::new(Receiver {
-                core: ReceiverCore::new(core)?,
+                core: crate::composition::build(&core)?,
             }))
         })
     }
@@ -303,23 +308,52 @@ mod tests {
         let receiver = Receiver::new(FfiAppConfig::from(&AppConfig::default()))
             .must("the receiver must start");
         let status = receiver.status();
-        assert_eq!(status.len(), 4);
+        // WHY: the count comes from the core, and not from a literal — a new
+        // protocol must not break a test that is about the shape of the list.
+        assert_eq!(status.len(), ProtocolKind::ALL.len());
         let names: Vec<&str> = status.iter().map(|entry| entry.protocol.as_str()).collect();
-        assert_eq!(names, vec!["airplay", "miracast", "cast", "dlna"]);
+        assert_eq!(
+            names,
+            vec!["airplay", "miracast", "cast", "dlna", "smartview"]
+        );
     }
 
     #[test]
-    fn starting_a_protocol_without_an_engine_is_an_unsupported_failure() {
+    fn a_native_shell_can_start_a_protocol() {
+        // WHY: this test is the proof that the native shells are more than a
+        // dashboard. A shell creates the receiver through this constructor and
+        // then starts a protocol — and it works, because the constructor
+        // registers the engines of the composition root.
+        let receiver = Receiver::new(FfiAppConfig::from(&AppConfig::default()))
+            .must("the receiver must start");
+        let status = receiver.start_protocol("airplay".to_string());
+        // WHY: the protocol may fail to start for a reason of the machine —
+        // a port that is taken, a network that is not there. What must not
+        // happen is the answer "no engine implementation is registered".
+        if let Err(error) = &status {
+            assert_ne!(
+                error.code(),
+                crate::error::FfiErrorCode::Unsupported.as_i32(),
+                "the engine of the protocol must be registered: {error}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_protocol_that_does_not_exist_is_refused_as_an_invalid_input() {
         let receiver = Receiver::new(FfiAppConfig::from(&AppConfig::default()))
             .must("the receiver must start");
         let error = receiver
-            .start_protocol("airplay".to_string())
-            .must_err("there is no engine for the protocol");
+            .start_protocol("telepathy".to_string())
+            .must_err("there is no such protocol");
+        // WHY: an unknown name is an invalid input, not a missing feature.
+        // The shell shows the two cases differently: one is a mistake of the
+        // caller, the other is a platform that cannot do it.
         assert_eq!(
             error.code(),
-            crate::error::FfiErrorCode::Unsupported.as_i32()
+            crate::error::FfiErrorCode::InvalidInput.as_i32()
         );
-        assert!(error.details().contains("airplay"), "{error}");
+        assert!(error.details().contains("telepathy"), "{error}");
     }
 
     #[test]

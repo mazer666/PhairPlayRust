@@ -1852,6 +1852,10 @@ public struct FfiLimitsConfig {
      */
     public var audioQueuePackets: UInt64
     /**
+     * The maximum total number of bytes buffered in the audio sink queue.
+     */
+    public var audioQueueBytes: UInt64
+    /**
      * The maximum number of pairing attempts before the sender is locked out.
      */
     public var maxPairingAttempts: UInt32
@@ -1889,6 +1893,9 @@ public struct FfiLimitsConfig {
          * The maximum number of audio packets buffered in the sink queue.
          */audioQueuePackets: UInt64, 
         /**
+         * The maximum total number of bytes buffered in the audio sink queue.
+         */audioQueueBytes: UInt64, 
+        /**
          * The maximum number of pairing attempts before the sender is locked out.
          */maxPairingAttempts: UInt32, 
         /**
@@ -1909,6 +1916,7 @@ public struct FfiLimitsConfig {
         self.videoQueueFrames = videoQueueFrames
         self.videoQueueBytes = videoQueueBytes
         self.audioQueuePackets = audioQueuePackets
+        self.audioQueueBytes = audioQueueBytes
         self.maxPairingAttempts = maxPairingAttempts
         self.maxArtworkBytes = maxArtworkBytes
         self.maxPhotoBytes = maxPhotoBytes
@@ -1932,6 +1940,9 @@ extension FfiLimitsConfig: Equatable, Hashable {
             return false
         }
         if lhs.audioQueuePackets != rhs.audioQueuePackets {
+            return false
+        }
+        if lhs.audioQueueBytes != rhs.audioQueueBytes {
             return false
         }
         if lhs.maxPairingAttempts != rhs.maxPairingAttempts {
@@ -1959,6 +1970,7 @@ extension FfiLimitsConfig: Equatable, Hashable {
         hasher.combine(videoQueueFrames)
         hasher.combine(videoQueueBytes)
         hasher.combine(audioQueuePackets)
+        hasher.combine(audioQueueBytes)
         hasher.combine(maxPairingAttempts)
         hasher.combine(maxArtworkBytes)
         hasher.combine(maxPhotoBytes)
@@ -1980,6 +1992,7 @@ public struct FfiConverterTypeFfiLimitsConfig: FfiConverterRustBuffer {
                 videoQueueFrames: FfiConverterUInt64.read(from: &buf), 
                 videoQueueBytes: FfiConverterUInt64.read(from: &buf), 
                 audioQueuePackets: FfiConverterUInt64.read(from: &buf), 
+                audioQueueBytes: FfiConverterUInt64.read(from: &buf), 
                 maxPairingAttempts: FfiConverterUInt32.read(from: &buf), 
                 maxArtworkBytes: FfiConverterUInt64.read(from: &buf), 
                 maxPhotoBytes: FfiConverterUInt64.read(from: &buf), 
@@ -1993,6 +2006,7 @@ public struct FfiConverterTypeFfiLimitsConfig: FfiConverterRustBuffer {
         FfiConverterUInt64.write(value.videoQueueFrames, into: &buf)
         FfiConverterUInt64.write(value.videoQueueBytes, into: &buf)
         FfiConverterUInt64.write(value.audioQueuePackets, into: &buf)
+        FfiConverterUInt64.write(value.audioQueueBytes, into: &buf)
         FfiConverterUInt32.write(value.maxPairingAttempts, into: &buf)
         FfiConverterUInt64.write(value.maxArtworkBytes, into: &buf)
         FfiConverterUInt64.write(value.maxPhotoBytes, into: &buf)
@@ -3506,6 +3520,10 @@ public enum FfiProtocolKind {
      * DLNA / UPnP MediaRenderer — media playback.
      */
     case dlna
+    /**
+     * Samsung Smart View — the MultiScreen Framework.
+     */
+    case smartView
 }
 
 
@@ -3531,6 +3549,8 @@ public struct FfiConverterTypeFfiProtocolKind: FfiConverterRustBuffer {
         
         case 4: return .dlna
         
+        case 5: return .smartView
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
@@ -3553,6 +3573,10 @@ public struct FfiConverterTypeFfiProtocolKind: FfiConverterRustBuffer {
         
         case .dlna:
             writeInt(&buf, Int32(4))
+        
+        
+        case .smartView:
+            writeInt(&buf, Int32(5))
         
         }
     }

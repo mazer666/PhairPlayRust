@@ -111,12 +111,13 @@ def the_status_survives_the_bridge():
     receiver = ffi.Receiver(a_configuration())
     status = receiver.status()
 
-    assert len(status) == 4, status
+    assert len(status) == 5, status
     assert [entry.protocol for entry in status] == [
         ffi.FfiProtocolKind.AIR_PLAY,
         ffi.FfiProtocolKind.MIRACAST,
         ffi.FfiProtocolKind.CAST,
         ffi.FfiProtocolKind.DLNA,
+        ffi.FfiProtocolKind.SMART_VIEW,
     ], status
     # The configuration of the proof disables the AirPlay engine and says
     # nothing about Miracast, which therefore keeps the default.
@@ -175,14 +176,14 @@ def an_error_arrives_as_a_structured_failure():
         raise AssertionError("the disabled protocol must be rejected")
 
     try:
-        receiver.start_protocol("cast")
+        receiver.start_protocol("telepathy")
     except ffi.FfiError.Failed as error:
-        # No engine is registered in the library of this proof, so the
-        # receiver must say so instead of pretending that it advertises.
-        assert error.code == 6, error.code
-        assert "cast" in error.details, error.details
+        # A name that is not a protocol is an invalid input. The receiver
+        # must say so instead of pretending that it advertises something.
+        assert error.code == 1, error.code
+        assert "telepathy" in error.details, error.details
     else:
-        raise AssertionError("the protocol without an engine must be rejected")
+        raise AssertionError("a name that is not a protocol must be rejected")
     print("ok  a failure arrives as a structured failure through the C ABI")
 
 

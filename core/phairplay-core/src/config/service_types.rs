@@ -51,8 +51,21 @@ pub const MIRACAST_TCP: &str = "_miracast._tcp";
 /// track" command back to it.
 pub const DACP_TCP: &str = "_dacp._tcp";
 
+/// The Samsung MultiScreen Framework service type.
+///
+/// WHY: a Galaxy phone looks for exactly this type when the user opens
+/// Smart View. A receiver that does not publish it is invisible to every
+/// Samsung sender.
+pub const SAMSUNG_MSF_TCP: &str = "_samsungmsf._tcp";
+
 /// Every service type the receiver advertises, in a stable order.
-pub const ALL: [&str; 4] = [AIRPLAY_TCP, RAOP_TCP, GOOGLECAST_TCP, MIRACAST_TCP];
+pub const ALL: [&str; 5] = [
+    AIRPLAY_TCP,
+    RAOP_TCP,
+    GOOGLECAST_TCP,
+    MIRACAST_TCP,
+    SAMSUNG_MSF_TCP,
+];
 
 /// Whether a service type is one the receiver advertises.
 #[must_use]
@@ -71,6 +84,7 @@ mod tests {
         assert_eq!(RAOP_TCP, "_raop._tcp");
         assert_eq!(GOOGLECAST_TCP, "_googlecast._tcp");
         assert_eq!(MIRACAST_TCP, "_miracast._tcp");
+        assert_eq!(SAMSUNG_MSF_TCP, "_samsungmsf._tcp");
         assert_eq!(DACP_TCP, "_dacp._tcp");
     }
 
