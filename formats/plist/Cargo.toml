@@ -1,4 +1,8 @@
 [package]
+# WHY: the crates of this workspace are built from the tree of the
+# repository and are not published to a registry. The licence is the AGPL
+# and the source is the repository.
+publish = false
 name = "phairplay-plist"
 description = "Apple property list codec (XML and binary) for PhairPlayRust."
 version.workspace = true

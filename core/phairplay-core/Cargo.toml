@@ -1,4 +1,8 @@
 [package]
+# WHY: the crates of this workspace are built from the tree of the
+# repository and are not published to a registry. The licence is the AGPL
+# and the source is the repository.
+publish = false
 name = "phairplay-core"
 description = "Shared core of the PhairPlayRust receiver stack: configuration, capabilities, session lifecycle, media sinks and the job executor."
 version.workspace = true

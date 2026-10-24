@@ -1,4 +1,8 @@
 [package]
+# WHY: the crates of this workspace are built from the tree of the
+# repository and are not published to a registry. The licence is the AGPL
+# and the source is the repository.
+publish = false
 name = "phairplay-h264"
 description = "H.264 bitstream parsing and RTP FU-A reassembly for PhairPlayRust."
 version.workspace = true

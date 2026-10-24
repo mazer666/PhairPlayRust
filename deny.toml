@@ -114,6 +114,7 @@ skip = [
     "phairplay-alac",
     "phairplay-ffi",
     "phairplay-web",
+    "phairplay-smartview",
 ]
 
 # ── The sources ─────────────────────────────────────────────────────────────

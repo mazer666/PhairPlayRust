@@ -1,4 +1,8 @@
 [package]
+# WHY: the crates of this workspace are built from the tree of the
+# repository and are not published to a registry. The licence is the AGPL
+# and the source is the repository.
+publish = false
 name = "phairplay-web"
 description = "The Rust backend of the PhairPlayRust dashboard: a local HTTP and WebSocket API."
 version.workspace = true
