@@ -92,6 +92,14 @@ jobs:
       - name: The lint of the workspace
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      # WHY: the round-trip test of the bridge loads the *shared library* and
+      # calls the *binding generator*. `cargo test` builds neither of them —
+      # it builds the test harness of the library, not its cdylib. Without
+      # this step the test fails on a clean checkout with "the shared
+      # library of the bridge must be built next to the test binary".
+      - name: The shared library and the binding generator of the bridge
+        run: cargo build -p phairplay-ffi
+
       - name: The tests of the workspace
         run: cargo test --workspace
 

@@ -296,6 +296,10 @@ if [ "$FAST" -eq 1 ]; then
   printf '    NOT RUN: the tests were skipped (--fast). The gate is a partial gate.\n' >&2
   NOT_RUN=$((NOT_RUN + 1))
 else
+  # WHY: the round-trip test of the bridge loads the shared library and
+  # calls the binding generator. `cargo test` builds neither — it builds the
+  # test harness of the library, not its cdylib.
+  run_step "the shared library of the bridge" cargo build -p phairplay-ffi
   run_step "the tests of the workspace" cargo test --workspace
 fi
 

@@ -1,0 +1,1270 @@
+   Compiling phairplay-cast v0.1.0 (/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/PhairPlayRust/engines/cast)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.30s
+     Running unittests src/lib.rs (target/debug/deps/phairplay_aac-fc9d629f664a1e2f)
+
+running 24 tests
+test adts::tests::counts_the_samples_of_a_frame ... ok
+test adts::tests::counts_the_samples_of_a_stream ... ok
+test adts::tests::parses_a_low_complexity_frame ... ok
+test adts::tests::rejects_a_frame_that_does_not_fit ... ok
+test adts::tests::rejects_a_missing_sync_word ... ok
+test adts::tests::rejects_a_reserved_sample_rate ... ok
+test adts::tests::rejects_a_truncated_header ... ok
+test adts::tests::reports_the_length_of_the_frame ... ok
+test adts::tests::splits_a_stream_into_frames ... ok
+test config::tests::computes_the_bitrate_from_a_measured_packet ... ok
+test config::tests::computes_the_bitrate_of_the_format ... ok
+test config::tests::computes_the_duration_of_a_packet ... ok
+test config::tests::computes_the_packet_size_from_a_bitrate ... ok
+test config::tests::counts_the_samples_of_a_low_complexity_packet ... ok
+test config::tests::counts_the_samples_of_a_low_delay_packet ... ok
+test config::tests::counts_the_samples_of_a_multi_frame_packet ... ok
+test config::tests::refuses_a_stream_without_a_sample_rate ... ok
+test eld::tests::parses_a_mono_header ... ok
+test eld::tests::parses_a_multichannel_header ... ok
+test eld::tests::parses_a_stereo_header ... ok
+test eld::tests::rejects_a_truncated_header ... ok
+test eld::tests::rejects_an_unknown_sync_word ... ok
+test error::tests::names_the_numbers ... ok
+test error::tests::names_the_sync_word ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_airplay-e42964e0fc2076a2)
+
+running 230 tests
+test dacp::tests::a_command_has_a_stable_path ... ok
+test dacp::tests::a_command_without_an_endpoint_is_rejected ... ok
+test dacp::tests::a_request_without_an_identity_is_rejected ... ok
+test dacp::tests::an_empty_identity_is_ignored ... ok
+test dacp::tests::the_identity_is_stored_once ... ok
+test dacp::tests::the_request_carries_the_token ... ok
+test dacp::tests::the_service_name_carries_the_identifier ... ok
+test dacp::tests::the_status_code_is_parsed ... ok
+test dmap::tests::a_body_that_is_not_a_dmap_document_is_rejected ... ok
+test dmap::tests::a_deeply_nested_document_does_not_recurse_forever ... ok
+test dmap::tests::a_flat_document_yields_the_metadata ... ok
+test dmap::tests::a_length_that_overruns_the_buffer_is_rejected ... ok
+test dmap::tests::a_nested_listing_item_yields_the_metadata ... ok
+test dmap::tests::a_too_short_body_is_rejected ... ok
+test dmap::tests::an_empty_value_is_treated_as_absent ... ok
+test engine::tests::a_new_engine_is_idle ... ok
+test engine::tests::a_second_sender_is_rejected_with_service_unavailable ... ok
+test engine::tests::a_started_engine_advertises_and_stops_again ... ok
+test engine::tests::starting_twice_is_refused ... ok
+test engine::tests::stopping_an_idle_engine_is_refused ... ok
+test engine::tests::the_status_is_readable_from_another_thread ... ok
+test error::tests::a_limit_error_maps_onto_the_core_limit_variant ... ok
+test error::tests::a_protocol_violation_maps_onto_the_core_protocol_variant ... ok
+test error::tests::an_io_error_is_carried_through ... ok
+test error::tests::an_unsupported_error_still_names_the_boundary ... ok
+test error::tests::the_core_error_kind_of_a_limit_is_resource_exhausted ... ok
+test fairplay::tests::a_request_of_the_wrong_size_is_rejected ... ok
+test fairplay::tests::a_second_phase_request_of_the_wrong_size_is_rejected ... ok
+test fairplay::tests::a_wrapped_key_of_the_wrong_size_is_rejected ... ok
+test fairplay::tests::an_invalid_mode_is_rejected ... ok
+test fairplay::tests::an_unsupported_version_is_rejected ... ok
+test fairplay::tests::every_mode_has_its_own_answer ... ok
+test fairplay::tests::the_first_phase_answers_with_142_bytes ... ok
+test fairplay::tests::the_hex_decoder_rejects_an_odd_length ... ok
+test fairplay::tests::the_key_cannot_be_unwrapped_without_the_handshake ... ok
+test fairplay::tests::the_key_decryption_reports_the_product_boundary ... ok
+test fairplay::tests::the_negotiated_version_is_remembered ... ok
+test fairplay::tests::the_second_phase_answers_with_32_bytes ... ok
+test fairplay::tests::the_second_version_echoes_its_own_version ... ok
+test fairplay::tests::the_second_version_patches_the_mode_into_the_answer ... ok
+test h264::tests::a_720p_sps_yields_its_resolution ... ok
+test h264::tests::a_picture_parameter_set_is_not_a_sequence_parameter_set ... ok
+test h264::tests::a_run_of_zero_bits_cannot_overflow_the_exp_golomb_reader ... ok
+test h264::tests::a_start_code_is_recognised_in_both_lengths ... ok
+test h264::tests::a_start_code_is_stripped_before_parsing ... ok
+test h264::tests::a_truncated_sps_is_rejected ... ok
+test h264::tests::an_all_zero_sps_is_rejected ... ok
+test h264::tests::an_empty_buffer_is_rejected ... ok
+test h264::tests::the_nal_type_is_read_from_the_first_byte ... ok
+test limits::tests::a_nonsensical_limit_is_raised_to_a_usable_floor ... ok
+test limits::tests::an_rtp_frame_can_never_exceed_the_message_limit ... ok
+test limits::tests::the_default_limits_are_usable ... ok
+test limits::tests::the_limits_come_from_the_configuration ... ok
+test limits::tests::the_message_limit_comes_from_the_protocol_configuration ... ok
+test mirror::tests::a_different_shared_secret_yields_a_different_key ... ok
+test mirror::tests::a_different_stream_identifier_yields_a_different_key ... ok
+test mirror::tests::a_truncated_avcc_payload_is_stopped_at_the_last_complete_unit ... ok
+test mirror::tests::a_zero_length_unit_ends_the_conversion ... ok
+test mirror::tests::avcc_nal_units_become_annex_b ... ok
+test mirror::tests::the_audio_key_is_the_first_half_of_the_hash ... ok
+test mirror::tests::the_derivation_is_deterministic ... ok
+test mirror::tests::the_derived_material_has_the_expected_length ... ok
+test pairing::identity::tests::a_malformed_public_key_is_rejected_without_panicking ... ok
+test pairing::identity::tests::a_malformed_signature_is_rejected_without_panicking ... ok
+test pairing::identity::tests::a_signature_over_another_message_does_not_verify ... ok
+test pairing::identity::tests::a_signature_verifies_against_the_public_key ... ok
+test pairing::identity::tests::an_identity_is_stable_across_loads ... ok
+test pairing::identity::tests::two_identities_with_different_seeds_differ ... ok
+test pairing::legacy::tests::a_client_key_outside_the_group_is_rejected ... ok
+test pairing::legacy::tests::a_client_that_knows_the_pin_completes_the_exchange ... ok
+test pairing::legacy::tests::a_wrong_pin_is_rejected ... ok
+test pairing::legacy::tests::an_unknown_request_is_rejected ... ok
+test pairing::legacy::tests::step_one_answers_with_a_key_and_a_salt ... ok
+test pairing::legacy::tests::step_three_before_step_two_is_rejected ... ok
+test pairing::legacy::tests::step_two_before_step_one_is_rejected ... ok
+test pairing::legacy::tests::the_counter_increments_with_carry ... ok
+test pairing::legacy::tests::the_group_prime_has_the_expected_size ... ok
+test pairing::legacy::tests::the_session_key_is_forty_bytes ... ok
+test pairing::raop_rsa::tests::a_garbage_blob_is_rejected ... ok
+test pairing::raop_rsa::tests::a_wrapped_key_is_recovered ... ok
+test pairing::raop_rsa::tests::the_embedded_key_parses ... ok
+test pairing::raop_rsa::tests::the_hex_decoder_rejects_an_odd_length ... ok
+test pairing::store::tests::a_controller_can_be_removed ... ok
+test pairing::store::tests::a_controller_can_be_stored_and_read_back ... ok
+test pairing::store::tests::an_unknown_controller_is_not_found ... ok
+test pairing::store::tests::the_failed_attempt_counter_grows_and_can_be_reset ... ok
+test pairing::verify::tests::a_complete_exchange_produces_a_shared_secret ... ok
+test pairing::verify::tests::a_forged_signature_is_rejected ... ok
+test pairing::verify::tests::a_message_of_the_wrong_size_is_rejected ... ok
+test pairing::verify::tests::an_unknown_state_byte_is_rejected ... ok
+test pairing::verify::tests::pair_setup_rejects_a_body_of_the_wrong_size ... ok
+test pairing::verify::tests::pair_setup_returns_the_receiver_public_key ... ok
+test pairing::verify::tests::the_derived_key_material_is_stable ... ok
+test pairing::verify::tests::the_second_message_without_the_first_is_rejected ... ok
+test pairing::verify::tests::the_sender_can_verify_the_receiver_signature ... ok
+test photo::tests::a_content_type_with_a_charset_is_accepted ... ok
+test photo::tests::a_jpeg_is_accepted ... ok
+test photo::tests::a_mismatched_content_type_is_rejected ... ok
+test photo::tests::a_png_is_accepted ... ok
+test photo::tests::an_empty_payload_is_rejected ... ok
+test photo::tests::an_octet_stream_content_type_is_tolerated ... ok
+test photo::tests::an_oversized_payload_is_rejected ... ok
+test photo::tests::random_bytes_are_rejected ... ok
+test photo::tests::the_mime_types_are_stable ... ok
+test plist::binary::tests::a_dictionary_round_trips ... ok
+test plist::binary::tests::a_document_that_declares_an_absurd_object_count_is_rejected ... ok
+test plist::binary::tests::a_document_with_a_reference_cycle_is_rejected ... ok
+test plist::binary::tests::a_document_without_the_magic_is_rejected ... ok
+test plist::binary::tests::a_long_string_uses_the_extended_length ... ok
+test plist::binary::tests::a_nested_structure_round_trips ... ok
+test plist::binary::tests::a_non_ascii_string_round_trips ... ok
+test plist::binary::tests::a_trailer_that_points_outside_the_buffer_is_rejected ... ok
+test plist::binary::tests::a_truncated_document_is_rejected ... ok
+test plist::binary::tests::an_array_round_trips ... ok
+test plist::binary::tests::an_oversized_document_is_rejected_by_the_limit ... ok
+test plist::binary::tests::data_round_trips ... ok
+test plist::tests::a_binary_document_is_decoded_by_the_generic_entry_point ... ok
+test plist::tests::a_garbage_document_is_rejected ... ok
+test plist::tests::an_xml_document_is_decoded_by_the_generic_entry_point ... ok
+test plist::value::tests::a_dictionary_answers_lookups ... ok
+test plist::value::tests::a_nested_value_can_be_reached ... ok
+test plist::value::tests::the_accessors_only_answer_their_own_type ... ok
+test plist::xml::tests::a_deeply_nested_document_is_rejected ... ok
+test plist::xml::tests::a_dictionary_round_trips ... ok
+test plist::xml::tests::a_dictionary_without_a_key_is_rejected ... ok
+test plist::xml::tests::a_doctype_with_a_subset_that_holds_a_greater_than_sign_is_refused ... ok
+test plist::xml::tests::a_doctype_with_an_internal_subset_is_refused ... ok
+test plist::xml::tests::a_document_with_a_doctype_is_decoded ... ok
+test plist::xml::tests::a_malformed_document_is_rejected ... ok
+test plist::xml::tests::an_array_round_trips ... ok
+test plist::xml::tests::an_oversized_document_is_rejected ... ok
+test plist::xml::tests::an_unclosed_declaration_is_refused ... ok
+test plist::xml::tests::an_unknown_element_is_rejected ... ok
+test plist::xml::tests::data_round_trips ... ok
+test plist::xml::tests::entities_are_resolved ... ok
+test queue::tests::a_frame_that_is_larger_than_the_budget_is_refused ... ok
+test queue::tests::the_frames_reach_the_sink ... ok
+test queue::tests::the_oldest_frame_is_dropped_when_the_budget_is_reached ... ok
+test rtp::tests::a_clean_end_of_stream_yields_no_frame ... ok
+test rtp::tests::a_complete_nal_unit_drops_an_unfinished_fragment ... ok
+test rtp::tests::a_complete_nal_unit_is_delivered_unchanged ... ok
+test rtp::tests::a_fragment_without_a_start_bit_is_dropped ... ok
+test rtp::tests::a_fragmented_nal_unit_is_reassembled ... ok
+test rtp::tests::a_header_extension_is_skipped ... ok
+test rtp::tests::a_new_fragment_discards_an_incomplete_one ... ok
+test rtp::tests::a_short_frame_is_rejected ... ok
+test rtp::tests::a_timestamp_becomes_microseconds ... ok
+test rtp::tests::a_truncated_header_extension_is_rejected ... ok
+test rtp::tests::an_empty_payload_is_ignored ... ok
+test rtp::tests::an_interleaved_frame_is_read ... ok
+test rtp::tests::an_oversized_frame_is_rejected ... ok
+test rtp::tests::an_rtp_frame_is_split_into_header_and_payload ... ok
+test rtsp::http::tests::a_fair_play_request_of_the_wrong_size_is_rejected ... ok
+test rtsp::http::tests::a_pair_setup_with_a_wrong_body_is_rejected ... ok
+test rtsp::http::tests::a_photo_delete_clears_the_published_photo ... ok
+test rtsp::http::tests::a_photo_is_accepted_and_published ... ok
+test rtsp::http::tests::a_photo_with_random_bytes_is_rejected ... ok
+test rtsp::http::tests::a_play_request_stores_the_media_url ... ok
+test rtsp::http::tests::a_play_request_without_a_url_is_rejected ... ok
+test rtsp::http::tests::a_teardown_without_a_body_names_no_stream ... ok
+test rtsp::http::tests::an_unknown_get_route_is_not_implemented ... ok
+test rtsp::http::tests::the_fair_play_phase_one_is_answered ... ok
+test rtsp::http::tests::the_generated_pin_has_four_digits ... ok
+test rtsp::http::tests::the_info_answer_is_a_binary_plist ... ok
+test rtsp::http::tests::the_pair_setup_answer_carries_the_public_key ... ok
+test rtsp::http::tests::the_pin_start_route_is_refused_without_a_pin_policy ... ok
+test rtsp::http::tests::the_pin_start_route_shows_a_pin_when_it_is_required ... ok
+test rtsp::http::tests::the_playback_info_answer_is_an_xml_plist ... ok
+test rtsp::http::tests::the_rate_and_scrub_routes_update_the_playback_state ... ok
+test rtsp::http::tests::the_scrub_answer_reports_the_position ... ok
+test rtsp::http::tests::the_stop_route_clears_the_playback_state ... ok
+test rtsp::http::tests::two_generated_pins_differ ... ok
+test rtsp::reader::tests::a_body_is_read_exactly ... ok
+test rtsp::reader::tests::a_declared_body_longer_than_the_limit_is_rejected ... ok
+test rtsp::reader::tests::a_header_without_a_colon_is_rejected ... ok
+test rtsp::reader::tests::a_malformed_content_length_is_rejected ... ok
+test rtsp::reader::tests::a_negative_content_length_is_rejected ... ok
+test rtsp::reader::tests::a_photo_body_may_use_the_photo_limit ... ok
+test rtsp::reader::tests::a_simple_request_is_read ... ok
+test rtsp::reader::tests::a_stalled_peer_hits_the_deadline ... ok
+test rtsp::reader::tests::an_end_of_stream_yields_no_request ... ok
+test rtsp::reader::tests::an_overlong_header_line_is_rejected ... ok
+test rtsp::reader::tests::an_overlong_request_line_is_rejected ... ok
+test rtsp::reader::tests::too_many_headers_are_rejected ... ok
+test rtsp::request::tests::a_binary_plist_body_is_recognised ... ok
+test rtsp::request::tests::a_header_without_a_colon_is_rejected ... ok
+test rtsp::request::tests::a_query_parameter_is_extracted ... ok
+test rtsp::request::tests::a_request_without_a_terminator_is_rejected ... ok
+test rtsp::request::tests::an_http_request_answers_in_http ... ok
+test rtsp::request::tests::an_options_request_is_parsed_completely ... ok
+test rtsp::request::tests::an_oversized_message_is_rejected ... ok
+test rtsp::request::tests::an_rtsp_request_answers_in_rtsp ... ok
+test rtsp::request::tests::an_unknown_method_is_kept_instead_of_rejected ... ok
+test rtsp::request::tests::headers_are_matched_case_insensitively ... ok
+test rtsp::request::tests::the_body_is_kept_as_raw_bytes ... ok
+test rtsp::response::tests::an_empty_body_carries_no_content_length ... ok
+test rtsp::response::tests::an_http_response_omits_the_cseq ... ok
+test rtsp::response::tests::an_ok_response_carries_the_cseq_and_the_server_token ... ok
+test rtsp::response::tests::extra_headers_are_written_in_order ... ok
+test rtsp::response::tests::the_content_length_counts_bytes_and_not_characters ... ok
+test rtsp::response::tests::the_second_peer_is_answered_with_service_unavailable ... ok
+test rtsp::router::tests::a_record_without_an_announce_is_rejected ... ok
+test rtsp::router::tests::an_announce_with_a_broken_sdp_is_rejected ... ok
+test rtsp::router::tests::an_announce_with_a_valid_sdp_is_accepted ... ok
+test rtsp::router::tests::an_options_request_is_answered_with_the_public_verbs ... ok
+test rtsp::router::tests::an_unknown_method_is_not_implemented ... ok
+test rtsp::router::tests::the_volume_is_answered_with_the_last_value ... ok
+test rtsp::router::tests::the_volume_is_stored_when_the_sender_sets_it ... ok
+test sdp::tests::a_malformed_base64_parameter_set_is_ignored ... ok
+test sdp::tests::a_session_with_only_audio_is_recognised ... ok
+test sdp::tests::a_video_and_audio_session_is_parsed ... ok
+test sdp::tests::an_aac_session_keeps_the_eld_codec ... ok
+test sdp::tests::an_alac_session_carries_the_frame_geometry ... ok
+test sdp::tests::an_empty_sdp_is_rejected ... ok
+test sdp::tests::an_oversized_sdp_is_rejected ... ok
+test sdp::tests::an_sdp_without_a_media_section_is_rejected ... ok
+test sdp::tests::the_aes_key_and_iv_are_extracted ... ok
+test sdp::tests::the_h264_parameter_sets_are_extracted ... ok
+test session::tests::a_new_session_carries_no_media ... ok
+test session::tests::every_session_has_its_own_identifier ... ok
+test session::tests::the_sender_name_falls_back_to_a_generic_one ... ok
+test session::tests::the_stream_types_are_tracked ... ok
+test timing::tests::a_fraction_is_converted_into_microseconds ... ok
+test timing::tests::a_packet_of_another_type_is_ignored ... ok
+test timing::tests::a_probe_is_answered_with_the_sender_sequence ... ok
+test timing::tests::a_probe_updates_the_clock_offset ... ok
+test timing::tests::a_short_probe_is_ignored ... ok
+test timing::tests::the_ntp_timestamp_is_in_the_ntp_epoch ... ok
+test timing::tests::the_response_carries_the_receive_timestamp ... ok
+test timing::tests::the_response_echoes_the_sender_transmit_time_as_the_reference ... ok
+
+test result: ok. 230 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+
+     Running tests/xml_plist_hardening.rs (target/debug/deps/xml_plist_hardening-00011bea27396e5e)
+
+running 9 tests
+test a_dictionary_without_a_key_is_refused ... ok
+test a_doctype_with_an_internal_subset_is_refused ... ok
+test a_document_that_is_too_large_is_refused_before_it_is_parsed ... ok
+test a_document_that_nests_too_deeply_is_refused ... ok
+test a_truncated_document_is_refused ... ok
+test an_entity_that_points_at_a_network_service_is_never_resolved ... ok
+test an_external_entity_is_never_resolved ... ok
+test an_unknown_element_is_refused ... ok
+test the_plain_doctype_of_apple_is_accepted ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_alac-331d904aa61f4620)
+
+running 61 tests
+test bits::tests::advances_over_bits ... ok
+test bits::tests::aligns_to_the_next_byte ... ok
+test bits::tests::counts_the_remaining_bits ... ok
+test bits::tests::reads_across_a_byte_boundary ... ok
+test bits::tests::reads_bits_most_significant_first ... ok
+test bits::tests::refuses_to_read_more_than_sixteen_bits ... ok
+test bits::tests::reports_a_truncated_read ... ok
+test config::tests::computes_the_size_of_a_frame ... ok
+test config::tests::parses_a_magic_cookie ... ok
+test config::tests::refuses_a_short_cookie ... ok
+test config::tests::refuses_a_zero_frame_length ... ok
+test config::tests::refuses_an_unknown_version ... ok
+test config::tests::refuses_an_unusable_bit_depth ... ok
+test config::tests::refuses_an_unusable_channel_count ... ok
+test config::tests::skips_the_alac_atom ... ok
+test config::tests::skips_the_frma_and_alac_atoms ... ok
+test decoder::tests::an_escaped_element_is_not_shifted_with_a_stale_buffer ... ok
+test decoder::tests::decodes_a_compressed_frame ... ok
+test decoder::tests::decodes_a_mono_frame_of_thirty_two_bit_samples ... ok
+test decoder::tests::decodes_a_stereo_frame ... ok
+test decoder::tests::decodes_an_uncompressed_frame ... ok
+test decoder::tests::packs_the_samples_of_a_frame ... ok
+test decoder::tests::refuses_a_coupling_element ... ok
+test decoder::tests::refuses_a_frame_that_announces_too_many_samples ... ok
+test decoder::tests::refuses_a_frame_with_a_broken_header ... ok
+test decoder::tests::refuses_a_frame_with_a_broken_shift_flag ... ok
+test decoder::tests::refuses_a_shift_that_is_wider_than_the_sample ... ok
+test decoder::tests::refuses_a_stereo_element_that_does_not_fit_into_the_mix_buffer ... ok
+test decoder::tests::refuses_a_stereo_frame_of_thirty_two_bit_samples ... ok
+test decoder::tests::refuses_a_stereo_shift_that_is_wider_than_the_sample ... ok
+test decoder::tests::refuses_an_unknown_element ... ok
+test decoder::tests::reports_a_truncated_frame ... ok
+test error::tests::names_the_numbers ... ok
+test error::tests::recognises_a_truncated_frame ... ok
+test golomb::tests::builds_the_parameters_of_the_coder ... ok
+test golomb::tests::computes_the_logarithm_of_the_mean ... ok
+test golomb::tests::counts_the_leading_zeroes ... ok
+test golomb::tests::decodes_a_simple_run_of_residuals ... ok
+test golomb::tests::decodes_a_zero_residual ... ok
+test golomb::tests::limits_the_prediction_width ... ok
+test golomb::tests::refuses_a_truncated_bitstream ... ok
+test golomb::tests::refuses_an_output_buffer_that_is_too_small ... ok
+test matrix::tests::applies_the_shifted_out_bits ... ok
+test matrix::tests::keeps_separate_channels_apart ... ok
+test matrix::tests::packs_samples_into_sixteen_bits ... ok
+test matrix::tests::packs_samples_into_thirty_two_bits ... ok
+test matrix::tests::packs_samples_into_twenty_bits ... ok
+test matrix::tests::packs_samples_into_twenty_four_bits ... ok
+test matrix::tests::refuses_an_unknown_bit_depth ... ok
+test matrix::tests::undoes_the_mixing ... ok
+test predictor::tests::applies_the_first_coefficients ... ok
+test predictor::tests::computes_the_sign_of_a_value ... ok
+test predictor::tests::copies_the_residuals_without_coefficients ... ok
+test predictor::tests::refuses_a_buffer_that_is_too_small ... ok
+test predictor::tests::refuses_a_residual_buffer_that_is_too_small ... ok
+test predictor::tests::refuses_an_unusable_channel_width ... ok
+test predictor::tests::refuses_more_coefficients_than_the_buffer_holds ... ok
+test predictor::tests::sums_the_residuals_in_place ... ok
+test predictor::tests::the_four_coefficient_path_predicts_the_previous_sample ... ok
+test predictor::tests::the_general_path_predicts_the_previous_sample ... ok
+test predictor::tests::the_optimised_paths_differ_from_the_general_one ... ok
+
+test result: ok. 61 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_cast-fc8643f3926cac86)
+
+running 80 tests
+test advertisement::tests::a_uuid_device_id_is_hashed_into_a_stable_id ... ok
+test advertisement::tests::the_device_id_is_thirty_two_hex_characters ... ok
+test advertisement::tests::the_friendly_name_is_the_device_name ... ok
+test advertisement::tests::the_model_description_is_base64_encoded ... ok
+test advertisement::tests::the_service_type_is_the_one_the_senders_browse ... ok
+test advertisement::tests::the_txt_record_carries_every_key_the_cast_protocol_defines ... ok
+test advertisement::tests::two_different_devices_get_different_ids ... ok
+test engine::tests::a_failing_advertisement_fails_the_start ... ok
+test engine::tests::a_zeroport_falls_back_to_the_port_the_senders_use ... ok
+test engine::tests::an_oversized_message_limit_is_capped ... ok
+test engine::tests::starting_binds_the_listener_and_advertises_the_service ... ok
+test engine::tests::starting_twice_fails ... ok
+test engine::tests::stopping_an_engine_that_does_not_run_fails ... ok
+test engine::tests::the_configuration_is_derived_from_the_application_configuration ... ok
+test engine::tests::the_engine_starts_in_the_idle_state ... ok
+test frame::tests::a_framed_message_round_trips ... ok
+test frame::tests::a_truncated_frame_is_an_io_error ... ok
+test frame::tests::an_empty_frame_is_rejected ... ok
+test frame::tests::an_oversized_length_is_rejected_without_allocating ... ok
+test frame::tests::writing_an_oversized_payload_is_refused ... ok
+test media::tests::a_load_reports_the_metadata_it_carried ... ok
+test media::tests::a_load_with_autoplay_starts_playing ... ok
+test media::tests::a_load_without_a_media_item_is_rejected ... ok
+test media::tests::a_load_without_autoplay_stays_idle ... ok
+test media::tests::a_malformed_media_payload_is_rejected ... ok
+test media::tests::a_seek_into_negative_time_is_rejected ... ok
+test media::tests::a_seek_moves_the_playback_position ... ok
+test media::tests::a_seek_with_an_infinite_position_is_rejected ... ok
+test media::tests::a_seek_without_a_position_is_rejected ... ok
+test media::tests::a_stop_clears_the_session ... ok
+test media::tests::an_unknown_media_command_is_rejected ... ok
+test media::tests::play_and_pause_change_the_player_state ... ok
+test media::tests::the_status_entry_carries_the_media_item ... ok
+test message::tests::a_binary_message_round_trips ... ok
+test message::tests::a_message_round_trips_through_the_wire_format ... ok
+test message::tests::a_message_without_a_namespace_decodes_to_none ... ok
+test message::tests::a_reply_swaps_source_and_destination ... ok
+test message::tests::a_truncated_message_is_rejected ... ok
+test message::tests::an_unknown_auth_type_is_rejected ... ok
+test message::tests::an_unknown_namespace_is_not_guessed ... ok
+test message::tests::an_unknown_payload_type_is_rejected ... ok
+test message::tests::every_namespace_resolves_to_its_own_name ... ok
+test payloads::tests::a_connect_request_is_parsed_with_its_sender_info ... ok
+test payloads::tests::a_load_request_carries_its_metadata ... ok
+test payloads::tests::a_load_request_without_media_is_parsed_but_has_no_item ... ok
+test payloads::tests::a_payload_that_is_not_json_has_no_type ... ok
+test payloads::tests::the_connect_response_carries_the_session_and_transport ... ok
+test payloads::tests::the_message_type_is_read_from_the_payload ... ok
+test payloads::tests::the_volume_status_has_a_sane_default ... ok
+test proto::tests::a_declared_length_beyond_the_buffer_is_rejected ... ok
+test proto::tests::a_declared_length_beyond_the_limit_is_rejected ... ok
+test proto::tests::a_field_longer_than_the_limit_is_rejected_before_it_is_written ... ok
+test proto::tests::a_string_field_round_trips ... ok
+test proto::tests::a_truncated_varint_is_rejected ... ok
+test proto::tests::a_varint_longer_than_ten_bytes_is_rejected ... ok
+test proto::tests::a_varint_round_trips ... ok
+test proto::tests::an_invalid_utf8_string_is_rejected ... ok
+test proto::tests::an_unknown_field_is_skipped_not_repaired ... ok
+test proto::tests::an_unsupported_wire_type_is_rejected ... ok
+test proto::tests::the_field_number_zero_is_reserved ... ok
+test session::tests::a_close_asks_the_engine_to_close_the_connection ... ok
+test session::tests::a_connect_is_answered_with_a_connected ... ok
+test session::tests::a_connect_remembers_the_name_of_the_sender ... ok
+test session::tests::a_launch_of_an_unknown_application_is_refused ... ok
+test session::tests::a_launch_of_the_own_application_is_accepted ... ok
+test session::tests::a_load_is_answered_with_a_media_status ... ok
+test session::tests::a_load_reports_the_metadata ... ok
+test session::tests::a_malformed_payload_is_refused ... ok
+test session::tests::a_ping_is_answered_with_a_pong ... ok
+test session::tests::a_pong_is_answered_with_nothing ... ok
+test session::tests::a_set_volume_changes_the_volume_and_reports_it ... ok
+test session::tests::a_volume_above_one_is_clamped ... ok
+test session::tests::an_unknown_command_is_refused ... ok
+test session::tests::an_unknown_namespace_is_refused ... ok
+test session::tests::the_greeting_opens_the_receiver_channel ... ok
+test session::tests::the_receiver_status_names_the_application ... ok
+test tls::tests::a_broken_key_is_rejected ... ok
+test tls::tests::a_key_that_does_not_belong_to_the_certificate_is_rejected ... ok
+test tls::tests::a_self_signed_certificate_is_generated ... ok
+test tls::tests::the_generated_configuration_carries_the_certificate ... ok
+
+test result: ok. 80 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/cast_engine_hardening.rs (target/debug/deps/cast_engine_hardening-43d3ca416ffc4047)
+
+running 6 tests
+test a_client_that_does_not_speak_tls_is_dropped ... ok
+test a_message_that_announces_more_than_the_limit_ends_the_session ... ok
+test a_message_that_is_not_a_protobuf_ends_the_session ... ok
+test a_peer_that_stays_silent_is_dropped_after_the_idle_timeout ... ok
+test a_valid_message_is_answered_and_the_session_stays_open ... ok
+test the_receiver_publishes_its_service_and_withdraws_it_again ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.61s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_core-754b24de1861070b)
+
+running 80 tests
+test build_info::tests::build_info_is_not_empty ... ok
+test build_info::tests::build_info_renders_a_readable_line ... ok
+test capabilities::tests::an_empty_capability_set_advertises_nothing ... ok
+test capabilities::tests::cast_baseline_is_incomplete_without_vp8 ... ok
+test capabilities::tests::cast_baseline_requires_h264_vp8_and_three_audio_codecs ... ok
+test capabilities::tests::miracast_baseline_needs_only_h264_and_lpcm ... ok
+test config::engine_limits::tests::a_changed_budget_reaches_the_engine ... ok
+test config::engine_limits::tests::the_default_limits_are_the_documented_ones ... ok
+test config::engine_limits::tests::the_idle_timeout_is_the_performance_budget ... ok
+test config::engine_limits::tests::the_limits_of_every_protocol_come_from_the_configuration ... ok
+test config::limits::tests::the_caps_are_the_documented_ones ... ok
+test config::limits::tests::the_ssdp_cap_fits_into_a_datagram ... ok
+test config::ports::tests::every_port_is_listed_exactly_once ... ok
+test config::ports::tests::the_default_port_matches_the_table ... ok
+test config::ports::tests::the_ports_are_the_ones_the_senders_expect ... ok
+test config::service_types::tests::every_advertised_type_is_unique ... ok
+test config::service_types::tests::the_dacp_type_is_not_an_advertised_type ... ok
+test config::service_types::tests::the_types_are_spelled_the_way_the_senders_expect ... ok
+test config::tests::a_default_configuration_is_valid ... ok
+test config::tests::a_missing_key_yields_the_default ... ok
+test config::tests::a_missing_protocol_entry_yields_the_default ... ok
+test config::tests::a_zero_queue_budget_is_rejected ... ok
+test config::tests::an_unknown_key_is_rejected ... ok
+test config::tests::an_unknown_protocol_name_is_rejected ... ok
+test config::tests::the_configuration_round_trips_through_toml ... ok
+test config::timeouts::tests::every_timeout_is_positive ... ok
+test config::timeouts::tests::the_timeouts_are_the_documented_ones ... ok
+test error::tests::describe_includes_the_cause_chain ... ok
+test error::tests::error_codes_are_stable ... ok
+test error::tests::error_kind_of_invalid_config_is_invalid_input ... ok
+test error::tests::error_kind_of_queue_full_is_resource_exhausted ... ok
+test identity::tests::a_name_that_is_only_whitespace_falls_back ... ok
+test identity::tests::an_unusable_name_falls_back ... ok
+test identity::tests::control_characters_are_removed ... ok
+test identity::tests::identity_uses_the_sanitised_name_for_the_service_instance ... ok
+test identity::tests::names_are_capped_at_the_dns_sd_limit ... ok
+test jobs::tests::a_failing_job_is_counted ... ok
+test jobs::tests::a_registered_job_runs_when_triggered ... ok
+test jobs::tests::removing_a_job_stops_it_from_running ... ok
+test media::tests::frame_sequence_increases_monotonically ... ok
+test media::tests::lpcm_is_not_compressed ... ok
+test media::tests::null_sinks_accept_everything ... ok
+test metrics::tests::counters_start_at_zero ... ok
+test metrics::tests::the_drop_ratio_is_zero_without_traffic ... ok
+test metrics::tests::the_drop_ratio_reflects_dropped_frames ... ok
+test privacy::tests::a_host_that_is_a_name_is_masked_like_a_name ... ok
+test privacy::tests::a_host_that_is_an_address_is_masked_like_an_address ... ok
+test privacy::tests::a_missing_name_becomes_unknown ... ok
+test privacy::tests::a_name_is_not_readable_in_its_pseudonym ... ok
+test privacy::tests::a_url_with_a_name_is_masked_like_a_name ... ok
+test privacy::tests::a_url_without_a_port_is_masked_too ... ok
+test privacy::tests::a_value_that_is_not_a_url_is_masked_like_a_name ... ok
+test privacy::tests::an_empty_name_stays_empty ... ok
+test privacy::tests::the_host_of_a_url_is_masked_and_the_path_is_dropped ... ok
+test privacy::tests::the_host_part_of_an_ipv4_address_is_masked ... ok
+test privacy::tests::the_host_part_of_an_ipv6_address_is_masked ... ok
+test privacy::tests::the_loopback_address_is_masked_as_well ... ok
+test privacy::tests::the_metadata_address_is_masked_as_well ... ok
+test privacy::tests::the_port_of_a_socket_address_is_kept ... ok
+test privacy::tests::the_same_name_always_gets_the_same_pseudonym ... ok
+test privacy::tests::two_different_names_get_two_different_pseudonyms ... ok
+test protocol::tests::a_dlna_renderer_advertises_nothing_over_mdns ... ok
+test protocol::tests::airplay_advertises_both_service_types ... ok
+test protocol::tests::every_advertised_type_has_a_single_owner ... ok
+test protocol::tests::only_streaming_protocols_carry_video ... ok
+test protocol::tests::protocol_kind_accepts_common_aliases ... ok
+test protocol::tests::protocol_kind_round_trips_through_its_string_form ... ok
+test queue::tests::a_queue_starts_empty ... ok
+test queue::tests::an_entry_that_is_larger_than_the_budget_is_refused ... ok
+test queue::tests::clearing_a_queue_frees_the_bytes ... ok
+test queue::tests::entries_are_returned_in_the_order_they_arrived ... ok
+test queue::tests::the_budget_comes_from_the_configuration ... ok
+test queue::tests::the_byte_budget_holds_under_the_ninety_frames_of_eight_megabytes_attack ... ok
+test queue::tests::the_newest_entries_survive_the_attack ... ok
+test queue::tests::the_oldest_entry_is_dropped_when_the_byte_budget_is_reached ... ok
+test queue::tests::the_oldest_entry_is_dropped_when_the_item_budget_is_reached ... ok
+test session::tests::an_end_for_an_unknown_session_does_not_clear_a_newer_one ... ok
+test session::tests::audio_format_change_updates_the_snapshot ... ok
+test session::tests::ended_event_clears_the_session ... ok
+test session::tests::started_event_creates_a_live_session ... ok
+
+test result: ok. 80 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_discovery-fe29e9edce790ff7)
+
+running 51 tests
+test mdns::tests::a_failing_registration_withdraws_the_previous_ones ... ok
+test mdns::tests::all_four_service_types_are_advertised_by_default ... ok
+test mdns::tests::an_unknown_service_type_is_ignored ... ok
+test mdns::tests::starting_twice_is_refused ... ok
+test mdns::tests::stopping_a_service_that_never_started_is_refused ... ok
+test mdns::tests::stopping_withdraws_every_service ... ok
+test mdns::tests::the_airplay_pair_is_registered_together ... ok
+test mdns::tests::the_airplay_service_advertises_the_reference_txt_records ... ok
+test mdns::tests::the_cast_service_advertises_the_cast_port ... ok
+test mdns::tests::the_instance_name_is_sanitised ... ok
+test mdns::tests::the_miracast_service_advertises_the_wfd_port ... ok
+test mdns::tests::the_raop_service_uses_the_mac_prefixed_name ... ok
+test mdns::tests::the_service_selection_can_be_restricted ... ok
+test mdns::tests::the_status_lists_the_advertised_services ... ok
+test service_types::tests::a_mac_with_colons_is_normalised ... ok
+test service_types::tests::a_pseudo_mac_is_stable_and_twelve_digits_long ... ok
+test service_types::tests::a_short_mac_is_padded_to_twelve_digits ... ok
+test service_types::tests::an_empty_device_id_yields_a_zero_mac ... ok
+test service_types::tests::an_unknown_service_type_is_not_known ... ok
+test service_types::tests::the_airplay_pair_is_complete ... ok
+test service_types::tests::the_mac_is_formatted_in_colon_notation ... ok
+test service_types::tests::the_raop_name_carries_the_mac_prefix ... ok
+test service_types::tests::the_raop_name_drops_a_second_separator ... ok
+test service_types::tests::the_raop_name_is_capped_at_the_dns_sd_limit ... ok
+test service_types::tests::the_raop_name_strips_control_characters ... ok
+test ssdp::tests::a_byebye_notification_is_parsed ... ok
+test ssdp::tests::a_header_line_without_a_colon_is_rejected ... ok
+test ssdp::tests::a_message_that_is_not_a_response_is_rejected ... ok
+test ssdp::tests::a_notification_with_an_unknown_nts_is_rejected ... ok
+test ssdp::tests::a_response_is_parsed ... ok
+test ssdp::tests::a_response_with_a_lower_case_header_is_parsed ... ok
+test ssdp::tests::an_alive_notification_is_parsed ... ok
+test ssdp::tests::an_over_long_header_line_is_rejected ... ok
+test ssdp::tests::an_oversized_message_is_rejected ... ok
+test ssdp::tests::the_browser_binds_and_stops_cleanly ... ok
+test ssdp::tests::the_browser_rejects_an_oversized_query ... ok
+test ssdp::tests::the_event_queue_drops_when_it_is_full ... ok
+test ssdp::tests::the_event_queue_drops_when_the_byte_budget_is_exhausted ... ok
+test ssdp::tests::the_query_carries_the_mandatory_headers ... ok
+test ssdp::tests::too_many_headers_are_rejected ... ok
+test txt::tests::a_record_key_with_an_equals_sign_is_rejected ... ok
+test txt::tests::a_record_value_with_control_characters_is_stripped ... ok
+test txt::tests::an_empty_record_is_empty ... ok
+test txt::tests::setting_the_same_key_twice_replaces_the_value ... ok
+test txt::tests::the_airplay_device_id_is_stable_and_in_colon_notation ... ok
+test txt::tests::the_airplay_name_is_stripped_of_control_characters ... ok
+test txt::tests::the_airplay_record_carries_the_reference_constants ... ok
+test txt::tests::the_audio_channel_record_is_advertised ... ok
+test txt::tests::the_cast_record_carries_the_device_id_and_name ... ok
+test txt::tests::the_miracast_record_carries_the_friendly_name ... ok
+test txt::tests::the_raop_record_carries_the_mandatory_version ... ok
+
+test result: ok. 51 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_dlna-a54ad56c0080ba3e)
+
+running 119 tests
+test description::tests::an_unknown_service_has_no_description ... ok
+test description::tests::the_device_description_escapes_the_friendly_name ... ok
+test description::tests::the_device_description_escapes_the_udn ... ok
+test description::tests::the_device_description_lists_the_three_services ... ok
+test description::tests::the_device_description_names_the_media_renderer ... ok
+test description::tests::the_escaping_covers_every_dangerous_character ... ok
+test description::tests::the_service_description_declares_the_state_variables ... ok
+test description::tests::the_service_description_lists_the_actions ... ok
+test description::tests::the_service_names_are_the_three_upnp_services ... ok
+test description::tests::the_transport_state_declares_its_values ... ok
+test engine::tests::starting_twice_is_refused ... ok
+test engine::tests::stopping_an_engine_that_never_started_is_refused ... ok
+test engine::tests::the_engine_can_be_started_again_after_a_stop ... ok
+test engine::tests::the_engine_reports_its_kind_and_state ... ok
+test engine::tests::the_engine_starts_and_stops ... ok
+test gena::tests::a_callback_without_angle_brackets_is_refused ... ok
+test gena::tests::a_control_point_on_the_same_subnet_may_subscribe ... ok
+test gena::tests::a_credential_in_the_url_is_refused ... ok
+test gena::tests::a_host_name_is_refused_because_it_is_never_resolved ... ok
+test gena::tests::a_missing_callback_is_refused ... ok
+test gena::tests::a_non_http_scheme_is_refused ... ok
+test gena::tests::a_public_address_is_refused ... ok
+test gena::tests::a_subscription_can_be_removed ... ok
+test gena::tests::a_url_with_a_fragment_is_refused ... ok
+test gena::tests::a_url_without_a_path_gets_the_root ... ok
+test gena::tests::a_url_without_a_scheme_is_refused ... ok
+test gena::tests::an_address_outside_the_local_subnet_is_refused ... ok
+test gena::tests::the_cloud_metadata_address_is_refused ... ok
+test gena::tests::the_first_of_several_callbacks_is_used ... ok
+test gena::tests::the_ipv6_loopback_is_refused ... ok
+test gena::tests::the_loopback_address_is_refused ... ok
+test gena::tests::the_private_ranges_are_recognised ... ok
+test gena::tests::the_subnet_comparison_uses_three_octets ... ok
+test gena::tests::the_subscription_identifiers_are_unique ... ok
+test gena::tests::the_url_parser_reads_the_port_and_the_path ... ok
+test gena::tests::the_url_parser_rejects_malformed_urls ... ok
+test http::tests::the_default_limits_are_bounded ... ok
+test http::tests::the_error_statuses_match_the_protocol ... ok
+test http::tests::the_method_names_match_the_wire ... ok
+test server::tests::the_connection_counter_never_goes_below_zero ... ok
+test server::tests::the_control_paths_are_recognised ... ok
+test server::tests::the_event_paths_are_recognised ... ok
+test server::tests::the_lifecycle_starts_idle ... ok
+test soap::tests::a_body_without_an_action_is_rejected ... ok
+test soap::tests::a_doctype_in_the_body_is_rejected ... ok
+test soap::tests::a_mismatching_action_header_is_rejected ... ok
+test soap::tests::a_mute_value_that_is_not_a_boolean_is_refused ... ok
+test soap::tests::a_second_control_point_is_rejected_while_the_first_streams ... ok
+test soap::tests::a_seek_sets_the_position ... ok
+test soap::tests::a_seek_with_a_malformed_target_is_refused ... ok
+test soap::tests::a_seek_with_an_unknown_unit_is_refused ... ok
+test soap::tests::a_time_is_parsed_and_formatted ... ok
+test soap::tests::a_volume_out_of_range_is_refused ... ok
+test soap::tests::a_volume_that_is_not_a_number_is_refused ... ok
+test soap::tests::an_empty_current_uri_is_rejected ... ok
+test soap::tests::an_entity_in_the_body_is_rejected ... ok
+test soap::tests::an_unknown_action_is_reported_as_a_fault ... ok
+test soap::tests::an_unknown_control_path_is_a_not_found ... ok
+test soap::tests::every_advertised_action_is_implemented ... ok
+test soap::tests::playing_without_media_is_refused ... ok
+test soap::tests::the_action_is_taken_from_the_body_when_the_header_is_missing ... ok
+test soap::tests::the_media_is_set_and_reported ... ok
+test soap::tests::the_mute_state_is_set ... ok
+test soap::tests::the_protocol_info_is_announced ... ok
+test soap::tests::the_same_control_point_may_continue ... ok
+test soap::tests::the_soap_action_header_is_parsed ... ok
+test soap::tests::the_transport_actions_follow_the_state ... ok
+test soap::tests::the_transport_state_follows_the_actions ... ok
+test soap::tests::the_volume_is_set_and_clamped ... ok
+test ssdp::tests::a_message_that_is_not_a_search_is_ignored ... ok
+test ssdp::tests::a_renderer_search_is_recognised ... ok
+test ssdp::tests::a_search_for_another_device_is_ignored ... ok
+test ssdp::tests::a_search_for_everything_is_answered_as_a_renderer ... ok
+test ssdp::tests::a_search_for_everything_is_recognised ... ok
+test ssdp::tests::a_search_for_the_root_device_is_recognised ... ok
+test ssdp::tests::a_search_without_a_target_falls_back_to_the_renderer ... ok
+test ssdp::tests::a_search_without_the_man_header_is_ignored ... ok
+test ssdp::tests::the_alive_announcement_is_complete ... ok
+test ssdp::tests::the_byebye_announcement_is_complete ... ok
+test ssdp::tests::the_renderer_announces_itself_under_three_targets ... ok
+test ssdp::tests::the_responder_answers_a_query_on_its_own_port ... ok
+test ssdp::tests::the_search_response_carries_the_location_and_the_usn ... ok
+test ssdp::tests::the_search_target_is_read ... ok
+test state::tests::a_new_renderer_has_no_media ... ok
+test state::tests::a_peer_may_not_release_the_session_of_another_peer ... ok
+test state::tests::a_second_peer_is_rejected_while_a_stream_runs ... ok
+test state::tests::a_second_peer_may_take_over_when_nothing_is_playing ... ok
+test state::tests::only_an_active_transport_blocks_a_second_peer ... ok
+test state::tests::setting_the_media_resets_the_position ... ok
+test state::tests::stopping_releases_the_session ... ok
+test state::tests::the_first_peer_claims_the_session ... ok
+test state::tests::the_position_is_clamped_to_a_known_duration ... ok
+test state::tests::the_same_peer_may_claim_the_session_again ... ok
+test state::tests::the_transport_state_names_match_the_specification ... ok
+test state::tests::the_volume_is_clamped ... ok
+test xml::tests::a_cdata_section_is_read_as_text ... ok
+test xml::tests::a_comment_is_skipped ... ok
+test xml::tests::a_descendant_is_found ... ok
+test xml::tests::a_doctype_in_lower_case_is_rejected ... ok
+test xml::tests::a_doctype_is_rejected ... ok
+test xml::tests::a_document_that_is_too_deep_is_rejected ... ok
+test xml::tests::a_document_with_too_many_elements_is_rejected ... ok
+test xml::tests::a_mismatched_end_tag_is_rejected ... ok
+test xml::tests::a_numeric_character_reference_is_expanded ... ok
+test xml::tests::a_processing_instruction_is_skipped ... ok
+test xml::tests::a_second_root_element_is_rejected ... ok
+test xml::tests::a_simple_document_is_parsed ... ok
+test xml::tests::a_surrogate_character_reference_is_rejected ... ok
+test xml::tests::an_entity_declaration_is_rejected ... ok
+test xml::tests::an_external_entity_reference_is_rejected ... ok
+test xml::tests::an_oversized_document_is_rejected ... ok
+test xml::tests::an_unclosed_element_is_rejected ... ok
+test xml::tests::an_unknown_entity_is_rejected ... ok
+test xml::tests::an_unquoted_attribute_value_is_rejected ... ok
+test xml::tests::an_unterminated_entity_is_rejected ... ok
+test xml::tests::attributes_are_read ... ok
+test xml::tests::namespace_prefixes_are_stripped_from_the_local_name ... ok
+test xml::tests::text_outside_the_root_element_is_rejected ... ok
+test xml::tests::the_predefined_entities_are_expanded ... ok
+
+test result: ok. 119 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.54s
+
+     Running tests/control_plane.rs (target/debug/deps/control_plane-fd679ad0699c34d5)
+
+running 10 tests
+test a_gena_callback_to_the_local_subnet_is_accepted ... ok
+test a_head_request_is_answered_without_a_body ... ok
+test a_second_control_point_is_rejected_while_the_first_streams ... ok
+test a_soap_action_is_answered ... ok
+test an_unknown_method_is_refused ... ok
+test an_unknown_path_is_a_not_found ... ok
+test the_device_description_is_served ... ok
+test the_engine_reports_the_streaming_state ... ok
+test the_engine_stops_cleanly_and_frees_the_port ... ok
+test the_service_descriptions_are_served ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests/hardening.rs (target/debug/deps/hardening-a7f8ab34eef40d0c)
+
+running 11 tests
+test a_body_that_is_too_large_is_refused ... ok
+test a_chunked_body_is_refused ... ok
+test a_doctype_in_the_soap_body_is_refused ... ok
+test a_gena_callback_to_a_host_name_is_refused ... ok
+test a_gena_callback_to_the_ipv6_loopback_is_refused ... ok
+test a_gena_callback_to_the_loopback_address_is_refused ... ok
+test a_gena_callback_to_the_metadata_service_is_refused ... ok
+test an_external_entity_in_the_soap_body_is_refused ... ok
+test an_over_long_header_line_is_refused ... ok
+test an_over_long_request_line_is_refused ... ok
+test too_many_headers_are_refused ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.03s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_ffi-bf5df76742362f49)
+
+running 38 tests
+test dto::config::tests::a_protocol_that_is_configured_twice_is_rejected ... ok
+test dto::config::tests::the_configuration_survives_the_conversion ... ok
+test dto::config::tests::the_default_configuration_survives_the_conversion ... ok
+test dto::identity::tests::the_build_info_is_not_empty ... ok
+test dto::identity::tests::the_identity_survives_the_conversion ... ok
+test dto::identity::tests::the_service_name_is_sanitised ... ok
+test dto::media::tests::the_audio_format_survives_the_conversion ... ok
+test dto::media::tests::the_capabilities_survive_the_conversion ... ok
+test dto::media::tests::the_frame_survives_the_conversion ... ok
+test dto::media::tests::the_video_format_survives_the_conversion ... ok
+test dto::protocol::tests::the_names_of_the_protocols_are_the_names_of_the_api ... ok
+test dto::protocol::tests::the_protocol_kind_survives_the_conversion ... ok
+test dto::protocol::tests::the_protocol_state_survives_the_conversion ... ok
+test dto::protocol::tests::the_status_survives_the_conversion ... ok
+test dto::session::tests::a_status_event_belongs_to_no_session ... ok
+test dto::session::tests::the_ended_event_carries_the_reason ... ok
+test dto::session::tests::the_snapshot_survives_the_conversion ... ok
+test dto::session::tests::the_started_event_carries_the_whole_session ... ok
+test dto::stats::tests::the_counters_survive_the_conversion ... ok
+test dto::stats::tests::the_drop_ratio_is_zero_without_traffic ... ok
+test dto::stats::tests::the_drop_ratio_reflects_the_dropped_frames ... ok
+test error::tests::a_bind_failure_is_a_resource_problem ... ok
+test error::tests::a_core_error_keeps_its_code_and_its_reason ... ok
+test error::tests::a_media_queue_failure_is_a_resource_problem ... ok
+test error::tests::an_unknown_number_is_not_mapped_onto_a_code ... ok
+test error::tests::the_details_of_an_error_are_never_empty ... ok
+test error::tests::the_numeric_codes_match_the_core ... ok
+test listener::tests::the_adapter_forwards_the_event_to_the_host ... ok
+test receiver::tests::an_invalid_configuration_is_rejected ... ok
+test receiver::tests::an_unknown_protocol_is_rejected_with_the_code_of_the_core ... ok
+test receiver::tests::starting_a_protocol_without_an_engine_is_an_unsupported_failure ... ok
+test receiver::tests::the_configuration_survives_the_bridge ... ok
+test receiver::tests::the_status_covers_every_protocol ... ok
+test sinks::tests::a_delivered_frame_is_counted ... ok
+test sinks::tests::a_refused_frame_is_counted_as_dropped ... ok
+test sinks::tests::the_audio_sink_counts_the_delivered_packets ... ok
+test sinks::tests::the_format_is_forwarded_to_the_decoder ... ok
+test sinks::tests::without_a_decoder_nothing_is_counted ... ok
+
+test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/uniffi-bindgen.rs (target/debug/deps/uniffi_bindgen-15c170db4ad355d4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/bridge_roundtrip.rs (target/debug/deps/bridge_roundtrip-fbf8df4b1fc6c02f)
+
+running 11 tests
+test a_configuration_that_is_written_back_survives_the_bridge ... ok
+test a_failing_start_reports_the_stable_code ... ok
+test a_session_survives_the_bridge ... ok
+test an_unknown_protocol_reports_the_stable_code ... ok
+test the_bridge_never_panics_on_hostile_input ... ok
+test the_bridge_reports_a_configuration_with_an_unknown_protocol ... ok
+test the_bridge_reports_an_invalid_configuration_instead_of_accepting_it ... ok
+test the_configuration_survives_the_bridge ... ok
+test the_counters_survive_the_bridge ... ok
+test the_identity_survives_the_bridge ... ok
+test the_status_survives_the_bridge ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/foreign_abi_roundtrip.rs (target/debug/deps/foreign_abi_roundtrip-763f90167b849299)
+
+running 2 tests
+test a_foreign_caller_round_trips_through_the_c_abi ... Warning: Unable to auto-format phairplay_ffi.py using yapf: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+ok
+test the_bindings_of_every_shell_can_be_generated ... Code generation complete, formatting with ktlint (use --no-format to disable)
+Warning: Unable to auto-format phairplay_ffi.kt using ktlint: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+Warning: Unable to auto-format /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/PhairPlayRust/target/tmp/bindings/swift/phairplay_ffi.swift using swift-format. Please make sure it is installed.
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.39s
+
+     Running tests/supervisor_lifecycle.rs (target/debug/deps/supervisor_lifecycle-83b8227e0b8848d5)
+
+running 9 tests
+test a_disabled_protocol_is_refused ... ok
+test a_fresh_supervisor_reports_every_protocol_as_idle ... ok
+test a_protocol_without_an_engine_is_refused_and_the_reason_is_named ... ok
+test a_successful_start_clears_the_reason_of_an_earlier_failure ... ok
+test an_engine_that_fails_to_start_leaves_the_reason_behind ... ok
+test starting_and_stopping_a_protocol_drives_the_engine ... ok
+test the_counters_of_a_protocol_start_at_zero_and_stay_readable ... ok
+test the_listener_receives_the_status_of_every_change ... ok
+test the_uptime_grows_and_the_configuration_is_readable ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_h264-c078f31ce7f7f0ab)
+
+running 51 tests
+test bits::tests::a_truncated_code_is_reported ... ok
+test bits::tests::byte_alignment_moves_to_the_next_boundary ... ok
+test bits::tests::reads_bits_most_significant_first ... ok
+test bits::tests::reads_the_signed_exp_golomb_codes ... ok
+test bits::tests::reads_the_simple_exp_golomb_codes ... ok
+test bits::tests::removing_escape_bytes_works ... ok
+test bits::tests::reports_a_truncated_buffer ... ok
+test bits::tests::the_test_writer_produces_readable_codes ... ok
+test bits::tests::thirty_one_leading_zeros_do_not_overflow ... ok
+test bits::tests::thirty_two_leading_zeros_are_clamped ... ok
+test bits::tests::too_many_leading_zeros_are_refused ... ok
+test error::tests::messages_name_the_numbers ... ok
+test error::tests::truncated_is_recognised ... ok
+test nal::tests::builds_the_header_byte ... ok
+test nal::tests::classifies_the_types ... ok
+test nal::tests::converts_annex_b_to_avcc ... ok
+test nal::tests::converts_avcc_to_annex_b ... ok
+test nal::tests::ignores_a_trailing_fragment ... ok
+test nal::tests::maps_the_known_types ... ok
+test nal::tests::rejects_a_truncated_avcc_length ... ok
+test nal::tests::rejects_a_zero_length_avcc_unit ... ok
+test nal::tests::rejects_an_avcc_length_that_points_past_the_end ... ok
+test nal::tests::rejects_an_empty_annex_b_stream ... ok
+test nal::tests::rejects_the_forbidden_zero_bit ... ok
+test nal::tests::returns_nothing_for_an_empty_stream ... ok
+test nal::tests::round_trips_through_annex_b ... ok
+test nal::tests::splits_a_four_byte_start_code_stream ... ok
+test nal::tests::splits_a_three_byte_start_code_stream ... ok
+test nal::tests::tolerates_leading_zeroes ... ok
+test pps::tests::parses_a_baseline_pps ... ok
+test pps::tests::rejects_too_many_slice_groups ... ok
+test pps::tests::reports_a_truncated_pps ... ok
+test rtp::tests::drops_a_continuation_without_a_start ... ok
+test rtp::tests::drops_the_previous_fragment_when_a_new_one_starts ... ok
+test rtp::tests::keeps_the_packet_that_arrives_after_an_aggregation_packet ... ok
+test rtp::tests::passes_a_single_nal_unit_through ... ok
+test rtp::tests::reassembles_a_fragmented_nal_unit ... ok
+test rtp::tests::rejects_a_fragment_that_is_larger_than_the_limit ... ok
+test rtp::tests::rejects_a_reassembled_unit_that_is_larger_than_the_limit ... ok
+test rtp::tests::rejects_a_reserved_bit ... ok
+test rtp::tests::rejects_a_too_short_fragment ... ok
+test rtp::tests::rejects_an_aggregation_packet_with_a_bad_length ... ok
+test rtp::tests::rejects_an_empty_payload ... ok
+test rtp::tests::rejects_an_unknown_payload_type ... ok
+test rtp::tests::unpacks_an_aggregation_packet ... ok
+test sps::tests::parses_a_baseline_sps ... ok
+test sps::tests::rejects_an_absurd_picture_size ... ok
+test sps::tests::reports_a_truncated_sps ... ok
+test vui::tests::parses_a_minimal_vui ... ok
+test vui::tests::parses_the_timing_information ... ok
+test vui::tests::reports_a_truncated_vui ... ok
+
+test result: ok. 51 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_miracast-0ea842f4ca1170ff)
+
+running 35 tests
+test engine::tests::a_fresh_engine_is_idle ... ok
+test engine::tests::a_second_sender_is_refused ... ok
+test engine::tests::a_sender_is_served_and_the_session_is_reported ... ok
+test engine::tests::starting_binds_the_port_and_advertises ... ok
+test engine::tests::starting_twice_fails ... ok
+test engine::tests::stopping_a_fresh_engine_fails ... ok
+test engine::tests::the_engine_reports_miracast ... ok
+test error::tests::every_failure_belongs_to_miracast ... ok
+test error::tests::the_message_carries_the_reason ... ok
+test peer::tests::a_request_without_a_user_agent_has_no_name ... ok
+test peer::tests::an_incomplete_request_has_no_header_end ... ok
+test peer::tests::the_header_end_is_found ... ok
+test peer::tests::the_sender_name_is_taken_from_the_user_agent ... ok
+test rtsp::tests::a_header_without_a_colon_is_rejected ... ok
+test rtsp::tests::a_request_is_parsed ... ok
+test rtsp::tests::a_request_line_without_a_method_is_rejected ... ok
+test rtsp::tests::an_overlong_header_line_is_rejected ... ok
+test rtsp::tests::an_oversized_message_is_rejected ... ok
+test rtsp::tests::an_unknown_method_is_refused ... ok
+test rtsp::tests::get_parameter_answers_with_the_sink_parameters ... ok
+test rtsp::tests::options_announces_the_public_methods ... ok
+test rtsp::tests::setup_answers_with_the_session_and_the_transport ... ok
+test rtsp::tests::the_serialised_answer_carries_the_sequence_number ... ok
+test rtsp::tests::too_many_headers_are_rejected ... ok
+test wfd::tests::a_block_that_runs_past_the_end_is_rejected ... ok
+test wfd::tests::a_source_only_device_is_not_a_sink ... ok
+test wfd::tests::a_trailing_type_byte_without_a_length_is_rejected ... ok
+test wfd::tests::a_version_block_of_the_wrong_length_is_rejected ... ok
+test wfd::tests::an_element_with_one_block_is_parsed ... ok
+test wfd::tests::an_empty_element_is_valid ... ok
+test wfd::tests::an_oversized_element_is_rejected ... ok
+test wfd::tests::several_blocks_are_parsed_in_order ... ok
+test wfd::tests::the_protocol_version_is_read ... ok
+test wfd::tests::the_sink_role_is_read_from_the_device_type ... ok
+test wfd::tests::too_many_blocks_are_rejected ... ok
+
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_plist-1b8419178d4bbdcb)
+
+running 84 tests
+test base64::tests::decodes_the_rfc4648_examples ... ok
+test base64::tests::ignores_whitespace ... ok
+test base64::tests::rejects_a_dangling_group ... ok
+test base64::tests::rejects_data_after_padding ... ok
+test base64::tests::rejects_invalid_characters ... ok
+test base64::tests::round_trips_arbitrary_bytes ... ok
+test binary::decode::tests::agrees_with_the_encoder ... ok
+test binary::decode::tests::decodes_a_hand_written_dictionary ... ok
+test binary::decode::tests::rejects_a_cycle ... ok
+test binary::decode::tests::rejects_a_data_blob_of_one_gigabyte ... ok
+test binary::decode::tests::rejects_a_data_blob_that_reaches_past_the_buffer ... ok
+test binary::decode::tests::rejects_a_length_field_that_exceeds_the_input ... ok
+test binary::decode::tests::rejects_a_null_object ... ok
+test binary::decode::tests::rejects_a_truncated_file ... ok
+test binary::decode::tests::rejects_a_wrong_magic ... ok
+test binary::decode::tests::rejects_an_absurd_object_count ... ok
+test binary::decode::tests::rejects_an_array_that_is_too_large ... ok
+test binary::decode::tests::rejects_an_illegal_offset_width ... ok
+test binary::decode::tests::rejects_an_illegal_reference_width ... ok
+test binary::decode::tests::rejects_an_object_graph_that_expands_too_far ... ok
+test binary::decode::tests::rejects_an_object_offset_outside_the_object_region ... ok
+test binary::decode::tests::rejects_an_object_reference_outside_the_table ... ok
+test binary::decode::tests::rejects_an_unknown_object_marker ... ok
+test binary::encode::tests::rejects_a_tree_that_is_too_deep ... ok
+test binary::encode::tests::round_trips_a_boolean ... ok
+test binary::encode::tests::round_trips_a_date ... ok
+test binary::encode::tests::round_trips_a_real ... ok
+test binary::encode::tests::round_trips_an_array_of_every_length ... ok
+test binary::encode::tests::round_trips_ascii_and_unicode_strings ... ok
+test binary::encode::tests::round_trips_containers ... ok
+test binary::encode::tests::round_trips_data_of_every_length ... ok
+test binary::encode::tests::round_trips_integers_of_every_width ... ok
+test binary::encode::tests::width_grows_with_the_value ... ok
+test binary::encode::tests::writes_the_magic_and_the_trailer ... ok
+test date::tests::apple_epoch_is_2001 ... ok
+test date::tests::fractional_seconds_are_rendered_without_padding_noise ... ok
+test date::tests::leap_day_is_handled ... ok
+test date::tests::malformed_timestamps_are_rejected ... ok
+test date::tests::non_finite_values_are_rejected ... ok
+test date::tests::round_trip_through_rfc3339_is_stable ... ok
+test date::tests::timezone_offsets_are_applied ... ok
+test date::tests::unix_epoch_is_before_the_apple_epoch ... ok
+test error::tests::limit_errors_are_recognised ... ok
+test error::tests::messages_name_the_offending_value ... ok
+test limits::tests::defaults_are_finite_and_non_zero ... ok
+test limits::tests::scaled_by_multiplies_every_budget ... ok
+test limits::tests::scaled_by_zero_does_not_shrink_the_budgets ... ok
+test tests::detects_the_binary_format ... ok
+test tests::rejects_input_that_is_neither_format ... ok
+test tests::rejects_invalid_utf8_in_an_xml_document ... ok
+test tests::round_trips_through_both_representations ... ok
+test value::tests::accessors_report_the_matching_variant_only ... ok
+test value::tests::dictionary_preserves_insertion_order ... ok
+test value::tests::get_finds_a_key_in_a_dictionary ... ok
+test value::tests::integers_are_not_silently_turned_into_reals ... ok
+test value::tests::node_count_and_depth_describe_the_tree ... ok
+test value::tests::sorted_dictionary_orders_keys ... ok
+test xml::decode::tests::decodes_an_empty_dictionary ... ok
+test xml::decode::tests::decodes_every_leaf_type ... ok
+test xml::decode::tests::decodes_nested_arrays ... ok
+test xml::decode::tests::enforces_the_depth_limit ... ok
+test xml::decode::tests::rejects_a_bad_date ... ok
+test xml::decode::tests::rejects_a_non_numeric_integer ... ok
+test xml::decode::tests::rejects_a_truncated_document ... ok
+test xml::decode::tests::rejects_an_internal_dtd_subset ... ok
+test xml::decode::tests::rejects_an_unknown_root_element ... ok
+test xml::decode::tests::rejects_an_unknown_value_element ... ok
+test xml::decode::tests::rejects_content_after_the_root_element ... ok
+test xml::encode::tests::encodes_a_dictionary ... ok
+test xml::encode::tests::escapes_markup_characters ... ok
+test xml::encode::tests::rejects_a_non_finite_real ... ok
+test xml::encode::tests::round_trips_a_whole_real_as_a_real ... ok
+test xml::encode::tests::round_trips_empty_containers ... ok
+test xml::encode::tests::round_trips_every_value_type ... ok
+test xml::reader::tests::enforces_the_text_limit ... ok
+test xml::reader::tests::reads_cdata_verbatim ... ok
+test xml::reader::tests::reads_elements_and_text ... ok
+test xml::reader::tests::reads_self_closing_elements ... ok
+test xml::reader::tests::rejects_an_internal_dtd_subset ... ok
+test xml::reader::tests::rejects_an_unknown_entity ... ok
+test xml::reader::tests::rejects_unterminated_markup ... ok
+test xml::reader::tests::resolves_entities ... ok
+test xml::reader::tests::skips_a_plain_doctype ... ok
+test xml::reader::tests::skips_comments_and_processing_instructions ... ok
+
+test result: ok. 84 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/phairplay_web-44f5a1b707e3f418)
+
+running 16 tests
+test api::tests::an_unknown_protocol_is_a_not_found ... ok
+test api::tests::the_status_is_answered ... ok
+test assets::tests::the_directory_of_the_dashboard_is_found ... ok
+test dto::tests::the_counters_of_a_quiet_receiver_report_no_loss ... ok
+test dto::tests::the_event_carries_its_kind ... ok
+test dto::tests::the_session_is_serialised_with_its_formats ... ok
+test dto::tests::the_status_is_serialised_with_a_readable_state ... ok
+test error::tests::an_invalid_request_is_a_bad_request ... ok
+test error::tests::an_unknown_protocol_is_a_not_found ... ok
+test error::tests::an_unsupported_feature_is_a_not_implemented ... ok
+test error::tests::the_code_of_the_bridge_is_kept ... ok
+test server::tests::the_address_of_the_server_is_the_loopback_interface ... ok
+test server::tests::the_bound_socket_is_on_the_loopback_interface ... ok
+test state::tests::a_status_event_becomes_a_dashboard_event ... ok
+test state::tests::an_unknown_protocol_is_refused ... ok
+test state::tests::the_state_covers_every_protocol ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (target/debug/deps/phairplay_web-a9461c2b38893e81)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests phairplay_aac
+
+running 6 tests
+test formats/aac/src/adts.rs - adts::AacProfile::from_index (line 39) ... ok
+test formats/aac/src/adts.rs - adts::split_adts (line 237) ... ok
+test formats/aac/src/adts.rs - adts::total_samples (line 275) ... ok
+test formats/aac/src/config.rs - config::AacConfig::bitrate_from_bytes (line 95) ... ok
+test formats/aac/src/config.rs - config::AacConfig::new (line 33) ... ok
+test formats/aac/src/lib.rs - (line 16) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.41s; merged doctests compilation took 0.39s
+   Doc-tests phairplay_airplay
+
+running 30 tests
+test engines/airplay/src/dacp.rs - dacp (line 16) ... ok
+test engines/airplay/src/dmap.rs - dmap (line 17) ... ok
+test engines/airplay/src/engine/mod.rs - engine (line 16) ... ok
+test engines/airplay/src/error.rs - error (line 12) ... ok
+test engines/airplay/src/fairplay.rs - fairplay (line 29) ... ok
+test engines/airplay/src/h264.rs - h264 (line 13) ... ok
+test engines/airplay/src/lib.rs - (line 32) ... ok
+test engines/airplay/src/limits.rs - limits (line 12) ... ok
+test engines/airplay/src/mirror.rs - mirror (line 12) ... ok
+test engines/airplay/src/pairing/identity.rs - pairing::identity (line 11) ... ok
+test engines/airplay/src/pairing/legacy.rs - pairing::legacy (line 23) ... ok
+test engines/airplay/src/pairing/raop_rsa.rs - pairing::raop_rsa (line 17) ... ok
+test engines/airplay/src/pairing/store.rs - pairing::store (line 12) ... ok
+test engines/airplay/src/pairing/verify.rs - pairing::verify (line 15) ... ok
+test engines/airplay/src/photo.rs - photo (line 12) ... ok
+test engines/airplay/src/plist/binary/mod.rs - plist::binary (line 13) ... ok
+test engines/airplay/src/plist/mod.rs - plist (line 11) ... ok
+test engines/airplay/src/plist/value.rs - plist::value (line 11) ... ok
+test engines/airplay/src/plist/xml/mod.rs - plist::xml (line 12) ... ok
+test engines/airplay/src/queue.rs - queue (line 20) ... ok
+test engines/airplay/src/queue.rs - queue::Mailbox<Q>::spawn (line 176) ... ok
+test engines/airplay/src/rtp.rs - rtp (line 21) ... ok
+test engines/airplay/src/rtsp/http/mod.rs - rtsp::http (line 11) ... ok
+test engines/airplay/src/rtsp/reader.rs - rtsp::reader (line 17) ... ok
+test engines/airplay/src/rtsp/request.rs - rtsp::request (line 11) ... ok
+test engines/airplay/src/rtsp/response.rs - rtsp::response (line 11) ... ok
+test engines/airplay/src/rtsp/router.rs - rtsp::router (line 11) ... ok
+test engines/airplay/src/sdp.rs - sdp (line 13) ... ok
+test engines/airplay/src/session.rs - session (line 11) ... ok
+test engines/airplay/src/timing.rs - timing (line 13) ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+all doctests ran in 1.47s; merged doctests compilation took 1.28s
+   Doc-tests phairplay_alac
+
+running 5 tests
+test formats/alac/src/bits.rs - bits::BitReader<'a>::new (line 31) ... ok
+test formats/alac/src/config.rs - config::AlacConfig::from_magic_cookie (line 76) ... ok
+test formats/alac/src/decoder.rs - decoder::AlacDecoder::new (line 106) ... ok
+test formats/alac/src/decoder.rs - decoder::DecodedAudio::sample (line 64) ... ok
+test formats/alac/src/lib.rs - (line 16) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.58s; merged doctests compilation took 0.55s
+   Doc-tests phairplay_cast
+
+running 11 tests
+test engines/cast/src/advertisement.rs - advertisement (line 16) ... ok
+test engines/cast/src/engine.rs - engine (line 17) ... ok
+test engines/cast/src/frame.rs - frame (line 14) ... ok
+test engines/cast/src/lib.rs - (line 30) ... ok
+test engines/cast/src/media.rs - media (line 16) ... ok
+test engines/cast/src/message.rs - message (line 14) ... ok
+test engines/cast/src/payloads.rs - payloads (line 15) ... ok
+test engines/cast/src/peer.rs - peer (line 16) - compile ... ok
+test engines/cast/src/proto.rs - proto (line 17) ... ok
+test engines/cast/src/session.rs - session (line 14) ... ok
+test engines/cast/src/tls.rs - tls (line 15) ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 1.42s; merged doctests compilation took 1.38s
+   Doc-tests phairplay_core
+
+running 17 tests
+test core/phairplay-core/src/config/engine_limits.rs - config::engine_limits (line 22) ... ok
+test core/phairplay-core/src/config/engine_limits.rs - config::engine_limits::AppConfig::limits_for (line 75) ... ok
+test core/phairplay-core/src/config/limits.rs - config::limits (line 21) ... ok
+test core/phairplay-core/src/config/ports.rs - config::ports (line 20) ... ok
+test core/phairplay-core/src/config/ports.rs - config::ports::default_port (line 57) ... ok
+test core/phairplay-core/src/config/service_types.rs - config::service_types (line 26) ... ok
+test core/phairplay-core/src/config/timeouts.rs - config::timeouts (line 20) ... ok
+test core/phairplay-core/src/lib.rs - (line 45) ... ok
+test core/phairplay-core/src/privacy.rs - privacy (line 33) ... ok
+test core/phairplay-core/src/privacy.rs - privacy::mask_host (line 157) ... ok
+test core/phairplay-core/src/privacy.rs - privacy::mask_ip (line 92) ... ok
+test core/phairplay-core/src/privacy.rs - privacy::mask_name (line 63) ... ok
+test core/phairplay-core/src/privacy.rs - privacy::mask_socket_addr (line 137) ... ok
+test core/phairplay-core/src/privacy.rs - privacy::mask_url (line 192) ... ok
+test core/phairplay-core/src/queue.rs - queue (line 20) ... ok
+test core/phairplay-core/src/queue.rs - queue::BoundedFrameQueue<T>::push (line 151) ... ok
+test core/phairplay-core/src/queue.rs - queue::QueueBudget::new (line 56) ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.74s
+   Doc-tests phairplay_discovery
+
+running 8 tests
+test engines/discovery/src/lib.rs - (line 34) ... ok
+test engines/discovery/src/mdns.rs - mdns (line 16) ... ok
+test engines/discovery/src/service_types.rs - service_types (line 22) ... ok
+test engines/discovery/src/service_types.rs - service_types::format_mac (line 156) ... ok
+test engines/discovery/src/service_types.rs - service_types::pseudo_mac (line 137) ... ok
+test engines/discovery/src/service_types.rs - service_types::raop_instance_name (line 82) ... ok
+test engines/discovery/src/ssdp.rs - ssdp (line 16) ... ok
+test engines/discovery/src/txt.rs - txt (line 18) ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.96s; merged doctests compilation took 0.92s
+   Doc-tests phairplay_dlna
+
+running 10 tests
+test engines/dlna/src/description.rs - description (line 17) ... ok
+test engines/dlna/src/engine.rs - engine (line 16) ... ok
+test engines/dlna/src/gena.rs - gena (line 30) ... ok
+test engines/dlna/src/http.rs - http (line 17) ... ok
+test engines/dlna/src/lib.rs - (line 31) ... ok
+test engines/dlna/src/server.rs - server (line 17) ... ok
+test engines/dlna/src/soap.rs - soap (line 20) ... ok
+test engines/dlna/src/ssdp.rs - ssdp (line 17) ... ok
+test engines/dlna/src/state.rs - state (line 17) ... ok
+test engines/dlna/src/xml.rs - xml (line 27) ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.92s; merged doctests compilation took 0.90s
+   Doc-tests phairplay_ffi
+
+running 14 tests
+test platform/phairplay-ffi/src/callbacks.rs - callbacks (line 18) ... ok
+test platform/phairplay-ffi/src/dto/config.rs - dto::config (line 19) ... ok
+test platform/phairplay-ffi/src/dto/identity.rs - dto::identity (line 14) ... ok
+test platform/phairplay-ffi/src/dto/media.rs - dto::media (line 14) ... ok
+test platform/phairplay-ffi/src/dto/mod.rs - dto (line 14) ... ok
+test platform/phairplay-ffi/src/dto/protocol.rs - dto::protocol (line 13) ... ok
+test platform/phairplay-ffi/src/dto/session.rs - dto::session (line 14) ... ok
+test platform/phairplay-ffi/src/dto/stats.rs - dto::stats (line 13) ... ok
+test platform/phairplay-ffi/src/error.rs - error (line 15) ... ok
+test platform/phairplay-ffi/src/lib.rs - (line 29) ... ok
+test platform/phairplay-ffi/src/listener.rs - listener (line 13) ... ok
+test platform/phairplay-ffi/src/receiver.rs - receiver (line 15) ... ok
+test platform/phairplay-ffi/src/sinks.rs - sinks (line 16) ... ok
+test platform/phairplay-ffi/src/supervisor.rs - supervisor (line 20) ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 1.67s; merged doctests compilation took 1.62s
+   Doc-tests phairplay_h264
+
+running 9 tests
+test formats/h264/src/bits.rs - bits::BitReader<'a>::new (line 28) ... ok
+test formats/h264/src/bits.rs - bits::unescape_rbsp (line 273) ... ok
+test formats/h264/src/lib.rs - (line 18) ... ok
+test formats/h264/src/nal.rs - nal::NalUnitType::from_value (line 71) ... ok
+test formats/h264/src/nal.rs - nal::avcc_to_annex_b (line 240) ... ok
+test formats/h264/src/nal.rs - nal::split_annex_b (line 170) ... ok
+test formats/h264/src/nal.rs - nal::to_annex_b (line 217) ... ok
+test formats/h264/src/rtp.rs - rtp::FuAReassembler::new (line 51) ... ok
+test formats/h264/src/rtp.rs - rtp::FuAReassembler::push (line 91) ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.52s; merged doctests compilation took 0.50s
+   Doc-tests phairplay_miracast
+
+running 3 tests
+test engines/miracast/src/lib.rs - (line 25) ... ok
+test engines/miracast/src/rtsp.rs - rtsp (line 17) ... ok
+test engines/miracast/src/wfd.rs - wfd (line 17) ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.75s
+   Doc-tests phairplay_plist
+
+running 7 tests
+test formats/plist/src/lib.rs - (line 17) ... ok
+test formats/plist/src/lib.rs - decode (line 58) ... ok
+test formats/plist/src/lib.rs - decode_with_limits (line 77) ... ok
+test formats/plist/src/lib.rs - encode_binary (line 135) ... ok
+test formats/plist/src/lib.rs - encode_binary_with_limits (line 153) ... ok
+test formats/plist/src/lib.rs - encode_xml (line 116) ... ok
+test formats/plist/src/lib.rs - is_binary (line 100) ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.48s; merged doctests compilation took 0.46s
+   Doc-tests phairplay_web
+
+running 7 tests
+test apps/web/src/api.rs - api (line 17) ... ok
+test apps/web/src/assets.rs - assets (line 14) ... ok
+test apps/web/src/dto.rs - dto (line 14) ... ok
+test apps/web/src/error.rs - error (line 17) ... ok
+test apps/web/src/lib.rs - (line 21) ... ok
+test apps/web/src/server.rs - server (line 15) ... ok
+test apps/web/src/state.rs - state (line 15) ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 2.30s; merged doctests compilation took 2.25s

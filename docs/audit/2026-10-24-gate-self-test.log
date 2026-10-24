@@ -1,0 +1,33 @@
+==> The self-test of the gate of PhairPlayRust
+    Every rule is broken on purpose, the gate has to go red, the
+    break is undone and the gate has to go green again.
+
+--- 1. the lint of the workspace: an unwrap() in the code
+    clippy with an unwrap() -> exit code 101
+    OK: the lint refused the unwrap().
+    clippy after the repair -> exit code 0
+    OK: the gate is green again.
+
+--- 2. the length of the source files: a file above the hard limit
+    the file-size check with a long file -> exit code 1
+    OK: the check refused the long file.
+    the file-size check after the repair -> exit code 0
+    OK: the gate is green again.
+
+--- 3. the licence headers: a literal licence in a member manifest
+    the licence-header check with a literal licence -> exit code 1
+    OK: the check refused the literal licence.
+    the licence-header check after the repair -> exit code 0
+    OK: the gate is green again.
+
+--- 4. the links of the documentation: a link to a file that does not exist
+    the link check with a broken link -> exit code 1
+    OK: the check refused the broken link.
+    the link check after the repair -> exit code 0
+    OK: the gate is green again.
+
+==> The self-test of the gate
+    rules proven   : 4
+    failed rules   : 0
+
+OK: every rule of the gate refused its violation and was green again after the repair.

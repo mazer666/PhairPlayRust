@@ -23,6 +23,9 @@ apps/web/.vite
 
 # Local artefacts
 *.log
+# WHY: the logs of the audit records are the *evidence* of the acceptance,
+# and they belong in the repository. Every other log stays out.
+!docs/audit/*.log
 .env
 .env.*
 
