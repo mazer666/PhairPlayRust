@@ -1,0 +1,50 @@
+diff --git a/apps/android/app/src/main/java/uniffi/phairplay_ffi/phairplay_ffi.kt b/apps/android/app/src/main/java/uniffi/phairplay_ffi/phairplay_ffi.kt
+index 1d56f1e..3d7a158 100644
+--- a/apps/android/app/src/main/java/uniffi/phairplay_ffi/phairplay_ffi.kt
++++ b/apps/android/app/src/main/java/uniffi/phairplay_ffi/phairplay_ffi.kt
+@@ -1181,7 +1181,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
+     if (lib.uniffi_phairplay_ffi_checksum_method_receiver_stop_protocol() != 15847.toShort()) {
+         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+     }
+-    if (lib.uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 31533.toShort()) {
++    if (lib.uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 5570.toShort()) {
+         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+     }
+     if (lib.uniffi_phairplay_ffi_checksum_method_platformaudiosink_submit_packet() != 34712.toShort()) {
+@@ -1851,6 +1851,11 @@ open class Receiver: Disposable, AutoCloseable, ReceiverInterface
+     /**
+      * Creates a receiver with the given configuration.
+      *
++     * WHY the engines are registered here: a receiver without engines is a
++     * receiver that cannot receive. The native shells reach the receiver
++     * only through this constructor, so this is the one place where the
++     * composition root has to run for them.
++     *
+      * # Errors
+      * Returns [`FfiError`] when the configuration is invalid or when the
+      * runtime of the bridge cannot be created.
+diff --git a/apps/macos/Sources/PhairPlayFFI/phairplay_ffi.swift b/apps/macos/Sources/PhairPlayFFI/phairplay_ffi.swift
+index 6811e56..3f9765c 100644
+--- a/apps/macos/Sources/PhairPlayFFI/phairplay_ffi.swift
++++ b/apps/macos/Sources/PhairPlayFFI/phairplay_ffi.swift
+@@ -737,6 +737,11 @@ open class Receiver: ReceiverProtocol, @unchecked Sendable {
+     /**
+      * Creates a receiver with the given configuration.
+      *
++     * WHY the engines are registered here: a receiver without engines is a
++     * receiver that cannot receive. The native shells reach the receiver
++     * only through this constructor, so this is the one place where the
++     * composition root has to run for them.
++     *
+      * # Errors
+      * Returns [`FfiError`] when the configuration is invalid or when the
+      * runtime of the bridge cannot be created.
+@@ -4960,7 +4965,7 @@ private let initializationResult: InitializationResult = {
+     if (uniffi_phairplay_ffi_checksum_method_receiver_stop_protocol() != 15847) {
+         return InitializationResult.apiChecksumMismatch
+     }
+-    if (uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 31533) {
++    if (uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 5570) {
+         return InitializationResult.apiChecksumMismatch
+     }
+     if (uniffi_phairplay_ffi_checksum_method_platformaudiosink_submit_packet() != 34712) {

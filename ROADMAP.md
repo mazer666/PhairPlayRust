@@ -694,8 +694,10 @@ Framework* (MSF).
       (`platform/phairplay-ffi/src/composition.rs`) — the receiver starts it with the other
       protocols and reports it in the status; the conflict of the SSDP port
       is named under the gates
-- [ ] The card of the fifth protocol in the dashboard — **not done**: the
-      panel of the browser lists five protocols
+- [x] The card of the fifth protocol in the dashboard — the panel of the
+      browser lists five protocols, the state badge of a card in a row of
+      five got a tighter tracking, and the grid carries five columns on a
+      television (`apps/web/assets/api.js`, `apps/web/assets/cards.css`)
 - [ ] The message format of the channel — **not implemented**, the format is
       proprietary (`EXC-011`)
 

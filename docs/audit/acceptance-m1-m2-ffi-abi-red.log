@@ -1,0 +1,25 @@
+
+running 2 tests
+test a_foreign_caller_round_trips_through_the_c_abi ... FAILED
+test the_bindings_of_every_shell_can_be_generated ... FAILED
+
+failures:
+
+---- a_foreign_caller_round_trips_through_the_c_abi stdout ----
+
+thread 'a_foreign_caller_round_trips_through_the_c_abi' (206549) panicked at platform/phairplay-ffi/tests/foreign_abi_roundtrip.rs:50:5:
+the shared library of the bridge must be built next to the test binary
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- the_bindings_of_every_shell_can_be_generated stdout ----
+
+thread 'the_bindings_of_every_shell_can_be_generated' (206550) panicked at platform/phairplay-ffi/tests/foreign_abi_roundtrip.rs:50:5:
+the shared library of the bridge must be built next to the test binary
+
+
+failures:
+    a_foreign_caller_round_trips_through_the_c_abi
+    the_bindings_of_every_shell_can_be_generated
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
