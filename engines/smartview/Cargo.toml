@@ -39,14 +39,14 @@ sha1 = "0.10"
 # set it without `unsafe` is a crate that wraps the socket API. `socket2` is
 # already in the tree of the workspace (the Tokio runtime uses it), so this
 # adds no new third-party code either.
-socket2 = "0.6"
+socket2 = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["test-util"] }
 # The end-to-end test of the discovery binds the SSDP port and joins the
 # multicast group. The standard library cannot set `SO_REUSEADDR`, and the
 # crate that wraps the socket API is already a dependency of this crate.
-socket2 = "0.6"
+socket2 = { workspace = true }
 
 [lints]
 workspace = true

@@ -21,6 +21,8 @@ tokio = { workspace = true }
 async-trait = { workspace = true }
 sha2 = { workspace = true }
 rand = { workspace = true }
+# The socket options of the SSDP socket of the core.
+socket2 = { workspace = true }
 base64 = { workspace = true }
 
 [dev-dependencies]

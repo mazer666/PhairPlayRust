@@ -15,6 +15,10 @@ rust-version.workspace = true
 phairplay-core = { path = "../../core/phairplay-core" }
 async-trait = { workspace = true }
 if-addrs = { workspace = true }
+# The socket options of the multicast socket. Without `SO_REUSEADDR` the
+# DLNA responder holds the SSDP port exclusively, and the Smart View engine
+# of the same receiver cannot bind it at all.
+socket2 = { workspace = true }
 rand = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }

@@ -19,12 +19,7 @@ fn search() -> String {
 
 #[test]
 fn the_responder_reports_the_port_it_listens_on() {
-    let responder = SsdpResponder::bind(
-        0,
-        "http://10.0.0.5:8001/description.xml".to_string(),
-        "uuid:abc".to_string(),
-    )
-    .expect("the responder binds");
+    let responder = SsdpResponder::bind(0).expect("the responder binds");
     assert!(responder.local_port() > 0);
     // WHY: the announcement goes to the group and to the port the
     // responder listens on.

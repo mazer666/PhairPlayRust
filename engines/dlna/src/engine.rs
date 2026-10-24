@@ -36,7 +36,7 @@ use crate::http::HttpLimits;
 use crate::reporter::SessionReporter;
 use crate::server::{HttpServer, Lifecycle, ServerContext};
 use crate::soap::{CompositeEventSink, EventSink, SoapDispatcher};
-use crate::ssdp::SsdpResponder;
+use crate::ssdp::{SsdpResponder, service};
 use crate::state::RendererState;
 
 /// The default port of the SSDP responder.
@@ -94,7 +94,7 @@ impl DlnaConfig {
 #[derive(Debug)]
 struct Runtime {
     server: HttpServer,
-    ssdp: SsdpResponder,
+    ssdp: std::sync::Arc<SsdpResponder>,
     location: String,
     udn: String,
 }
@@ -240,11 +240,11 @@ impl ProtocolEngine for DlnaEngine {
         };
         let tcp_port = server.local_port();
 
-        let ssdp = match SsdpResponder::bind(
-            self.config.ssdp_port,
-            format!("http://{}:{tcp_port}/description.xml", self.config.local_ip),
-            udn.clone(),
-        ) {
+        // WHY the shared responder: the receiver announces more than one
+        // service over the same multicast group, and Linux allows one socket
+        // per group. The core owns the listener; the renderer registers
+        // itself with it.
+        let ssdp = match SsdpResponder::shared() {
             Ok(ssdp) => ssdp,
             Err(error) => {
                 return self
@@ -254,7 +254,9 @@ impl ProtocolEngine for DlnaEngine {
         let udp_port = ssdp.local_port();
 
         let location = format!("http://{}:{tcp_port}/description.xml", self.config.local_ip);
-        if let Err(error) = ssdp.send_alive(&location, &udn) {
+        let service = service(&location, &udn);
+        ssdp.add_service(service.clone());
+        if let Err(error) = ssdp.announce(&service) {
             tracing::warn!(reason = %error, "the SSDP announcement could not be sent");
         }
 
@@ -285,11 +287,15 @@ impl ProtocolEngine for DlnaEngine {
             return Err(EngineError::NotRunning { protocol: "dlna" });
         };
         self.lock_lifecycle().set_state(ProtocolState::Stopping);
-        if let Err(error) = runtime.ssdp.send_byebye(&runtime.udn) {
+        // WHY the service leaves the registry but the responder stays: the
+        // Smart View service of the same receiver may still be announced.
+        // The listener belongs to the process, not to one protocol.
+        let service = service(&runtime.location, &runtime.udn);
+        if let Err(error) = runtime.ssdp.withdraw(&service) {
             tracing::warn!(reason = %error, "the SSDP farewell could not be sent");
         }
+        runtime.ssdp.remove_service(&runtime.udn);
         runtime.server.stop().await;
-        runtime.ssdp.stop();
         self.reporter.detach();
         {
             let mut lifecycle = self.lock_lifecycle();

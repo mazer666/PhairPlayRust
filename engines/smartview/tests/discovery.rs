@@ -53,8 +53,8 @@ fn read_answer(socket: &UdpSocket) -> Option<String> {
 
 #[test]
 fn a_search_for_the_multi_screen_service_is_answered_over_the_network() {
-    let responder =
-        SsdpResponder::bind(0, LOCATION.to_string(), UDN.to_string()).expect("the responder binds");
+    let responder = SsdpResponder::bind(0).expect("the responder binds");
+    responder.add_service(phairplay_smartview::ssdp::service(LOCATION, UDN));
     let socket = sender();
     socket
         .send_to(search().as_bytes(), ("127.0.0.1", responder.local_port()))
@@ -75,8 +75,8 @@ fn a_search_with_a_broken_length_is_not_answered_and_the_responder_survives() {
     // malformed. The responder has to refuse it — and it has to stay alive:
     // a parser that panics on a broken datagram takes the whole
     // discovery of the receiver down.
-    let responder =
-        SsdpResponder::bind(0, LOCATION.to_string(), UDN.to_string()).expect("the responder binds");
+    let responder = SsdpResponder::bind(0).expect("the responder binds");
+    responder.add_service(phairplay_smartview::ssdp::service(LOCATION, UDN));
     let socket = sender();
     let hostile = format!("{}CONTENT-LENGTH: 999999999\r\n\r\n", search());
     socket
@@ -102,8 +102,8 @@ fn a_search_with_a_broken_length_is_not_answered_and_the_responder_survives() {
 
 #[test]
 fn a_search_for_another_service_is_not_answered() {
-    let responder =
-        SsdpResponder::bind(0, LOCATION.to_string(), UDN.to_string()).expect("the responder binds");
+    let responder = SsdpResponder::bind(0).expect("the responder binds");
+    responder.add_service(phairplay_smartview::ssdp::service(LOCATION, UDN));
     let socket = sender();
     let hostile = search().replace(SEARCH_TARGET, "urn:schemas-upnp-org:device:MediaRenderer:1");
     socket
@@ -149,14 +149,15 @@ fn the_announcement_reaches_the_multicast_group() {
         .set_read_timeout(Some(Duration::from_secs(5)))
         .expect("the timeout is set");
 
-    let responder = SsdpResponder::bind(port, LOCATION.to_string(), UDN.to_string())
-        .expect("the responder binds");
+    let responder = SsdpResponder::bind(port).expect("the responder binds");
+    responder.add_service(phairplay_smartview::ssdp::service(LOCATION, UDN));
     assert_eq!(
         responder.announcement_target(),
         std::net::SocketAddr::from((MULTICAST_ADDRESS, port))
     );
+    let service = phairplay_smartview::ssdp::service(LOCATION, UDN);
     responder
-        .send_alive(LOCATION, UDN)
+        .announce(&service)
         .expect("the announcement is sent");
 
     let mut buffer = vec![0u8; 2048];

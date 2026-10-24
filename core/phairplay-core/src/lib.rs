@@ -74,6 +74,7 @@ pub mod privacy;
 pub mod protocol;
 pub mod queue;
 pub mod session;
+pub mod ssdp;
 
 pub use build_info::BuildInfo;
 pub use capabilities::{AudioCodec, MediaCapabilities, PassthroughCodec, VideoCodec};

@@ -1,5 +1,8 @@
 #![allow(clippy::expect_used, clippy::unwrap_used)]
 
+use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
+use std::time::Duration;
+
 use super::*;
 
 #[test]
@@ -107,12 +110,8 @@ fn the_renderer_announces_itself_under_three_targets() {
 fn the_responder_answers_a_query_on_its_own_port() {
     // The responder is bound to an ephemeral port so that the test does
     // not fight with a real DLNA server on the machine.
-    let mut responder = SsdpResponder::bind(
-        0,
-        "http://127.0.0.1:1/d.xml".to_string(),
-        "uuid:abc".to_string(),
-    )
-    .expect("the responder binds");
+    let responder = SsdpResponder::bind(0).expect("the responder binds");
+    responder.add_service(service("http://127.0.0.1:1/d.xml", "uuid:abc"));
     let port = responder.local_port();
     assert!(port > 0);
     let client =

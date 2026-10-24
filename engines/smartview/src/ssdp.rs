@@ -40,17 +40,22 @@
 //! assert!(alive.contains("NTS: ssdp:alive"));
 //! ```
 
-use std::io;
-use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::thread::JoinHandle;
-use std::time::Duration;
-
-use socket2::{Domain, Protocol, Socket, Type};
+use phairplay_core::ssdp as core_ssdp;
 
 /// The IPv4 multicast group SSDP uses.
-pub const MULTICAST_ADDRESS: Ipv4Addr = Ipv4Addr::new(239, 255, 255, 250);
+pub use core_ssdp::MULTICAST_ADDRESS;
+
+/// The responder of the process.
+///
+/// WHY it lives in the core: the receiver announces more than one service
+/// over the same multicast group, and Linux allows one socket per group.
+/// Two responders would fight over the port and the receiver would lose a
+/// protocol because of a socket option. The core owns one listener, and
+/// every service registers itself with it.
+pub use core_ssdp::SsdpResponder;
+
+/// The reasons the SSDP socket could not be opened.
+pub use core_ssdp::SsdpError;
 
 /// The port SSDP uses.
 ///
@@ -80,9 +85,6 @@ pub const CACHE_CONTROL_MAX_AGE: u32 = phairplay_core::config::timeouts::UPNP_MA
 /// Its single owner is
 /// [`phairplay_core::config::limits::SSDP_MESSAGE_BYTES`].
 pub const MAX_PACKET_BYTES: usize = phairplay_core::config::limits::SSDP_MESSAGE_BYTES;
-
-/// The interval the reader thread wakes up in.
-const READ_POLL_INTERVAL: Duration = Duration::from_millis(500);
 
 /// The value of the `MAN` header of a search that asks for an answer.
 const MAN_DISCOVER: &str = "ssdp:discover";
@@ -190,149 +192,23 @@ pub fn notify_byebye(udn: &str, notification_type: &str) -> String {
     )
 }
 
-/// The SSDP responder of the Smart View receiver.
-#[derive(Debug)]
-pub struct SsdpResponder {
-    socket: Arc<UdpSocket>,
-    running: Arc<AtomicBool>,
-    worker: Option<JoinHandle<()>>,
-    local_port: u16,
-    announcement_target: SocketAddr,
-}
-
-impl SsdpResponder {
-    /// Binds the responder socket and starts the reader thread.
-    ///
-    /// # Errors
-    /// Returns [`crate::error::SmartViewError::Ssdp`] when the socket cannot
-    /// be bound or the multicast group cannot be joined.
-    pub fn bind(
-        port: u16,
-        location: String,
-        udn: String,
-    ) -> Result<Self, crate::error::SmartViewError> {
-        let socket = bind_multicast_socket(port)?;
-        let local_port = socket
-            .local_addr()
-            .map(|address| address.port())
-            .unwrap_or(port);
-        let shared = Arc::new(socket);
-        let running = Arc::new(AtomicBool::new(true));
-        let reader_socket = Arc::clone(&shared);
-        let reader_running = Arc::clone(&running);
-        let worker = std::thread::Builder::new()
-            .name("phairplay-smartview-ssdp".to_string())
-            .spawn(move || {
-                let mut buffer = vec![0u8; MAX_PACKET_BYTES];
-                while reader_running.load(Ordering::Relaxed) {
-                    match reader_socket.recv_from(&mut buffer) {
-                        Ok((read, from)) => {
-                            let message = String::from_utf8_lossy(&buffer[..read]).to_string();
-                            if is_smartview_search(&message) {
-                                let target = requested_target(&message);
-                                let response = search_response(&location, &udn, &target);
-                                let _ = reader_socket.send_to(response.as_bytes(), from);
-                            }
-                        }
-                        Err(error) => match error.kind() {
-                            io::ErrorKind::WouldBlock | io::ErrorKind::TimedOut => {}
-                            _ => break,
-                        },
-                    }
-                }
-            })
-            .map_err(|error| crate::error::SmartViewError::Ssdp(error.to_string()))?;
-
-        Ok(Self {
-            socket: shared,
-            running,
-            worker: Some(worker),
-            local_port,
-            announcement_target: SocketAddr::from((MULTICAST_ADDRESS, local_port)),
-        })
-    }
-
-    /// The port the responder listens on.
-    #[must_use]
-    pub fn local_port(&self) -> u16 {
-        self.local_port
-    }
-
-    /// The address the announcements are sent to.
-    ///
-    /// WHY: the announcement belongs to the group and to the port the
-    /// responder listens on. In the configuration of a receiver that is the
-    /// well-known SSDP port 1900 — the port a sender searches. A receiver
-    /// that is configured on another port announces on that port, so that
-    /// the pair "the port I listen on" and "the port I announce on" can
-    /// never disagree.
-    #[must_use]
-    pub fn announcement_target(&self) -> SocketAddr {
-        self.announcement_target
-    }
-
-    /// Announces the receiver on the multicast group.
-    ///
-    /// # Errors
-    /// Returns the I/O error of the send.
-    pub fn send_alive(&self, location: &str, udn: &str) -> io::Result<()> {
-        let message = notify_alive(location, udn, SEARCH_TARGET);
-        self.socket
-            .send_to(message.as_bytes(), self.announcement_target)
-            .map(|_| ())
-    }
-
-    /// Announces that the receiver has left.
-    ///
-    /// # Errors
-    /// Returns the I/O error of the send.
-    pub fn send_byebye(&self, udn: &str) -> io::Result<()> {
-        let message = notify_byebye(udn, SEARCH_TARGET);
-        self.socket
-            .send_to(message.as_bytes(), self.announcement_target)
-            .map(|_| ())
-    }
-
-    /// Stops the reader thread.
-    pub fn stop(&mut self) {
-        self.running.store(false, Ordering::Relaxed);
-        if let Some(worker) = self.worker.take() {
-            let _ = worker.join();
-        }
-    }
-}
-
-impl Drop for SsdpResponder {
-    fn drop(&mut self) {
-        self.stop();
-    }
-}
-
-/// Binds the multicast socket and joins the SSDP group.
+/// The description of the receiver as a service of the shared responder.
 ///
-/// WHY: `SO_REUSEADDR` is set before the bind. Without it, a second
-/// responder on the same host — the DLNA engine of the same receiver, for
-/// example — cannot bind the port at all, and the receiver loses a
-/// protocol. The standard library cannot set the option, and the only way
-/// to set it without `unsafe` is a crate that wraps the socket API.
-fn bind_multicast_socket(port: u16) -> Result<UdpSocket, crate::error::SmartViewError> {
-    let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP))
-        .map_err(|error| crate::error::SmartViewError::Ssdp(error.to_string()))?;
-    socket
-        .set_reuse_address(true)
-        .map_err(|error| crate::error::SmartViewError::Ssdp(error.to_string()))?;
-    let address = SocketAddr::from((Ipv4Addr::UNSPECIFIED, port));
-    socket
-        .bind(&address.into())
-        .map_err(|error| crate::error::SmartViewError::Ssdp(error.to_string()))?;
-    socket
-        .join_multicast_v4(&MULTICAST_ADDRESS, &Ipv4Addr::UNSPECIFIED)
-        .map_err(|error| crate::error::SmartViewError::Ssdp(error.to_string()))?;
-    let socket: UdpSocket = socket.into();
-    socket
-        .set_read_timeout(Some(READ_POLL_INTERVAL))
-        .map_err(|error| crate::error::SmartViewError::Ssdp(error.to_string()))?;
-    Ok(socket)
+/// WHY the service carries the rule: the listener of the core asks every
+/// service whether a message is a search *it* answers. The rule of Samsung —
+/// the `MAN` header may be missing, a `Content-Length` means the datagram
+/// is malformed — belongs to the receiver, not to the listener.
+#[must_use]
+pub fn service(location: &str, udn: &str) -> core_ssdp::SsdpService {
+    core_ssdp::SsdpService {
+        filter: core_ssdp::SearchFilter::new(is_smartview_search),
+        primary_target: SEARCH_TARGET.to_string(),
+        search_targets: vec![SEARCH_TARGET.to_string()],
+        notification_targets: vec![SEARCH_TARGET.to_string()],
+        location: location.to_string(),
+        usn: udn.to_string(),
+        server: SERVER.to_string(),
+    }
 }
 
 #[cfg(test)]
