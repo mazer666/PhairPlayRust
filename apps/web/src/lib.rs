@@ -31,9 +31,12 @@
 
 pub mod api;
 pub mod assets;
+pub mod cli;
 pub mod dto;
 pub mod error;
 pub mod events;
+pub mod profiles;
+pub mod receiver;
 pub mod server;
 pub mod state;
 

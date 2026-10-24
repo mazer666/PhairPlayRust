@@ -32,10 +32,12 @@ use crate::protocol::ProtocolKind;
 pub mod engine_limits;
 pub mod limits;
 pub mod ports;
+pub mod profiles;
 pub mod service_types;
 pub mod timeouts;
 
 pub use engine_limits::EngineLimits;
+pub use profiles::DeviceProfile;
 
 /// The top-level configuration of the receiver.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -276,11 +278,44 @@ impl AppConfig {
     /// [`AppConfig::validate`].
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, ConfigError> {
         let path = path.as_ref();
-        let text = std::fs::read_to_string(path).map_err(|error| match error.kind() {
-            std::io::ErrorKind::NotFound => ConfigError::NotFound(path.display().to_string()),
-            _ => ConfigError::Io(error),
-        })?;
+        let text = read_file(path)?;
         let config: AppConfig = toml::from_str(&text)?;
+        config.validate()?;
+        Ok(config)
+    }
+
+    /// Loads a configuration from a TOML file and lays it over a base.
+    ///
+    /// WHY: a device profile is a *base*, and a configuration file is the
+    /// explicit wish of the user. The values of the file therefore win over
+    /// the values of the base, and the base fills in what the file does
+    /// not mention. The merge happens on the tables and not on the typed
+    /// model, because only the table knows which value the user actually
+    /// wrote — a model that was deserialised with defaults cannot tell a
+    /// default from an explicit value.
+    ///
+    /// # Errors
+    /// Returns [`ConfigError::NotFound`] if the file does not exist,
+    /// [`ConfigError::Parse`] if it is not valid TOML or does not fit the
+    /// model, and any error from [`AppConfig::validate`].
+    pub fn from_path_over(path: impl AsRef<Path>, base: &toml::Table) -> Result<Self, ConfigError> {
+        let path = path.as_ref();
+        let text = read_file(path)?;
+        let overlay: toml::Table = toml::from_str(&text)?;
+        let mut merged = base.clone();
+        Self::merge_tables(&mut merged, overlay);
+        let config: AppConfig = merged.try_into()?;
+        config.validate()?;
+        Ok(config)
+    }
+
+    /// Builds a configuration out of a table.
+    ///
+    /// # Errors
+    /// Returns [`ConfigError::Parse`] when the table does not fit the model
+    /// and any error from [`AppConfig::validate`].
+    pub fn from_table(table: toml::Table) -> Result<Self, ConfigError> {
+        let config: AppConfig = table.try_into()?;
         config.validate()?;
         Ok(config)
     }
@@ -292,6 +327,52 @@ impl AppConfig {
     pub fn to_toml(&self) -> Result<String, ConfigError> {
         toml::to_string_pretty(self).map_err(|error| ConfigError::Io(std::io::Error::other(error)))
     }
+
+    /// The configuration as a table.
+    ///
+    /// WHY: a table is what the merge of a base and an overlay works on.
+    /// The configuration is therefore able to become the base of a file
+    /// without a detour through the text of the file.
+    ///
+    /// # Errors
+    /// Returns [`ConfigError::Io`] when serialisation fails.
+    pub fn to_table(&self) -> Result<toml::Table, ConfigError> {
+        let text = self.to_toml()?;
+        toml::from_str(&text).map_err(|error| ConfigError::Io(std::io::Error::other(error)))
+    }
+
+    /// Merges two tables: the values of the overlay win.
+    ///
+    /// WHY: the merge is deep for the tables and shallow for the values. A
+    /// section of the overlay replaces the section of the base *key by
+    /// key*, so that a file that changes one limit keeps the other limits
+    /// of the base. A value that is not a table replaces the value of the
+    /// base as a whole.
+    pub fn merge_tables(base: &mut toml::Table, overlay: toml::Table) {
+        for (key, value) in overlay {
+            match (base.get_mut(&key), value) {
+                (Some(toml::Value::Table(base_table)), toml::Value::Table(overlay_table)) => {
+                    Self::merge_tables(base_table, overlay_table);
+                }
+                (_, value) => {
+                    base.insert(key, value);
+                }
+            }
+        }
+    }
+}
+
+/// Reads a configuration file.
+///
+/// WHY: the failure of a file that does not exist is not the same failure
+/// as the failure of a file that cannot be read. The first is a typo in
+/// the command line, the second is a broken installation — and the user
+/// has to be able to tell them apart.
+fn read_file(path: &Path) -> Result<String, ConfigError> {
+    std::fs::read_to_string(path).map_err(|error| match error.kind() {
+        std::io::ErrorKind::NotFound => ConfigError::NotFound(path.display().to_string()),
+        _ => ConfigError::Io(error),
+    })
 }
 
 /// Parses a protocol name, tolerating the aliases used in configuration.
@@ -380,5 +461,152 @@ mod tests {
             DeviceConfig::default().manufacturer
         );
         assert!(config.validate().is_ok());
+    }
+
+    /// Writes a fixture into the temporary directory and returns its path.
+    ///
+    /// WHY: the loader needs a file, and the repository must not be filled
+    /// with the fixtures of a test. The name carries the process id, so
+    /// two fixtures of the same test cannot collide.
+    fn fixture(name: &str, content: &str) -> std::path::PathBuf {
+        let mut path = std::env::temp_dir();
+        path.push(format!("phairplay-config-{}-{name}", std::process::id()));
+        std::fs::write(&path, content).expect("the fixture must be writable");
+        path
+    }
+
+    /// Removes a fixture again.
+    fn remove(path: &std::path::Path) {
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn a_configuration_is_loaded_from_a_file() {
+        let path = fixture(
+            "valid.toml",
+            r#"
+                [device]
+                name = "Living Room"
+
+                [performance]
+                max_memory_mb = 64
+            "#,
+        );
+        let config = AppConfig::from_path(&path).expect("the file must be loaded");
+        remove(&path);
+
+        assert_eq!(config.device.name, "Living Room");
+        assert_eq!(config.performance.max_memory_mb, 64);
+        // WHY: a key that the file does not mention keeps the default of
+        // the model — the file changes what it names and nothing else.
+        assert_eq!(
+            config.device.manufacturer,
+            DeviceConfig::default().manufacturer
+        );
+    }
+
+    #[test]
+    fn a_missing_file_names_the_path() {
+        let mut path = std::env::temp_dir();
+        path.push(format!("phairplay-absent-{}.toml", std::process::id()));
+        let error = AppConfig::from_path(&path).expect_err("the file must be missing");
+        let message = error.to_string();
+        assert!(message.contains("not found"), "{message}");
+        assert!(message.contains("phairplay-absent"), "{message}");
+    }
+
+    #[test]
+    fn a_broken_file_is_a_parse_error() {
+        let path = fixture("broken.toml", "[device\nname = \"Living Room\"");
+        let error = AppConfig::from_path(&path).expect_err("the file must be refused");
+        remove(&path);
+        assert!(matches!(error, ConfigError::Parse(_)), "{error}");
+    }
+
+    #[test]
+    fn a_file_with_an_invalid_value_is_refused() {
+        let path = fixture("invalid.toml", "[limits]\nvideo_queue_frames = 0");
+        let error = AppConfig::from_path(&path).expect_err("the value must be refused");
+        remove(&path);
+        assert!(error.to_string().contains("video_queue_frames"), "{error}");
+    }
+
+    #[test]
+    fn a_file_lays_over_a_base() {
+        // WHY: the profile is the base and the file is the explicit wish of
+        // the user. The file wins — and only for the keys it names.
+        let mut base = AppConfig::default();
+        base.device.name = "PhairPlay Pi".to_string();
+        base.device.model = "Raspberry Pi Receiver".to_string();
+        base.performance.max_cpu_percent = 25;
+        let base = base.to_table().expect("a table");
+
+        let path = fixture(
+            "overlay.toml",
+            r#"
+                [device]
+                name = "Living Room"
+
+                [performance]
+                max_memory_mb = 64
+            "#,
+        );
+        let config = AppConfig::from_path_over(&path, &base).expect("the file must be loaded");
+        remove(&path);
+
+        assert_eq!(config.device.name, "Living Room");
+        assert_eq!(config.performance.max_memory_mb, 64);
+        // WHY: the values of the base that the file does not mention stay.
+        assert_eq!(config.device.model, "Raspberry Pi Receiver");
+        assert_eq!(config.performance.max_cpu_percent, 25);
+    }
+
+    #[test]
+    fn the_merge_is_deep() {
+        let mut base = toml::Table::new();
+        base.insert(
+            "device".to_string(),
+            toml::Value::Table({
+                let mut device = toml::Table::new();
+                device.insert("name".to_string(), toml::Value::String("Pi".to_string()));
+                device.insert(
+                    "model".to_string(),
+                    toml::Value::String("Board".to_string()),
+                );
+                device
+            }),
+        );
+        let mut overlay = toml::Table::new();
+        overlay.insert(
+            "device".to_string(),
+            toml::Value::Table({
+                let mut device = toml::Table::new();
+                device.insert("name".to_string(), toml::Value::String("Attic".to_string()));
+                device
+            }),
+        );
+
+        AppConfig::merge_tables(&mut base, overlay);
+
+        let device = base
+            .get("device")
+            .and_then(toml::Value::as_table)
+            .expect("a table");
+        assert_eq!(
+            device.get("name").and_then(toml::Value::as_str),
+            Some("Attic")
+        );
+        assert_eq!(
+            device.get("model").and_then(toml::Value::as_str),
+            Some("Board")
+        );
+    }
+
+    #[test]
+    fn a_configuration_round_trips_through_a_table() {
+        let config = AppConfig::default();
+        let table = config.to_table().expect("a table");
+        let parsed = AppConfig::from_table(table).expect("a configuration");
+        assert_eq!(config, parsed);
     }
 }

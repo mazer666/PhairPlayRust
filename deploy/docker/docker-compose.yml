@@ -1,0 +1,105 @@
+# PhairPlayRust — the receiver as a container.
+#
+# WHAT: the two ways to run the receiver in a container.
+#
+#   * `phairplay`       — the recommended variant. The container shares the
+#                         network of the host (`network_mode: host`), so the
+#                         mDNS and the SSDP announcements reach the senders
+#                         in the network and a phone finds the receiver in
+#                         its device list.
+#   * `phairplay-bridge` — the variant for a bridge network. It exists, it
+#                         starts, and **no sender finds the receiver** —
+#                         see the warning in that service.
+#
+# WHY: the receiver announces itself with mDNS (UDP 5353, the multicast
+#      group 224.0.0.251) and with SSDP (UDP 1900, the multicast group
+#      239.255.255.250). A Docker bridge network routes neither of the two.
+#      The sender asks the network "who is there?", the answer never leaves
+#      the bridge, and the device list of the phone stays empty. Publishing
+#      the ports with `ports:` does not help: the ports are not the
+#      problem, the multicast is.
+#
+#      The host network is therefore the recommendation for every device
+#      that is supposed to *receive* — a Raspberry Pi, a NAS, a mini PC.
+#
+# EXAMPLE:
+#
+#   # the recommended way:
+#   cd deploy/docker
+#   cp ../../config/profiles/generic.toml ./phairplayrust.toml
+#   docker compose up -d phairplay
+#
+#   # the variant without the discovery — for the dashboard alone:
+#   docker compose up -d phairplay-bridge
+#
+# The whole installation is in deploy/README.md.
+
+name: phairplayrust
+
+services:
+  # ── The recommended variant: the network of the host ───────────────────────
+  phairplay:
+    build:
+      # WHY: the context is the root of the repository, because the cargo
+      # workspace spans the whole tree. The Dockerfile itself is in
+      # deploy/docker.
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    image: phairplayrust:latest
+    container_name: phairplayrust
+    restart: unless-stopped
+    # WHY: the host network. This is the whole point of this variant: the
+    # mDNS and the SSDP announcements have to leave the container, and only
+    # the network of the host lets them.
+    #
+    # WHY: there is no `ports:` here. With `network_mode: host` the ports of
+    # the container are the ports of the host — a `ports:` list is an error
+    # in this mode.
+    network_mode: host
+    volumes:
+      # WHY: the configuration of the receiver is a file of the host, not a
+      # file of the image. The file is read-only for the container.
+      #
+      # Create it before the first start:
+      #   cp ../../config/profiles/generic.toml ./phairplayrust.toml
+      - ./phairplayrust.toml:/etc/phairplayrust/config.toml:ro
+    environment:
+      # WHY: the log level of the receiver. The receiver never logs the
+      # content of a stream.
+      RUST_LOG: "info"
+    # WHY: the container gets a name of its own, so that the user can stop
+    # it with `docker stop phairplayrust`.
+
+  # ── The variant without the discovery — the warning belongs here ───────────
+  phairplay-bridge:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    image: phairplayrust:latest
+    container_name: phairplayrust-bridge
+    restart: unless-stopped
+    profiles:
+      # WHY: the variant does not start with `docker compose up -d`. It has
+      # to be asked for explicitly:
+      #   docker compose --profile bridge up -d phairplay-bridge
+      - "bridge"
+    networks:
+      - bridge
+    ports:
+      # WHY: the ports are published so that a sender that is configured
+      # with the address of the container by hand can reach the receiver.
+      # This is the *only* thing this variant does well.
+      - "7878:7878"   # the dashboard
+      - "7000:7000"   # the RTSP control channel of AirPlay
+      - "8009:8009"   # the TLS control channel of Google Cast
+      - "7236:7236"   # the RTSP control plane of Miracast
+    volumes:
+      - ./phairplayrust.toml:/etc/phairplayrust/config.toml:ro
+    environment:
+      RUST_LOG: "info"
+
+networks:
+  # WHY: the bridge network of the variant above. The receiver announces
+  # itself into this network and the announcement stays there.
+  bridge:
+    driver: bridge

@@ -67,6 +67,20 @@ use crate::state::AppState;
 /// everything that is not an API path is answered from the directory of the
 /// dashboard.
 pub fn router(state: AppState) -> Router {
+    router_with(state, true)
+}
+
+/// Builds the router of the dashboard, with or without its files.
+///
+/// WHY: a NAS has no screen and nobody opens a browser on it. The API is
+/// still the way to ask the receiver what it does — only the files of the
+/// dashboard are left out.
+///
+/// WHY the order of the two fallbacks matters: a router has **one** slot
+/// for the fallback, and the last one that is set is the one that answers.
+/// The files of the dashboard therefore come last — otherwise the panel
+/// would answer 404 for its own pages.
+pub fn router_with(state: AppState, dashboard: bool) -> Router {
     let api = Router::new()
         .route("/api/status", get(status))
         .route("/api/sessions", get(sessions))
@@ -77,12 +91,14 @@ pub fn router(state: AppState) -> Router {
         .route("/api/protocols/{name}/disable", post(disable_protocol))
         .route("/api/events", get(events::events));
 
-    // WHY: the dashboard files and the API share one binary. The API keeps
-    // its own paths; everything else is answered from the static directory, and
-    // a path that exists in neither is a clean 404 — not a panic.
-    api.with_state(state)
-        .fallback_service(ServeDir::new(static_root()))
-        .fallback(not_found)
+    let app = api.with_state(state);
+    if dashboard {
+        app.fallback_service(
+            ServeDir::new(static_root()).fallback(axum::routing::any::<_, _, ()>(not_found)),
+        )
+    } else {
+        app.fallback(not_found)
+    }
 }
 
 /// The answer of a path that does not exist.
@@ -263,5 +279,56 @@ mod tests {
             .await
             .must("the request must be answered");
         assert_eq!(response.status(), axum::http::StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn the_files_of_the_dashboard_are_served() {
+        // WHY: the dashboard is served by the same binary as the API. A
+        // router that answers 404 for its own pages is a router whose
+        // fallback was set in the wrong order.
+        let response = app()
+            .oneshot(
+                Request::builder()
+                    .uri("/index.html")
+                    .body(Body::empty())
+                    .must("the request must be buildable"),
+            )
+            .await
+            .must("the request must be answered");
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn without_the_dashboard_the_files_are_not_served() {
+        // WHY: a NAS has no screen. The API stays, the files of the panel
+        // are left out.
+        let state = AppState::with_default_configuration()
+            .unwrap_or_else(|error| panic!("the state must start: {error}"));
+        let response = router_with(state, false)
+            .oneshot(
+                Request::builder()
+                    .uri("/index.html")
+                    .body(Body::empty())
+                    .must("the request must be buildable"),
+            )
+            .await
+            .must("the request must be answered");
+        assert_eq!(response.status(), axum::http::StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn without_the_dashboard_the_api_stays() {
+        let state = AppState::with_default_configuration()
+            .unwrap_or_else(|error| panic!("the state must start: {error}"));
+        let response = router_with(state, false)
+            .oneshot(
+                Request::builder()
+                    .uri("/api/status")
+                    .body(Body::empty())
+                    .must("the request must be buildable"),
+            )
+            .await
+            .must("the request must be answered");
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
     }
 }

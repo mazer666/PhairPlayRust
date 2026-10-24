@@ -1,0 +1,122 @@
+# Device profile: NAS (Synology, QNAP, TrueNAS, …)
+#
+# WHAT: the defaults for a network attached storage that runs the receiver as
+#       a service.
+#
+# WHY: a NAS is a headless computer with a disk and no screen. Its strength
+#      is that it is switched on, is connected to the network all day and has
+#      more than one core of a low-power x86 CPU (or of a comparable ARM SoC).
+#      Its weakness is that it has no display: the dashboard is a control
+#      panel and nothing more, and the user reaches it through an SSH port
+#      forwarding (`ssh -L 7878:127.0.0.1:7878 nas`) instead of clicking on
+#      it. The protocol is the product on such a device; the surface is
+#      secondary.
+#
+#      Two honest limits belong to this profile:
+#
+#        * A NAS has no Wi-Fi Direct radio. Miracast is therefore switched
+#          off — the same reason as on the Raspberry Pi.
+#        * The headless web backend registers no video sink (see
+#          apps/web/src/), so a receiver on a NAS accepts a session, parses
+#          the stream and measures it, but shows no picture anywhere. The
+#          receiver does not decode: the core hands the *encoded* frames to
+#          the platform, and on a NAS there is no platform that decodes. A
+#          NAS without a display is a node of the network that serves the
+#          protocol, not a television.
+#
+# EXAMPLE:
+#
+#   phairplay-web --config config/profiles/nas.toml
+#
+#   # on the NAS itself, as a service:
+#   phairplay-web --profile nas
+#
+# The file has the shape of `AppConfig`
+# (core/phairplay-core/src/config.rs), so it is handed to `--config`
+# unchanged. A key that is not in this file keeps the default of the typed
+# model; the product-wide numbers live in
+# config/performance-budgets.toml and are not repeated here.
+#
+# The values below are *budgets for this class of device*, not measurements.
+# None of them has been measured in this repository.
+
+# ── The identity that is advertised to senders ───────────────────────────────
+[device]
+# WHY: the name appears in the device picker of every sender in the network.
+# It carries the product and the device class, because a NAS and a phone in
+# the same household must be told apart. The user renames it to the room as
+# soon as the receiver is installed.
+name = "PhairPlay NAS"
+# WHY: the model string names the device class. The receiver does not know
+# the brand and the model of the NAS it runs on — the software must not
+# claim a precision it does not have.
+model = "PhairPlay Rust Receiver on NAS"
+# WHY: the manufacturer is the maker of the *software*. The NAS vendor did
+# not make this receiver, and a sender that groups the devices by
+# manufacturer must not show a Synology device that was never made by
+# Synology.
+manufacturer = "PhairPlayRust"
+
+# ── Per-protocol defaults ────────────────────────────────────────────────────
+[protocols.airplay]
+# WHY: AirPlay over the ordinary network is the protocol a household uses
+# most. The NAS has no speakers of its own, but the receiver serves the
+# sender the same way it does on any other device.
+enabled = true
+# WHY: the port is pinned to the well-known port of the RTSP control
+# channel, so that the firewall rule of the household has a port to name.
+# The owner of the number is core/phairplay-core/src/config/ports.rs.
+port = 7000
+
+[protocols.miracast]
+# WHY: switched off on purpose. Miracast needs a Wi-Fi Direct radio (P2P
+# GO/GO negotiation); a NAS has an Ethernet port and at best a client
+# Wi-Fi adapter. A receiver that advertises the service without the radio
+# appears in the device list of a Windows phone and fails on every attempt.
+enabled = false
+# WHY: the port stays pinned even though the protocol is off, so that a
+# later switch of the protocol does not move it.
+port = 7236
+
+[protocols.cast]
+# WHY: Google Cast runs over the ordinary network. The control channel is
+# TLS, so port 8009 has to be open for the sender.
+enabled = true
+port = 8009
+
+[protocols.dlna]
+# WHY: DLNA is what Windows uses for "Cast to Device" and what VLC offers
+# as a renderer. It is discovered with SSDP, not with mDNS.
+enabled = true
+# WHY: a DLNA renderer has no single TCP port — the description documents
+# are served on an ephemeral HTTP port and the announcement travels over
+# SSDP on UDP 1900. The port therefore stays unpinned.
+port = 0
+
+# ── Resource budgets of this device class ────────────────────────────────────
+[performance]
+# WHY: 192 MB is the sixth of the RAM of the smallest NAS that is sold with
+# 1 GB. The operating system, the web interface and the indexer of the NAS
+# have the rest; the receiver is a guest and behaves like one.
+max_memory_mb = 192
+# WHY: a third of one core. The NAS uses its cores for the file system and
+# for the indexer; the receiver needs the parsing of the bitstream, the TLS
+# handshake of the Cast channel and the network, and it must not push the
+# disk work of the NAS into a queue.
+max_cpu_percent = 35
+# WHY: the product-wide budgets of the time to the first picture and of the
+# frame rate are **not** changed. The receiver does not decode — the time to
+# the first *decoded* picture belongs to the platform that decodes, and the
+# headless build on a NAS shows no picture at all. A budget that this file
+# cannot measure does not belong to it.
+
+# ── Queue budgets of this device class ───────────────────────────────────────
+[limits]
+# WHY: 60 frames are two seconds of a 30 fps stream. The queue holds the
+# *encoded* frames, the NAS has the memory for them, and the deeper queue
+# rides out the scheduling delay of a disk that is busy with a rebuild.
+video_queue_frames = 60
+# WHY: 32 MiB is the sixth of the memory budget of this profile. The queue
+# is bounded by the item count *and* by the byte budget, so a peer that
+# sends maximum-size frames cannot fill the memory of the NAS.
+video_queue_bytes = 33554432

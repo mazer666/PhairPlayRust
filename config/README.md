@@ -8,6 +8,7 @@ values. The mapping is:
 | Documented file | Typed model in the Rust core |
 |---|---|
 | `config/app-defaults.toml` | `DeviceConfig`, `ProtocolConfig` in `core/phairplay-core/src/config.rs`; `DeviceIdentity` in `core/phairplay-core/src/identity.rs` |
+| `config/profiles/*.toml` | `AppConfig` in `core/phairplay-core/src/config.rs` — a profile is a complete configuration of one class of devices |
 | `config/performance-budgets.toml` | `PerformanceConfig`, `LimitsConfig` in `core/phairplay-core/src/config.rs` |
 | `config/security-policy.toml` | `AppConfig` in `core/phairplay-core/src/config.rs` plus the parser, callback and pairing guards of the engines |
 
@@ -80,6 +81,25 @@ change is incomplete otherwise. See
 - [`security-policy.toml`](security-policy.toml) — the threat model, the
   privacy promise, the parser rules, the XML rules, the callback guard, the
   pairing policy and the copy-protection policy.
+- [`profiles/`](profiles/README.md) — the device profiles: one TOML file per
+  class of devices.
+
+## Device profiles
+
+A **profile** is the configuration of one class of devices. The numbers of a
+profile live in the profile itself and are **not** repeated here — the table
+below links to them.
+
+| Profile | Owner of the values | Purpose | How it is used |
+|---|---|---|---|
+| [`raspberry-pi`](profiles/raspberry-pi.toml) | the profile file — the device integration, reviewed by Product + Architect + Performance | a Raspberry Pi 3B/4/5 or an Orange Pi as a service: small memory budget, no Miracast without a Wi-Fi Direct radio | `phairplay-web --config config/profiles/raspberry-pi.toml` or `--profile raspberry-pi` |
+| [`nas`](profiles/nas.toml) | the profile file — the device integration, reviewed by Product + Architect + Performance | a Synology, QNAP or TrueNAS box without a display: the protocol is the product, the dashboard is a control panel reached over SSH | `phairplay-web --config config/profiles/nas.toml` or `--profile nas` |
+| [`docker`](profiles/docker.toml) | the profile file — the device integration, reviewed by Product + Architect + Performance | the receiver in a container: the network mode of the container decides whether a sender finds the receiver at all | `phairplay-web --config config/profiles/docker.toml` or `--profile docker` |
+| [`desktop`](profiles/desktop.toml) | the profile file — the device integration, reviewed by Product + Architect + Performance | a Linux desktop with a screen: all four protocols, the product-wide budgets | `phairplay-web --config config/profiles/desktop.toml` or `--profile desktop` |
+| [`generic`](profiles/generic.toml) | the profile file — the device integration, reviewed by Product + Architect + Performance | the fallback for a device nobody described: the product-wide behaviour, written down explicitly | `phairplay-web --config config/profiles/generic.toml` or `--profile generic` |
+
+The rules of a profile — what it may decide, what it may not, and why every
+number in it is justified — are in [`profiles/README.md`](profiles/README.md).
 
 ## How a value is read at runtime
 

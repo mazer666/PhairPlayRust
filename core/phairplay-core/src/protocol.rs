@@ -144,6 +144,26 @@ pub enum ProtocolState {
     Failed,
 }
 
+impl std::fmt::Display for ProtocolState {
+    /// The name of the state, as the dashboard and the command line show it.
+    ///
+    /// WHY: the state is shown in three places — the panel of the browser, the
+    /// line of the command line and the log. A single spelling keeps the
+    /// three of them from drifting apart.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            ProtocolState::Idle => "idle",
+            ProtocolState::Starting => "starting",
+            ProtocolState::Advertising => "advertising",
+            ProtocolState::Streaming => "streaming",
+            ProtocolState::Stopping => "stopping",
+            ProtocolState::Stopped => "stopped",
+            ProtocolState::Failed => "failed",
+        };
+        f.write_str(name)
+    }
+}
+
 impl ProtocolState {
     /// Whether a peer may connect in this state.
     #[must_use]

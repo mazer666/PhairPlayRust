@@ -1,0 +1,129 @@
+# Device profile: Raspberry Pi
+#
+# WHAT: the defaults for a Raspberry Pi that runs the receiver as a service.
+#
+# WHY: the Raspberry Pi is the most common target of this product and the
+#      weakest one that is still interesting. A Pi 3B has 1 GB of RAM and four
+#      Cortex-A53 cores; a Pi 4 has up to 8 GB and four Cortex-A72; a Pi 5 has
+#      up to 16 GB and four Cortex-A76. The receiver does **not** decode: the
+#      core parses the bitstream, reassembles the RTP packets and hands the
+#      *encoded* frames to the platform — the decoding is the job of the
+#      platform (MediaCodec on Android, VideoToolbox on Apple). What the
+#      receiver costs on a board is the parsing, the TLS handshake of the
+#      Cast channel and the network, not the pixels. The profile therefore
+#      spends the memory on a small queue and keeps a quarter of one core
+#      for the system, and it leaves Miracast switched off: the Wi-Fi chip of
+#      a Pi is a client radio, it does not implement Wi-Fi Direct (P2P), and
+#      a receiver that advertises `_miracast._tcp` without a P2P radio shows
+#      up in the device list of a Windows phone and then fails on every
+#      connection attempt. AirPlay, Google Cast and DLNA work over the
+#      ordinary network and are therefore switched on.
+#
+# EXAMPLE:
+#
+#   phairplay-web --config config/profiles/raspberry-pi.toml
+#
+#   # or, with the profile name of the receiver:
+#   phairplay-web --profile raspberry-pi
+#
+# The file has the shape of `AppConfig`
+# (core/phairplay-core/src/config.rs), so it is handed to `--config`
+# unchanged. A key that is not in this file keeps the default of the typed
+# model; the product-wide numbers live in
+# config/performance-budgets.toml and are not repeated here.
+#
+# The values below are *budgets for this class of device*, not measurements.
+# None of them has been measured in this repository; a device of this class
+# has to prove them with the acceptance procedure of
+# docs/acceptance/.
+
+# ── The identity that is advertised to senders ───────────────────────────────
+[device]
+# WHY: the name is what the user sees in the picker of the phone. It carries
+# the product and the device class, because two receivers in one network have
+# to be told apart. The user renames it to the room ("Living Room") as soon
+# as the receiver is installed.
+name = "PhairPlay Pi"
+# WHY: the model string names the device class, not the board revision. The
+# receiver does not know which revision of the board it sits on, and a name
+# that claims a precision the software does not have is a lie in the device
+# list of the sender.
+model = "PhairPlay Rust Receiver on Raspberry Pi"
+# WHY: the manufacturer is the maker of the *software*. The board maker is
+# not the manufacturer of this receiver, and a sender that groups the
+# devices by manufacturer must not show a Raspberry Pi Foundation device
+# that was never made by them.
+manufacturer = "PhairPlayRust"
+
+# ── Per-protocol defaults ────────────────────────────────────────────────────
+[protocols.airplay]
+# WHY: AirPlay is the reason most people put a Pi on the network: an iPhone
+# or a Mac finds the receiver over mDNS and sends the picture. It works over
+# the ordinary Wi-Fi of the board.
+enabled = true
+# WHY: the port is pinned to the well-known port of the RTSP control
+# channel, because the firewall rule of the household has to name a port.
+# The owner of the number is core/phairplay-core/src/config/ports.rs.
+port = 7000
+
+[protocols.miracast]
+# WHY: switched off on purpose. Miracast needs a Wi-Fi Direct radio (P2P
+# GO/GO negotiation), and the Wi-Fi chip of a Pi does not implement it. A
+# receiver that advertises the service without the radio is a device that
+# a Windows user selects and that then never connects.
+enabled = false
+# WHY: the port stays pinned even though the protocol is off. If the user
+# owns a Pi with a Wi-Fi Direct capable adapter and switches the protocol
+# on, the port does not change and the firewall rule keeps working.
+port = 7236
+
+[protocols.cast]
+# WHY: Google Cast runs over the ordinary network as well. The Cast control
+# channel is TLS, so the receiver needs port 8009 open for the sender.
+enabled = true
+port = 8009
+
+[protocols.dlna]
+# WHY: DLNA is the protocol that Windows uses for "Cast to Device" and that
+# VLC offers as a renderer. It is discovered with SSDP, not with mDNS.
+enabled = true
+# WHY: a DLNA renderer has no single TCP port — the description documents
+# are served on an ephemeral HTTP port and the announcement travels over
+# SSDP on UDP 1900. The port therefore stays unpinned.
+port = 0
+
+# ── Resource budgets of this device class ────────────────────────────────────
+[performance]
+# WHY: 96 MB is the largest share of a 1 GB Pi 3B that the receiver may
+# occupy without pushing the system into the swap. The memory goes into the
+# queues of the encoded frames, into the network stack and into the TLS
+# session of the Cast channel — not into decoded pictures.
+max_memory_mb = 96
+# WHY: a quarter of one core. The four cores of the board belong to the
+# system, to the SSH daemon and to the framebuffer; the receiver needs the
+# parsing of the bitstream and the TLS handshake of the Cast channel, and it
+# must not starve the machine.
+max_cpu_percent = 25
+# WHY: the product-wide budgets of the time to the first picture and of the
+# frame rate are **not** changed. The receiver does not decode — the time to
+# the first *decoded* picture belongs to the platform that decodes (the
+# native shells), and the headless build on a Pi shows no picture at all.
+# A budget that this file cannot measure does not belong to it.
+#
+# ── Queue budgets of this device class ───────────────────────────────────────
+[limits]
+# WHY: 30 frames are about one second of a 30 fps stream. The queue holds
+# the *encoded* frames — the compressed payload, not a picture — and a deeper
+# queue only buys latency on a slow board: the frames arrive late either
+# way.
+video_queue_frames = 30
+# WHY: 16 MiB is the sixth of the memory budget of this profile. The queue
+# is bounded by the item count *and* by the byte budget, so a peer that
+# sends maximum-size frames cannot fill the memory of the board.
+video_queue_bytes = 16777216
+# WHY: half of the product-wide packet budget; the audio path of a Pi is
+# cheap, but the packets queue behind the video path.
+audio_queue_packets = 100
+# WHY: 1 MiB of audio buffer is enough to ride out a scheduling hiccup of
+# the board. The audio packets are encoded (AAC, ALAC) and therefore small.
+audio_queue_bytes = 1048576

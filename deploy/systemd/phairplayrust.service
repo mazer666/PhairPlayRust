@@ -1,0 +1,106 @@
+# PhairPlayRust — the receiver as a system service.
+#
+# WHAT: the unit that runs the headless receiver on a Linux machine: a
+#       Raspberry Pi, a NAS, a mini PC, a desktop.
+#
+# WHY: a receiver that has to be started by hand is a receiver that is not
+#      running. The unit starts the receiver after the network is up, restarts
+#      it when it fails, and stops it cleanly when the machine is shut down.
+#      The unit runs the receiver as its **own unprivileged user** — a
+#      receiver that listens on the local network must not be able to write
+#      into the system, and it must not run as root.
+#
+#      The service user is created once, before the first start:
+#
+#        sudo useradd --system --home-dir /var/lib/phairplayrust \
+#             --shell /usr/sbin/nologin phairplay
+#
+#      `deploy/install.sh` creates the user, installs the binary, installs
+#      this unit and enables it.
+#
+# EXAMPLE:
+#
+#        sudo systemctl daemon-reload
+#        sudo systemctl enable --now phairplayrust.service
+#        journalctl -u phairplayrust -f
+#
+# The paths of the unit are the paths of `deploy/install.sh`:
+#
+#        binary   /opt/phairplayrust/bin/phairplay-web
+#        config   /etc/phairplayrust/config.toml
+#        state    /var/lib/phairplayrust
+
+[Unit]
+Description=PhairPlayRust receiver (AirPlay 2, Miracast, Google Cast, DLNA)
+Documentation=https://github.com/mazer666/PhairPlayRust
+Documentation=file:/opt/phairplayrust/README.md
+# The receiver announces itself with mDNS (UDP 5353) and with SSDP
+# (UDP 1900). Both need a network that is up and has an address — a
+# receiver that starts before the network is ready advertises into the
+# void and stays invisible until the next restart.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# The service runs as its own unprivileged user. There is no `User=root`
+# here and there never will be: the receiver is a program on the network,
+# not an administrator of the machine.
+User=phairplay
+Group=phairplay
+WorkingDirectory=/opt/phairplayrust
+# The receiver reads its configuration from the file that the installer
+# placed there. The file is a device profile (config/profiles/) or the
+# configuration of the user.
+ExecStart=/opt/phairplayrust/bin/phairplay-web --config /etc/phairplayrust/config.toml
+# A receiver that crashes is restarted. A receiver that is stopped by the
+# user stays stopped: `Restart=on-failure` does not fight `systemctl stop`.
+Restart=on-failure
+RestartSec=5
+# The shutdown of the receiver is graceful: the engines stop, the sockets are
+# released, the process leaves with the status 0. Twenty seconds are enough
+# for a session that is being torn down.
+KillSignal=SIGTERM
+TimeoutStopSec=20
+# The environment of the receiver. The file is optional; the log level of
+# the receiver is `info` without it.
+Environment=RUST_LOG=info
+EnvironmentFile=-/etc/phairplayrust/phairplayrust.env
+# The state directory of the service: the pairing material of the platform
+# and nothing else. systemd creates it and gives it to the service user.
+StateDirectory=phairplayrust
+StateDirectoryMode=0750
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=phairplayrust
+
+# ── Hardening ────────────────────────────────────────────────────────────────
+# The receiver binds the ports 7000 (AirPlay), 8009 (Cast) and 7236
+# (Miracast) and sends to the multicast groups 224.0.0.251 (mDNS) and
+# 239.255.255.250 (SSDP). It needs no privileged port and no capability.
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+# The socket families of the receiver: IPv4, IPv6, the local socket and the
+# netlink socket that the interface list is read from.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+
+[Install]
+WantedBy=multi-user.target

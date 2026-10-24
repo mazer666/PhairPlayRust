@@ -1,0 +1,119 @@
+# Device profile: Docker container
+#
+# WHAT: the defaults for the receiver running as a container.
+#
+# WHY: a container shares the kernel of its host: it needs no driver of its
+#      own, it starts in a second and it is easy to reproduce. What it does
+#      not share is the *network*. The receiver announces itself with mDNS
+#      (UDP 5353, the multicast group 224.0.0.251) and with SSDP (UDP 1900,
+#      the multicast group 239.255.255.250). A Docker bridge network routes
+#      neither of the two, and a sender in the same network never sees the
+#      announcement — the container is up, the ports are open, and no phone
+#      finds the receiver. The container therefore needs `--net=host` or
+#      `network_mode: host`; the profiles cannot fix that, only the network
+#      mode of the container can. deploy/docker/docker-compose.yml holds the
+#      two variants, the host network as the recommended one.
+#
+#      A container has no radio of its own. Miracast needs a Wi-Fi Direct
+#      radio (P2P GO/GO negotiation) and is therefore switched off; the
+#      protocol works on a host with a Wi-Fi Direct adapter only when the
+#      user switches it on in the configuration.
+#
+#      The resource budget of a container is set twice: by the cgroup of the
+#      container and by the profile. The profile states what the *receiver*
+#      may use; the compose file states what the container may use. The
+#      receiver stays below its own budget, so that the rest of the
+#      container stays usable.
+#
+# EXAMPLE:
+#
+#   phairplay-web --config config/profiles/docker.toml
+#
+#   # as a container, with the host network (the recommended way):
+#   docker run --net=host --name phairplayrust phairplayrust:latest
+#
+# The file has the shape of `AppConfig`
+# (core/phairplay-core/src/config.rs), so it is handed to `--config`
+# unchanged. A key that is not in this file keeps the default of the typed
+# model; the product-wide numbers live in
+# config/performance-budgets.toml and are not repeated here.
+#
+# The values below are *budgets for this class of device*, not measurements.
+# None of them has been measured in this repository.
+
+# ── The identity that is advertised to senders ───────────────────────────────
+[device]
+# WHY: the name appears in the device picker of every sender in the network.
+# It carries the product and the device class, because a container and a
+# phone in the same household must be told apart. The user renames it to
+# the room as soon as the receiver is installed.
+name = "PhairPlay Container"
+# WHY: the model string names the device class. A container has no model of
+# its own, and the name must not claim one.
+model = "PhairPlay Rust Receiver in a container"
+# WHY: the manufacturer is the maker of the *software*. The image is built
+# from this repository and not from a NAS vendor or a board maker.
+manufacturer = "PhairPlayRust"
+
+# ── Per-protocol defaults ────────────────────────────────────────────────────
+[protocols.airplay]
+# WHY: AirPlay over the ordinary network is the protocol a household uses
+# most, and it works in a container as soon as the container shares the
+# network of the host.
+enabled = true
+# WHY: the port is pinned to the well-known port of the RTSP control
+# channel, so that the firewall rule of the household has a port to name.
+# The owner of the number is core/phairplay-core/src/config/ports.rs.
+port = 7000
+
+[protocols.miracast]
+# WHY: switched off on purpose. A container has no radio, and the Wi-Fi
+# Direct capability of a host is not exposed to a container by default. A
+# receiver that advertises the service without the radio appears in the
+# device list of a Windows phone and fails on every attempt.
+enabled = false
+# WHY: the port stays pinned even though the protocol is off, so that a
+# later switch of the protocol does not move it.
+port = 7236
+
+[protocols.cast]
+# WHY: Google Cast runs over the ordinary network. The control channel is
+# TLS, so port 8009 has to be open for the sender.
+enabled = true
+port = 8009
+
+[protocols.dlna]
+# WHY: DLNA is what Windows uses for "Cast to Device" and what VLC offers
+# as a renderer. It is discovered with SSDP, not with mDNS.
+enabled = true
+# WHY: a DLNA renderer has no single TCP port — the description documents
+# are served on an ephemeral HTTP port and the announcement travels over
+# SSDP on UDP 1900. The port therefore stays unpinned.
+port = 0
+
+# ── Resource budgets of this device class ────────────────────────────────────
+[performance]
+# WHY: 128 MB is the middle of what a container of this kind is usually
+# given (256 MB to 512 MB in the compose file). The receiver stays below
+# its own budget, so that the rest of the container stays usable.
+max_memory_mb = 128
+# WHY: half of one core. A container is usually given one or two cores, and
+# the receiver needs the parsing of the bitstream, the TLS handshake of the
+# Cast channel and the network.
+max_cpu_percent = 50
+# WHY: the product-wide budgets of the time to the first picture and of the
+# frame rate are kept: a container runs on the hardware of its host, and
+# this profile assumes a host of the desktop class. On a Raspberry Pi host
+# the profile of the Raspberry Pi is the right one. The receiver does not
+# decode in either case — the decoding belongs to the platform.
+
+# ── Queue budgets of this device class ───────────────────────────────────────
+[limits]
+# WHY: 60 frames are two seconds of a 30 fps stream. The queue holds the
+# *encoded* frames, the container has the memory for them, and the deeper
+# queue rides out a scheduling delay of a host that is busy.
+video_queue_frames = 60
+# WHY: 32 MiB is the quarter of the memory budget of this profile. The
+# queue is bounded by the item count *and* by the byte budget, so a peer
+# that sends maximum-size frames cannot fill the memory of the container.
+video_queue_bytes = 33554432

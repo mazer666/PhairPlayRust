@@ -14,12 +14,13 @@
 //!
 //! ```
 //! use phairplay_core::config::AppConfig;
+//! use phairplay_core::protocol::ProtocolKind;
 //! use phairplay_web::state::AppState;
 //!
 //! let receiver = phairplay_ffi::ReceiverCore::new(AppConfig::default())
 //!     .unwrap_or_else(|error| panic!("the receiver must start: {error}"));
 //! let state = AppState::new(receiver);
-//! assert_eq!(state.protocol_statuses().len(), 4);
+//! assert_eq!(state.protocol_statuses().len(), ProtocolKind::ALL.len());
 //! ```
 
 use std::sync::Arc;
@@ -235,7 +236,9 @@ mod tests {
         let state = AppState::with_default_configuration()
             .unwrap_or_else(|error| panic!("the state must start: {error}"));
         let statuses = state.protocol_statuses();
-        assert_eq!(statuses.len(), 4);
+        // WHY: the number of protocols is the one of the core. A hard
+        // number in the test breaks the day the core learns a protocol.
+        assert_eq!(statuses.len(), ProtocolKind::ALL.len());
         assert_eq!(statuses[0].protocol, "airplay");
         assert_eq!(statuses[3].protocol, "dlna");
     }

@@ -19,6 +19,15 @@ path = "src/main.rs"
 phairplay-core = { path = "../../core/phairplay-core" }
 phairplay-ffi = { path = "../../platform/phairplay-ffi" }
 
+# The engines of the four protocols. The web backend is the composition root
+# of the receiver: it builds the engines and hands them to the supervisor,
+# which is the only place that starts, stops and watches an engine. The
+# engines themselves know nothing of the bridge and nothing of the web.
+phairplay-airplay = { path = "../../engines/airplay" }
+phairplay-cast = { path = "../../engines/cast" }
+phairplay-dlna = { path = "../../engines/dlna" }
+phairplay-miracast = { path = "../../engines/miracast" }
+
 # The versions of the web stack are declared here and not in the shared
 # manifest: no other crate of the workspace needs a web server, and the
 # manifest of the workspace stays free of a dependency that only the
@@ -28,6 +37,12 @@ tower-http = { version = "0.7", features = ["fs"] }
 futures = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+# The tables of the configuration: the profile is the base and the file of
+# the user is laid over it.
+toml = { workspace = true }
+# The address of the device in the local network, for the announcement of
+# the renderer. The crate is already in the tree of the workspace.
+if-addrs = { workspace = true }
 tokio = { workspace = true, features = ["signal", "fs"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }

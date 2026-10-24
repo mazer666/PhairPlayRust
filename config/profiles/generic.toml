@@ -1,0 +1,93 @@
+# Device profile: generic device
+#
+# WHAT: the defaults for a device that nobody has described yet — the
+#       fallback of the product.
+#
+# WHY: most devices that run this receiver are not a Raspberry Pi, not a NAS
+#      and not a desktop. They are a mini PC under a desk, a virtual machine
+#      of a hypervisor, a box with an old laptop in it. The generic profile
+#      is what such a device gets when the user does not choose anything: the
+#      product-wide budgets and all four protocols switched on, because the
+#      generic device is assumed to be a machine of the desktop class with a
+#      normal network.
+#
+#      The profile is deliberately unexciting. It is the file that a user can
+#      read to learn what the product does when nothing is configured, and it
+#      is the file that the other profiles deviate from. If a device turns
+#      out to be weak, the user takes the profile of the Raspberry Pi or of
+#      the NAS — and not a value that was edited into this file.
+#
+# EXAMPLE:
+#
+#   phairplay-web --config config/profiles/generic.toml
+#
+#   # or, without any option at all — the product default:
+#   phairplay-web
+#
+# The file has the shape of `AppConfig`
+# (core/phairplay-core/src/config.rs), so it is handed to `--config`
+# unchanged. A key that is not in this file keeps the default of the typed
+# model.
+#
+# The values below are *budgets for this class of device*, not measurements.
+# None of them has been measured in this repository.
+
+# ── The identity that is advertised to senders ───────────────────────────────
+[device]
+# WHY: the plain product name. The generic profile is used when nobody
+# described the device, so there is nothing that could be said about it that
+# would be true on the next device as well.
+name = "PhairPlay"
+# WHY: the model string names the device class, and "generic" is the honest
+# answer for a device that has not been identified.
+model = "PhairPlay Rust Receiver"
+# WHY: the manufacturer is the maker of the *software*. The vendor of the
+# machine did not make this receiver.
+manufacturer = "PhairPlayRust"
+
+# ── Per-protocol defaults ────────────────────────────────────────────────────
+[protocols.airplay]
+# WHY: AirPlay over the ordinary network is the protocol a household uses
+# most, and it works on every device that has a network.
+enabled = true
+# WHY: the port is pinned to the well-known port of the RTSP control
+# channel, so that the firewall rule of the household has a port to name.
+# The owner of the number is core/phairplay-core/src/config/ports.rs.
+port = 7000
+
+[protocols.miracast]
+# WHY: switched on. The generic device is assumed to have a Wi-Fi adapter
+# of the current generation, and those implement Wi-Fi Direct more often
+# than not. A device without a P2P radio takes the profile of the
+# Raspberry Pi, where the protocol is switched off.
+enabled = true
+port = 7236
+
+[protocols.cast]
+# WHY: Google Cast runs over the ordinary network. The control channel is
+# TLS, so port 8009 has to be open for the sender.
+enabled = true
+port = 8009
+
+[protocols.dlna]
+# WHY: DLNA is what Windows uses for "Cast to Device" and what VLC offers
+# as a renderer. It is discovered with SSDP, not with mDNS.
+enabled = true
+# WHY: a DLNA renderer has no single TCP port — the description documents
+# are served on an ephemeral HTTP port and the announcement travels over
+# SSDP on UDP 1900. The port therefore stays unpinned.
+port = 0
+
+# ── Resource budgets of this device class ────────────────────────────────────
+[performance]
+# WHY: the product-wide budget of the memory. The generic profile restates
+# it on purpose — it is the explicit fallback of the product — but the owner
+# of the number stays config/performance-budgets.toml.
+max_memory_mb = 150
+# WHY: the product-wide budget of the CPU. See the note above: the owner of
+# the number stays config/performance-budgets.toml.
+max_cpu_percent = 30
+# WHY: the product-wide budgets of the time to the first picture and of the
+# frame rate are kept: a device of the generic class reaches them — with the
+# decoder of the platform, not with the receiver. The receiver itself only
+# parses the stream and hands the encoded frames to the platform.

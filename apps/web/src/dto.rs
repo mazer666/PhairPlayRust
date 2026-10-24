@@ -32,7 +32,6 @@ use phairplay_core::config::AppConfig;
 use phairplay_core::metrics::StreamStats;
 use phairplay_core::protocol::{ProtocolKind, ProtocolState, ProtocolStatus};
 use phairplay_core::session::SessionSnapshot;
-use phairplay_ffi::dto::protocol::FfiProtocolState;
 use serde::{Deserialize, Serialize};
 
 /// The state of a protocol engine, as the dashboard shows it.
@@ -55,6 +54,20 @@ pub enum ProtocolStateDto {
     Failed,
 }
 
+impl From<phairplay_ffi::dto::FfiProtocolState> for ProtocolStateDto {
+    fn from(state: phairplay_ffi::dto::FfiProtocolState) -> Self {
+        match state {
+            phairplay_ffi::dto::FfiProtocolState::Idle => ProtocolStateDto::Idle,
+            phairplay_ffi::dto::FfiProtocolState::Starting => ProtocolStateDto::Starting,
+            phairplay_ffi::dto::FfiProtocolState::Advertising => ProtocolStateDto::Advertising,
+            phairplay_ffi::dto::FfiProtocolState::Streaming => ProtocolStateDto::Streaming,
+            phairplay_ffi::dto::FfiProtocolState::Stopping => ProtocolStateDto::Stopping,
+            phairplay_ffi::dto::FfiProtocolState::Stopped => ProtocolStateDto::Stopped,
+            phairplay_ffi::dto::FfiProtocolState::Failed => ProtocolStateDto::Failed,
+        }
+    }
+}
+
 impl From<ProtocolState> for ProtocolStateDto {
     fn from(state: ProtocolState) -> Self {
         match state {
@@ -65,25 +78,6 @@ impl From<ProtocolState> for ProtocolStateDto {
             ProtocolState::Stopping => ProtocolStateDto::Stopping,
             ProtocolState::Stopped => ProtocolStateDto::Stopped,
             ProtocolState::Failed => ProtocolStateDto::Failed,
-        }
-    }
-}
-
-impl From<FfiProtocolState> for ProtocolStateDto {
-    /// Translates the state that arrived over the native bridge.
-    ///
-    /// WHY: the dashboard must not reach into the bridge types when it renders
-    /// a card. It translates once, here, and works with its own vocabulary
-    /// afterwards.
-    fn from(state: FfiProtocolState) -> Self {
-        match state {
-            FfiProtocolState::Idle => ProtocolStateDto::Idle,
-            FfiProtocolState::Starting => ProtocolStateDto::Starting,
-            FfiProtocolState::Advertising => ProtocolStateDto::Advertising,
-            FfiProtocolState::Streaming => ProtocolStateDto::Streaming,
-            FfiProtocolState::Stopping => ProtocolStateDto::Stopping,
-            FfiProtocolState::Stopped => ProtocolStateDto::Stopped,
-            FfiProtocolState::Failed => ProtocolStateDto::Failed,
         }
     }
 }
