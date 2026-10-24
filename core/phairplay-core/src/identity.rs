@@ -71,7 +71,10 @@ pub fn sanitize_service_name(raw: &str, fallback: &str) -> String {
         .filter(|c| (' '..='~').contains(c))
         .collect::<String>();
     let trimmed = printable.trim();
-    let truncated = trimmed.chars().take(MAX_SERVICE_NAME_LENGTH).collect::<String>();
+    let truncated = trimmed
+        .chars()
+        .take(MAX_SERVICE_NAME_LENGTH)
+        .collect::<String>();
     let result = truncated.trim();
     if result.is_empty() {
         fallback

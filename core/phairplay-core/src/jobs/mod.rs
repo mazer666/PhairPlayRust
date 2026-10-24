@@ -127,7 +127,9 @@ impl JobExecutor {
                             queue.push((id, job));
                         }
                         Some(Command::Remove(id)) => {
-                            if let Some(position) = queue.iter().position(|(job_id, _)| *job_id == id) {
+                            if let Some(position) =
+                                queue.iter().position(|(job_id, _)| *job_id == id)
+                            {
                                 queue.remove(position);
                                 stats
                                     .registered
@@ -135,9 +137,7 @@ impl JobExecutor {
                             }
                         }
                         Some(Command::Run(id)) => {
-                            if let Some((_, job)) =
-                                queue.iter().find(|(job_id, _)| *job_id == id)
-                            {
+                            if let Some((_, job)) = queue.iter().find(|(job_id, _)| *job_id == id) {
                                 let job = job.clone();
                                 match job.run() {
                                     JobOutcome::Completed => {}
@@ -208,10 +208,7 @@ impl JobExecutor {
                 .stats
                 .executed
                 .load(std::sync::atomic::Ordering::Relaxed),
-            failed: self
-                .stats
-                .failed
-                .load(std::sync::atomic::Ordering::Relaxed),
+            failed: self.stats.failed.load(std::sync::atomic::Ordering::Relaxed),
         }
     }
 
@@ -305,8 +302,7 @@ mod tests {
             )
             .await
             .expect("register");
-        executor.run_now(1).await
-            .expect("run");
+        executor.run_now(1).await.expect("run");
         // Give the worker a moment to pick the command up.
         tokio::time::sleep(Duration::from_millis(50)).await;
         assert_eq!(counter.load(Ordering::SeqCst), 1);
@@ -319,8 +315,7 @@ mod tests {
             .register(1, Job::new(|| JobOutcome::Failed("boom".into())))
             .await
             .expect("register");
-        executor.run_now(1).await
-            .expect("run");
+        executor.run_now(1).await.expect("run");
         tokio::time::sleep(Duration::from_millis(50)).await;
         assert_eq!(executor.stats().failed, 1);
         assert_eq!(executor.stats().executed, 1);
@@ -341,10 +336,8 @@ mod tests {
             )
             .await
             .expect("register");
-        executor.remove(1).await
-            .expect("remove");
-        executor.run_now(1).await
-            .expect("run");
+        executor.remove(1).await.expect("remove");
+        executor.run_now(1).await.expect("run");
         tokio::time::sleep(Duration::from_millis(50)).await;
         assert_eq!(counter.load(Ordering::SeqCst), 0);
     }

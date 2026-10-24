@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PhairPlayRust — word mark.
+
+  WHAT: the horizontal lockup: the pictorial mark plus the product name.
+  WHY: `core/phairplay-core` points rustdoc at this file with
+  `#![doc(html_logo_url = ...)]`, so it has to be self-contained and has to
+  stay legible on the light rustdoc page as well as on a dark background.
+  HOW: the mark sits on its own deep plate, which makes the lockup readable
+  on every background. `textLength` pins the width of the word mark so the
+  lockup does not change shape when a different system font is used.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 80" width="380" height="80" role="img" aria-labelledby="phairplayrust-logo-title">
+  <title id="phairplayrust-logo-title">PhairPlayRust</title>
+  <rect x="0" y="0" width="380" height="80" rx="14" fill="#0a0b10"/>
+  <g transform="translate(13 8)" fill="none" stroke="#a78bfa" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 32h38" stroke-width="3.5"/>
+    <path d="M42 32 61 17" stroke-width="3"/>
+    <path d="M42 32h19" stroke-width="3"/>
+    <path d="M42 32 61 47" stroke-width="3"/>
+    <path d="M31 9 12 49h38Z" stroke-width="3.5"/>
+  </g>
+  <text x="92" y="50" textLength="248" lengthAdjust="spacing"
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+        font-size="30" font-weight="600" fill="#e9ecf4">PhairPlayRust</text>
+</svg>

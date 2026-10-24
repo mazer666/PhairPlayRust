@@ -9,7 +9,15 @@ rust-version.workspace = true
 
 [dependencies]
 phairplay-core = { path = "../../core/phairplay-core" }
-phairplay-h264 = { path = "../../formats/h264" }
+
+# Async runtime and the engine trait.
+async-trait = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "net", "io-util", "sync", "time", "macros"] }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+
+# The sink answers with a plain text body.
+base64 = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["test-util"] }

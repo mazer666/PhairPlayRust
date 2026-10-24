@@ -1,0 +1,626 @@
+version: 1
+plan:
+  name: 'PhairPlayRust — Protokoll-Stack, Anwendungsschicht, Dokumentation und Abnahme'
+  max_concurrency: 8
+  max_consecutive_failures: 3
+  max_cycles: 8
+tasks:
+  # ─────────────────────────── Zyklus 1: parallele Produktion ───────────────────────────
+  - id: formats-media
+    title: 'Formatebene: plist, h264, aac und alac implementieren'
+    prompt: |
+      Implementiere die vier Formate-Crates von PhairPlayRust vollständig und getestet.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese — keine fremden Dateien anfassen):
+        formats/plist/**, formats/h264/**, formats/aac/**, formats/alac/**
+      Zusätzlich darfst du den Eintrag für den ALAC-Port in THIRD_PARTY.md ergänzen.
+
+      Umfang:
+      1. `formats/plist`: Apple Property List, XML- UND Binary-Format (bplist00), beide Richtungen.
+         Binary-Decoder: Trailer, Offset-Table, Objekt-Referenzen, Integer/Real/Bool/Date/Data/
+         String/Array/Dict. Härtung: Referenzzyklen erkennen, Objektanzahl und Rekursionstiefe
+         begrenzen, Längenfelder niemals ungeprüft allozieren.
+      2. `formats/h264`: SPS/PPS-Parsing, NAL-Unit-Splitting, Annex-B, RTP FU-A-Reassembly.
+         Die `readUe()`-Funktion darf bei 31 führenden Nullbits NICHT überlaufen — rechne in u64
+         und klemme. Der Negativtest mit dem 31-Nullen-Muster ist Pflicht.
+      3. `formats/aac`: ADTS-Header, AAC-ELD-Framing, Sample-Zählung, Bitrate.
+      4. `formats/alac`: nativer Rust-Port des Apple-Lossless-Decoders. KEIN Kopieren der
+         C-Dateien. Jede abgeleitete Datei trägt einen Attributions-Header (Apple, Apache-2.0).
+         Wenn die Zeit nicht reicht: Port ehrlich als "partially ported" mit exakter Restliste
+         markieren, statt eine Funktion vorzutäuschen.
+
+      Regeln: keine `unwrap()`/`expect()`, kein `unsafe`, jede öffentliche Funktion hat einen
+      Test, jede Härtung einen Negativtest, Dateien ≤ 400 Zeilen (soft) / 550 (hart),
+      WHAT/WHY/EXAMPLE-Doc-Kommentare.
+
+      Abschluss: `cargo test -p phairplay-plist -p phairplay-h264 -p phairplay-aac -p phairplay-alac`
+      muss grün sein. Zitiere die echte Summary-Zeile in deinem deliverable.md.
+    assigned_to: 'Rust Media Engineer'
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe die vier Formate-Crates von PhairPlayRust read-only. Führe selbst aus:
+      `export HOME=/workspace/.home PATH=$HOME/.cargo/bin:$PATH && cd /workspace/PhairPlayRust &&
+       cargo test -p phairplay-plist -p phairplay-h264 -p phairplay-aac -p phairplay-alac`
+      Liest NICHT nur die Zusammenfassung des Produzenten.
+      Prüfe adversarial, ob der Binary-Plist-Decoder einen zyklischen Objektgraphen oder eine
+      Bomben-Größe ablehnt; ob der SPS-Parser das 31-Nullen-Muster ablehnt statt zu überlaufen;
+      ob die FU-A-Reassembly einen Fragment-Überlauf korrekt behandelt.
+      Wenn ein Pflicht-Negativtest fehlt oder eine Härtung nicht greift: FAIL mit der exakten
+      Lücke (Dateiname, Funktion, erwarteter Test).
+      Verändere KEINE Projektdateien.
+    timeout_ms: 1800000
+
+  - id: engines-discovery-dlna
+    title: 'Discovery- und DLNA-Engine implementieren'
+    prompt: |
+      Implementiere die Discovery-Schicht und die DLNA-Engine von PhairPlayRust.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese): engines/discovery/**, engines/dlna/**
+
+      Umfang:
+      1. `engines/discovery`: DNS-SD/mDNS-Werbung und SSDP. Service-Typen: `_airplay._tcp`,
+         `_raop._tcp` (BEIDE sind für AirPlay nötig), `_googlecast._tcp`, `_miracast._tcp`.
+         DNS-SD-Instanzname auf 63 Zeichen begrenzen und von Steuerzeichen befreien
+         (siehe `phairplay_core::identity::sanitize_service_name`).
+      2. `engines/dlna`: UPnP/DLNA MediaRenderer — SSDP-NOTIFY + M-SEARCH-Antwort,
+         `/description.xml` und die SCPD-Servicedeskriptoren, SOAP-Dispatcher mit
+         ConnectionManager, AVTransport und RenderingControl, GENA-Events.
+         Härtung: XXE (DOCTYPE verboten, externe Entitäten aus, Rekursionstiefe begrenzt),
+         SSRF-Guard für GENA-Callback-URLs (nur private IPv4 im lokalen Subnet; `169.254.169.254`
+         und `::1` müssen abgewiesen werden), Payload-Limits, Header-Limits.
+
+      Referenz-Verhalten: /workspace/repos/PhairPlay/app/src/main/kotlin/com/phairplay/dlna/
+      und .../airplay/MdnsService.kt (Kotlin, Apache 2.0).
+
+      Regeln: jede Engine implementiert `phairplay_core::protocol::ProtocolEngine` exakt nach
+      docs/design/BUILD-CONTRACT.md. Jeder Netzwerk-Input ist untrusted. Ein zweiter Peer wird
+      abgelehnt, nicht eingereiht. Keine `unwrap()`/`expect()`, kein `unsafe`. Jede öffentliche
+      Funktion hat einen Test, jede Härtung einen Negativtest. Dateien ≤ 400/550 Zeilen.
+
+      Abschluss: `cargo test -p phairplay-discovery -p phairplay-dlna` grün. Zitiere die
+      echte Summary-Zeile im deliverable.md.
+    assigned_to: 'Rust Protocol Engineer'
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe engines/discovery und engines/dlna read-only. Führe selbst aus:
+      `export HOME=/workspace/.home PATH=$HOME/.cargo/bin:$PATH && cd /workspace/PhairPlayRust &&
+       cargo test -p phairplay-discovery -p phairplay-dlna`
+      Adversarial: Schicke einen SOAP-Body mit DOCTYPE/XXE und einen GENA-CALLBACK auf
+      169.254.169.254 gegen die Implementierung (eigene Testharness in $TMPDIR, keine
+      Projektdateien ändern). Prüfe, dass beide abgewiesen werden. Prüfe, dass `_raop._tcp`
+      mitadvertised wird. Wenn eine Abwehr fehlt: FAIL mit Dateiname, Funktion, erwartetem Test.
+    timeout_ms: 1800000
+
+  - id: engines-airplay
+    title: 'AirPlay-2-Engine implementieren'
+    prompt: |
+      Implementiere die AirPlay-2-Engine von PhairPlayRust — das größte und wichtigste Protokoll.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese): engines/airplay/**
+
+      Umfang, in dieser Prioritätsreihenfolge:
+      1. RTSP-Request-Reader und -Response-Bau (Methoden: OPTIONS, ANNOUNCE, SETUP, RECORD,
+         TEARDOWN, GET_PARAMETER, SET_PARAMETER, FLUSH, PAUSE sowie die HTTP-artigen GET/POST-
+         Routen /info, /play, /rate, /scrub, /stop, /playback-info, /photo, /feedback).
+         Request-Limit, Header-Count-Limit, Header-Zeilen-Limit aus `AppConfig::limits` lesen.
+      2. SDP-Parser: Video/Audio-Medienabschnitte, H.264-SPS/PPS aus sprop-parameter-sets,
+         ALAC-Fmtp-Parameter, AES-Key/IV aus rsaaeskey/fpaeskey/aesiv.
+      3. RTP-Interleaving und Paket-Reassembly.
+      4. Session-Zustandsmaschine auf Basis von `phairplay_core::protocol::ProtocolEngine`:
+         Idle → Starting → Advertising → Streaming → Stopping → Stopped, `status()` jederzeit
+         und thread-sicher abrufbar. Genau ein Peer gleichzeitig; ein zweiter wird mit
+         `503 Service Unavailable` abgelehnt.
+      5. Pairing: HomeKit-artiges Ed25519/X25519-Pairing und Legacy-SRP-PIN-Pairing.
+      6. FairPlay: fp-setup v2/v3 und Legacy-rsaaeskey, Session-Key-Entschlüsselung.
+      7. DACP-Reverse-Remote, DMAP-Now-Playing-Metadaten, NTP-Timing, Photo-Empfang.
+
+      Referenz-Verhalten (Kotlin, Apache 2.0):
+      /workspace/repos/PhairPlay/app/src/main/kotlin/com/phairplay/airplay/ — dort RtspHandler.kt,
+      RtspMessages.kt, RtspRequestReader.kt, SdpParser.kt, RtpInterleaved.kt, handshake/*
+      (PairingSession, FairPlay, PairingStore, LegacyPairSetupPin, RaopRsa, MirrorCrypto,
+      InfoResponder, AudioStreamServer, MirrorStreamServer), DacpClient.kt, PhotoHandler.kt,
+      TimingHandler.kt.
+
+      Der Port ist KEINE 1:1-Kotlin-Übersetzung: Rust-Typen, echte Fehler, keine `null`.
+
+      WICHTIG: Wenn die Zeit für alles nicht reicht, ist die ehrliche Teilabgabe besser als eine
+      vorgetäuschte Vollständigkeit. Liefere dann RTSP-Parser, SDP-Parser und die
+      Zustandsmaschine fertig und getestet ab und markiere den Rest in der Fertig/Offen-Matrix
+      als offen. FairPlay-DRM-Inhalte bleiben grundsätzlich unentschlüsselbar — das ist eine
+      ehrliche Produktgrenze, kein offener Bug.
+
+      Regeln: jeder Netzwerk-Input untrusted, Längenlimits, Timeouts, bounded Queues mit
+      Byte-Budget. Keine `unwrap()`/`expect()`, kein `unsafe`. Jede öffentliche Funktion hat
+      einen Test, jede Härtung einen Negativtest. Dateien ≤ 400/550 Zeilen.
+
+      Abschluss: `cargo test -p phairplay-airplay` grün. Zitiere die echte Summary-Zeile.
+    assigned_to: 'Rust Protocol Engineer'
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe engines/airplay read-only. Führe selbst aus:
+      `export HOME=/workspace/.home PATH=$HOME/.cargo/bin:$PATH && cd /workspace/PhairPlayRust &&
+       cargo test -p phairplay-airplay`
+      Adversarial: greife den RTSP-Reader mit einem Riesen-Content-Length, einer
+      Header-Zeilen-Flut, einem 1-MB-SDP und einem SDP mit 31-Nullen-SPS an (eigene Harness in
+      $TMPDIR, keine Projektdateien ändern). Prüfe, dass Limits greifen statt zu allozieren.
+      Prüfe außerdem, dass der Zustandsübergang Streaming → Stopped einen laufenden Peer
+      tatsächlich beendet. Wenn eine Abwehr fehlt: FAIL mit Dateiname, Funktion, erwartetem Test.
+    timeout_ms: 1800000
+
+  - id: engines-cast-miracast
+    title: 'Cast- und Miracast-Engine implementieren'
+    prompt: |
+      Implementiere die Google-Cast- und die Miracast-Engine von PhairPlayRust.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese): engines/cast/**, engines/miracast/**
+
+      Umfang:
+      1. `engines/cast`: Google-Cast-Receiver. TLS-Listener, CastV2-Protokoll, App-ID-Handling,
+         Heartbeat/PING, CONNECT, Medienkanäle, Media-Receiver-Status, mDNS-Werbung über
+         `_googlecast._tcp`. **Cast ist die dokumentierte Ausnahme von der Ein-Peer-Regel** —
+         mehrere gleichzeitige Sender sind erlaubt.
+      2. `engines/miracast`: Miracast-/WFD-Sink. RTSP-Control-Plane, WFD-Information-Element-
+         Parsing, Sink-Discovery-Antwort, Unterstützung der Basiscodecs (H.264 + LPCM) gemäß
+         `MediaCapabilities::supports_miracast_baseline()`.
+
+      Referenz-Verhalten (Kotlin, Apache 2.0):
+      /workspace/repos/PhairPlay/app/src/main/kotlin/com/phairplay/miracast/MiracastReceiver.kt
+      und .../firetv/kotlin/com/phairplay/cast/CastReceiver.kt,
+      .../googletv/kotlin/com/phairplay/cast/CastReceiver.kt
+
+      Beide Engines implementieren `phairplay_core::protocol::ProtocolEngine` exakt nach
+      docs/design/BUILD-CONTRACT.md. Jeder Netzwerk-Input ist untrusted: Längenlimits,
+      Timeouts, bounded Queues. Keine `unwrap()`/`expect()`, kein `unsafe`. Jede öffentliche
+      Funktion hat einen Test, jede Härtung einen Negativtest. Dateien ≤ 400/550 Zeilen.
+
+      Abschluss: `cargo test -p phairplay-cast -p phairplay-miracast` grün. Zitiere die echte
+      Summary-Zeile im deliverable.md. Wenn ein Teil unfertig bleibt, markiere ihn ehrlich.
+    assigned_to: 'Rust Protocol Engineer'
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe engines/cast und engines/miracast read-only. Führe selbst aus:
+      `export HOME=/workspace/.home PATH=$HOME/.cargo/bin:$PATH && cd /workspace/PhairPlayRust &&
+       cargo test -p phairplay-cast -p phairplay-miracast`
+      Adversarial: schicke einen CastV2-Frame mit übergroßer Längenangabe und ein WFD-IE mit
+      kaputter Länge (eigene Harness in $TMPDIR, keine Projektdateien ändern). Prüfe, dass beide
+      abgewiesen werden. Prüfe, dass der Cast-Receiver mehrere gleichzeitige Sender korrekt
+      behandelt (die dokumentierte Ausnahme von der Ein-Peer-Regel). Bei Lücke: FAIL mit
+      Dateiname, Funktion, erwartetem Test.
+    timeout_ms: 1800000
+
+  - id: platform-ffi
+    title: 'UniFFI-Brücke und Rust-Web-Backend implementieren'
+    prompt: |
+      Implementiere die Plattformbrücke von PhairPlayRust: die UniFFI-Brücke und das Rust-Backend
+      des Dashboards.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese): platform/phairplay-ffi/**, apps/web/src/**, apps/web/Cargo.toml
+      sowie die Web-Backend-Dateien unter apps/web/ (NICHT die Frontend-Assets — die baut der
+      Dashboard-Designer).
+
+      Umfang:
+      1. `platform/phairplay-ffi`: DTOs für Protokollstatus, Session-Snapshot, Stream-Stats,
+         Geräteidentität, Konfiguration und Fehler. Der Fehler trägt den stabilen numerischen
+         Code aus `phairplay_core::error::ErrorCode`. Eine `Receiver`-Fassade zum Starten und
+         Stoppen der Engines, zur Statusabfrage, zum Setzen der Konfiguration und zum Ausliefern
+         der Ereignisse als Callbacks.
+         **Über die Brücke darf niemals ein Panic entstehen** — Fehler kommen strukturiert
+         (Code + Meldung) an.
+         Schreibe einen echten **Roundtrip-Test**: Wert rein → durch die Brücke → Wert wieder
+         raus, identisch. Das beweist die Bindung, nicht ihre Kompilierbarkeit.
+      2. `apps/web`: HTTP-API mit `GET /api/status`, `/api/sessions`, `/api/metrics`,
+         `/api/config`, `/api/build-info`, `POST /api/protocols/{name}/enable` und
+         `/api/protocols/{name}/disable`, dazu ein WebSocket-Kanal `/api/events` für die
+         Live-Ereignisse. Der Server bindet **ausschließlich auf Loopback** — er ist ein
+         lokales Bedienpanel, kein Netzwerkdienst; das ist Teil des Datenschutzversprechens.
+         Nutze `phairplay_core::session::SessionRegistry` und `phairplay_core::metrics` als
+         Datenquelle, damit die API nichts erfindet.
+         Jeder Endpunkt hat einen Test, Fehlerpfade eingeschlossen.
+
+      Vorbild für die Brücke: /workspace/repos/Vocument/platform/vocument-ffi/ und
+      /workspace/repos/Vocument/docs/adr/ADR-0003-uniffi-binding-generation-and-bridge-verification.md
+
+      Regeln: keine `unwrap()`/`expect()`, kein `unsafe`, keine Stubs. Wenn UniFFI 0.29 mit
+      Rust 2024 nicht baut, dokumentiere das ehrlich mit der exakten Fehlermeldung und liefere
+      eine kompilierende Alternative (e.g. ein schlankes C-ABI) — aber erfinde keinen Erfolg.
+
+      Abschluss: `cargo test -p phairplay-ffi` und die Web-Backend-Tests grün. Zitiere die
+      echten Summary-Zeilen.
+    assigned_to: 'Rust Platform Engineer'
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe platform/phairplay-ffi und das Web-Backend read-only. Führe selbst aus:
+      `export HOME=/workspace/.home PATH=$HOME/.cargo/bin:$PATH && cd /workspace/PhairPlayRust &&
+       cargo test -p phairplay-ffi` sowie die Tests des Web-Backends.
+      Prüfe adversarial: (a) kann über die Brücke ein Panic entstehen — suche nach jedem
+      `unwrap`/`expect`/`panic!` auf einem extern erreichbaren Pfad; (b) bindet der Web-Server
+      auf einer Adresse, die nicht Loopback ist — suche die Bind-Adresse im Quelltext;
+      (c) liefert jeder Endpunkt bei unbekanntem Protokoll und bei ungültiger Konfiguration
+      einen Fehler statt 500. Bei Lücke: FAIL mit Dateiname, Funktion, erwartetem Test.
+    timeout_ms: 1800000
+
+  - id: dashboard-visual
+    title: 'Dashboard, Landing-Page und visuelle Identität bauen'
+    prompt: |
+      Baue das Web-Dashboard, die Landing-Page und die visuelle Identität von PhairPlayRust.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese): apps/web/assets/**, apps/web/index.html,
+      apps/web/*.css, apps/web/*.js bzw. *.ts, docs/assets/**, docs/site/**
+
+      Der Rust-Backend-Engineer liefert die API: `GET /api/status`, `/api/sessions`,
+      `/api/metrics`, `/api/config`, `/api/build-info`, `POST /api/protocols/{name}/enable`,
+      `POST /api/protocols/{name}/disable`, WebSocket `/api/events`. Greif NICHT in die
+      Rust-Dateien unter apps/web/src/ — wenn du einen Endpunkt brauchst, den es noch nicht
+      gibt, dokumentiere ihn als Anforderung im deliverable.md.
+
+      Umfang:
+      1. Dashboard (`apps/web/`): Header mit Produktname, Live-Status, Build-Info und
+         Hell/Dunkel-Umschalter; Protokollkarten für AirPlay 2, Miracast, Google Cast und DLNA
+         mit Zustand (Advertising / Streaming / Disabled / Error), Port, Peer-Zahl, Ein/Aus-
+         Schalter und Live-Zählern; Live-Sitzungsbereich; ein leichtgewichtiger SVG-Verlaufsgraph
+         für Framerate/Bytes; eine kompakte Codec-Referenz.
+         Responsive von 360 px bis Ultra-Wide. Vollständig barrierearm: Tastaturbedienung,
+         sichtbarer Fokus, ARIA, Kontrast ≥ 4.5:1, `prefers-reduced-motion` respektiert.
+      2. `docs/assets/phairplayrust-logo.svg` und `docs/assets/favicon.svg` — gültige SVGs.
+         Die Datei `phairplayrust-logo.svg` MUSS existieren, weil
+         `core/phairplay-core/src/lib.rs` per `html_logo_url` darauf verweist.
+      3. `apps/web/assets/theme.css`: die Palette als CSS-Custom-Properties mit dokumentierten
+         Rollen (surface, surface-raised, border, text, text-muted, accent, accent-soft,
+         success, warning, danger) — keine verstreuten Hex-Literale.
+      4. `docs/site/index.html`: statische, selbstenthaltende Landing-Page auf Deutsch **und**
+         Englisch, mit den Kernversprechen (kein Konto, keine Werbung, keine Telemetrie, kein
+         Cloud-Zwang), einer Protokollmatrix, einem Architekturdiagramm und den Quickstart-
+         Befehlen. Ohne JavaScript-Framework, offline lesbar.
+
+      Stil: Artcraft.Characteristics: dunkle, tiefe Grundfläche; ein einziger, kräftiger Akzent;
+      viel Weißraum; klare Typografie; feine, präzise Linien statt schwerer Kästen; subtile
+      Bewegung. Keine Anlehnung an eine bestehende Marke, keine fremden Logos.
+
+      Regeln: keine externen Abhängigkeiten, kein CDN, keine Webfonts, keine Icon-Packs von
+      Dritten. Alles self-contained. Keine Platzhalter, kein "coming soon". Dateien ≤ 400/550
+      Zeilen.
+
+      Abschluss: Öffne die HTML-Dateien nicht nur — prüfe die Struktur (valides HTML5,
+      SVG valide, keine toten Links zwischen den Dateien). Zitiere die Prüfung im deliverable.md.
+    assigned_to: 'Dashboard Designer'
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe das Dashboard, die Landing-Page und die Assets read-only.
+      (a) Validiere die SVGs (z.B. mit `python3 -c "import xml.dom.minidom,sys;
+      xml.dom.minidom.parse(open(sys.argv[1]).read())"` auf docs/assets/phairplayrust-logo.svg
+      und docs/assets/favicon.svg) — beide müssen fehlerfrei parsen.
+      (b) Suche in apps/web/ und docs/site/ nach externen Ressourcen: `grep -rnE
+      'https?://[^"]+\.(js|css|woff2?|ttf)|cdn\\.|unpkg|jsdelivr|googleapis'` — es darf KEIN
+      Treffer für geladene Ressourcen geben (Links in Prosa sind erlaubt).
+      (c) Suche nach Platzhaltern: `grep -rniE 'lorem ipsum|coming soon|TODO|FIXME|XXX'`.
+      (d) Prüfe, dass jede im Frontend referenzierte API-Route auch in der Rust-Seite existiert
+      (`grep -rn '/api/' apps/web/` gegen die Routendefinitionen) — dokumentiere Abweichungen.
+      (e) Prüfe auf Kontrast: die Textfarben aus theme.css müssen gegen ihre Flächen ≥ 4.5:1
+      erreichen — rechne die Werte selbst nach.
+      Verändere KEINE Projektdateien. Bei Lücke: FAIL mit Dateiname und konkretem Fund.
+    timeout_ms: 1800000
+
+  - id: docs-suite
+    title: 'Die Dokumentationslandschaft im Vocument-Format aufbauen'
+    prompt: |
+      Baue die vollständige Dokumentationslandschaft von PhairPlayRust im Vocument-Format.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese): README.md, ARCHITECTURE.md, ROADMAP.md, REQUIREMENTS.md,
+      AGENTS.md, PROJECT_MANAGEMENT.md, QUALITY.md, WHERE_TO_CHANGE.md, GLOSSARY.md,
+      CONTRIBUTING.md, CHANGELOG.md, Makefile, project/project.yaml, config/**,
+      docs/README.md, docs/DOCUMENTATION_POLICY.md, docs/BEST_IN_CLASS.md,
+      docs/GETTING-STARTED.md, docs/acceptance/ACCEPTANCE_TEMPLATE.md,
+      docs/adr/ADR_TEMPLATE.md, docs/cr/CR_TEMPLATE.md, docs/guides/**
+      (docs/adr/ADR-000x*.md und docs/assets/ und docs/site/ gehören anderen Workern —
+      nicht anfassen.)
+
+      Das Format ist bindend. Studiere /workspace/repos/Vocument/ gründlich: README.md,
+      ARCHITECTURE.md, ROADMAP.md, REQUIREMENTS.md, AGENTS.md, PROJECT_MANAGEMENT.md,
+      QUALITY.md, WHERE_TO_CHANGE.md, GLOSSARY.md, CONTRIBUTING.md, SECURITY.md, PRIVACY.md,
+      THIRD_PARTY.md, docs/README.md, docs/DOCUMENTATION_POLICY.md, docs/BEST_IN_CLASS.md,
+      docs/GETTING-STARTED.md, docs/acceptance/ACCEPTANCE_TEMPLATE.md, docs/adr/ADR_TEMPLATE.md,
+      docs/cr/CR_TEMPLATE.md, project/project.yaml, config/README.md, Makefile.
+      Übernimm STRUKTUR und DICHTE, nicht den Inhalt.
+
+      Inhaltliche Mindestqualität:
+      - REQUIREMENTS.md: FR-IDs fortlaufend, je mit "How to Verify" und "Pass Condition".
+        NFRs: Latenz ≤ 100 ms bis zum ersten Frame, ≥ 25 fps, RAM ≤ 150 MB, CPU ≤ 30 %,
+        Null-Telemetrie, Sicherheit, Interoperabilität.
+      - ARCHITECTURE.md: Schichtenmodell, Crate-Diagramm, Datenflüsse je Protokoll,
+        Threading-/Konkurrenzmodell, Fehler- und Ereignisfluss.
+      - ROADMAP.md: Meilensteine M0…M4 mit Gates und Abnahmekriterien.
+      - BEST_IN_CLASS.md: das messbare Qualitätsraster.
+      - AGENTS.md: Rollenmodell, universelle Regeln, Review-Matrix, Definition of Done,
+        verbotene Agenten-Verhaltensweisen, Handoff-Template — PhairPlayRust-spezifisch.
+      - GLOSSARY.md: AirPlay, RAOP, FairPlay, WFD, Miracast, SSDP, GENA, SOAP, UPnP, DLNA, SDP,
+        RTP, RTCP, NTP, DACP, DMAP, EDID, HDCP, ALAC, AAC-ELD, HLS, UniFFI, Tokio, mDNS,
+        DNS-SD, SRP, Ed25519, X25519.
+      - Die **ehrlichen Grenzen** aus dem Kotlin-Vorgänger übernehmen: FairPlay-DRM ist nicht
+        entschlüsselbar; Apple-Music-In-App-Audio ist geschützt; Miracast braucht
+        WFD-Systemberechtigung. Erfinde keine Fähigkeiten, die der Code nicht hat.
+
+      Regeln: jeder Link, jeder Befehl, jeder Pfad muss real existieren (prüfe mit `ls`).
+      Doppelte Quellen der Wahrheit sind verboten. Baue `scripts/check-docs-links.sh` und
+      teste es laufend — inklusive Negativfall (kaputten Link einbauen → rot → zurückbauen →
+      grün); protokolliere beide Ausgaben. Repo-Inhalte auf ENGLISCH.
+
+      Abschluss: das Link-Skript muss grün sein. Zitiere die echte Ausgabe im deliverable.md.
+    assigned_to: 'Rust Docs Lead'
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe die Dokumentationslandschaft read-only.
+      (a) Führe das Link-Skript aus: `export HOME=/workspace/.home && cd /workspace/PhairPlayRust &&
+      bash scripts/check-docs-links.sh` — es muss grün sein.
+      (b) Extrahiere ALLE internen Markdown-Links aus allen .md-Dateien und prüfe jede
+      Zielexistenz selbst mit einem eigenen Skript in $TMPDIR (nicht dem Skript des Produzenten
+      vertrauen).
+      (c) Prüfe auf erfundene Fähigkeiten: Suche in README.md und REQUIREMENTS.md nach Claims
+      wie "fully implemented" und prüfe im Code, ob die genannte Funktion existiert.
+      (d) Prüfe, ob jede Zahl/Regel nur an EINER Stelle steht (keine doppelten Quellen der
+      Wahrheit) — suche nach wiederholten Zahlenwerten wie "100 ms", "25 fps", "150 MB".
+      (e) Prüfe, dass die Doku-Dateien dem Vocument-Format entsprechen (Struktur, Dichte,
+      Abschnittsnamen). Verändere KEINE Projektdateien.
+    timeout_ms: 1800000
+
+  # ───────────── Zyklus 2: Härtung, Integration, Abnahme (nach Zyklus 1) ─────────────
+  - id: security-hardening
+    title: 'Bedrohungsmodell, Parser-Härtung und Datenschutz'
+    prompt: |
+      Auditiere und härte die Angriffsflächen von PhairPlayRust, und schreibe SECURITY.md und
+      PRIVACY.md.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien: engines/**, formats/** (nur Härtungsänderungen), core/phairplay-core/**
+      (nur Logging-Maskierung), SECURITY.md, PRIVACY.md, deny.toml, THIRD_PARTY.md.
+
+      Bedrohungsmodell: Der Angreifer ist typischerweise **ein beliebiges Gerät im selben WLAN**.
+      PIN-Auth ist standardmäßig AUS — jeder im LAN darf streamen. Also ist JEDER
+      Netzwerk-Input untrusted: RTSP-Header/Bodies, SDP, Property-Lists, H.264-SPS/PPS,
+      AAC/ALAC-Payloads, SSDP-M-SEARCH-Requests, SOAP-Bodies (XML), GENA-Callback-URLs,
+      HTTP-Header, CastV2-Nutzdaten, WFD-Information-Elements.
+
+      Zu prüfen und nötigenfalls zu beheben (mit je einem Negativtest, der den Angriff real
+      ausführt):
+      - SPS-Parser: `readUe()` darf bei 31 führenden Nullbits nicht überlaufen (in u64 rechnen,
+        klemmen, Grenzwerte prüfen).
+      - Frame-/Audio-Queues: **Byte-Budget** zusätzlich zur Item-Anzahl, konfigurierbar über
+        `AppConfig::limits`; bei Überschreitung älteste Einträge verwerfen, kein OOM.
+      - SOAP/XML: DOCTYPE verboten, externe Entitäten abgeschaltet, Rekursionstiefe begrenzt.
+      - GENA-Callback: SSRF-Guard — nur private IPv4 im lokalen Subnet; `169.254.169.254`,
+        `::1`, Link-Local und IPv6 müssen abgewiesen werden.
+      - Property-List-Decoder: Zyklen, Bomben, Längenfelder.
+      - Jeder Socket-Read: Längenlimit und Timeout.
+      - Logs: Geräte-/Sendernamen und IP-Adressen maskieren (Datenschutz).
+
+      Danach: `SECURITY.md` und `PRIVACY.md` im Vocument-Format und -Ton
+      (Vorbild: /workspace/repos/Vocument/SECURITY.md, /workspace/repos/Vocument/PRIVACY.md).
+      Prüfe außerdem die AGPL-Compliance: `deny.toml` muss die erlaubten Lizenzen korrekt
+      abbilden (AGPL-3.0-or-later plus die zulässigen Permissiven), `THIRD_PARTY.md` muss
+      vollständig sein, und der ALAC-Port (Apple, Apache-2.0) muss attribuiert sein.
+
+      Regeln: Findings immer mit Ort, Angreifer-Szenario, Angriffspfad, Schadenspotenzial,
+      konkretem Fix und Negativtest. Keine erfundenen Zahlen/CVE-IDs. Keine Stubs.
+      Repo-Inhalte ENGLISCH, deliverable.md DEUTSCH.
+
+      Abschluss: `cargo test --workspace` grün. Zitiere die echte Summary-Zeile.
+    assigned_to: 'Rust Security Engineer'
+    depends_on: [formats-media, engines-discovery-dlna, engines-airplay, engines-cast-miracast]
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe die Härtung read-only, adversarial.
+      (a) Führe `cargo test --workspace` aus.
+      (b) Greife in $TMPDIR mit eigenen Harness die SPS-, Plist-, SOAP- und SSRF-Angriffe an und
+      prüfe, dass sie abgewiesen werden. Ein Beispiel, das du prüfen sollst: ein SPS mit 31
+      führenden Nullbits, ein Binary-Plist mit einem Zyklus, ein GENA-Callback auf 169.254.169.254.
+      (c) Prüfe, ob irgendeine Queue weiterhin **nur** nach Item-Anzahl begrenzt ist.
+      (d) Prüfe `deny.toml` gegen die tatsächlich verwendeten Lizenzen der Abhängigkeiten
+      (`cargo metadata` / `cargo tree`).
+      (e) Prüfe, ob SECURITY.md und PRIVACY.md Behauptungen aufstellen, die der Code nicht erfüllt.
+      Verändere KEINE Projektdateien. Bei Lücke: FAIL mit exakter Stelle und erwartetem Test.
+    timeout_ms: 1800000
+
+  - id: architecture-integration
+    title: 'Crate-Grenzen, öffentliche API, ADRs und Workspace-Integration'
+    prompt: |
+      Prüfe die Modulgrenzen und die öffentliche API von PhairPlayRust, schreibe die ADRs und
+      stelle die Workspace-Integration sicher.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien: docs/adr/ADR-000*.md, scripts/check-crate-boundaries.sh,
+      core/phairplay-core/** (nur additive API-Erweiterungen, die andere Crates brauchen —
+      mit Tests), Cargo.toml (nur wenn eine Abhängigkeit wirklich fehlt).
+
+      Aufgaben:
+      1. **Crate-Grenzen prüfen.** Die Richtung muss strikt sein:
+         `apps/*` → `platform/*` → `core/*` → `engines/*` → `formats/*`.
+         Ein `formats/*` darf nicht von einem `engines/*` abhängen, ein `core/*` von keinem
+         anderen Workspace-Crate. Schreibe `scripts/check-crate-boundaries.sh`, das die Richtung
+         maschinell prüft und bei Verstoß mit Exit-Code 1 fehlschlägt. **Beweise es:** baue
+         temporär einen Verstoß → Gate muss rot werden → Verstoß zurückbauen → Gate muss grün
+         werden. Protokolliere beide Ausgaben wörtlich.
+      2. **Öffentliche API reviewen.** Jede `pub`-Funktion, jeder `pub`-Typ: dokumentiert,
+         stabile Signatur, richtige Abstraktion. Fehlt etwas, das andere Crates brauchen, gehört
+         es nach `phairplay-core` (mit Tests) — nicht als Duplikat in ein Engine-Crate.
+      3. **ADRs schreiben** im Format /workspace/repos/Vocument/docs/adr/ADR_TEMPLATE.md, unter
+         docs/adr/, fortlaufend nummeriert, Status Accepted/Proposed. Mindestens:
+         ADR-0001 Cargo-Workspace und Modulgrenzen, ADR-0002 Engine-Trait/Protokollabstraktion,
+         ADR-0003 UniFFI-Bindings und Brückenverifikation, ADR-0004 Fehlerhierarchy und
+         FFI-Fehlercodes. Hänge an vorhandene Dateien an, überschreibe nichts.
+      4. **Doppelte Wahrheiten aufspüren.** Ports, Limits, Service-Typen, Timeouts müssen an
+         genau einer Stelle stehen (in `phairplay_core::config`). Finde Duplikate über
+         Crate-Grenzen hinweg und ziehe sie zusammen.
+      5. **Integration**: `cargo build --workspace`, `cargo test --workspace`,
+         `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --check`.
+         Jeder Fehler wird behoben oder ehrlich dokumentiert. **Kein Lint wird mit einem
+         pauschalen `#[allow]` wegkommentiert** — es sei denn, die Begründung steht im ADR.
+
+      Regeln: keine `unwrap()`/`expect()`, kein `unsafe`, keine Stubs, Dateien ≤ 400/550 Zeilen.
+
+      Abschluss: alle vier Kommandos grün, oder jeder Fehler ehrlich dokumentiert mit exakter
+      Meldung. Zitiere die echten Ausgaben.
+    assigned_to: 'Rust Architect'
+    depends_on: [formats-media, engines-discovery-dlna, engines-airplay, engines-cast-miracast, platform-ffi]
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe read-only. Führe selbst aus:
+      `export HOME=/workspace/.home PATH=$HOME/.cargo/bin:$PATH && cd /workspace/PhairPlayRust &&
+       cargo build --workspace && cargo test --workspace &&
+       cargo clippy --workspace --all-targets -- -D warnings && cargo fmt --check`
+      (a) Prüfe die Abhängigkeitsrichtung mechanisch mit einem eigenen Skript in $TMPDIR, nicht
+      mit dem Skript des Produzenten.
+      (b) Suche nach pauschalen `#[allow(`-Attributen im ganzen Workspace — jedes muss eine
+      ADR-Begründung haben.
+      (c) Prüfe, ob die ADRs dem Vocument-ADR-Template entsprechen und ob die referenzierten
+      Dateien real existieren.
+      (d) Prüfe, ob `core/phairplay-core` von einem anderen Workspace-Crate abhängt (das wäre
+      ein Zyklus und ein Contract-Bruch).
+      Verändere KEINE Projektdateien. Bei Lücke: FAIL mit exaktem Fund.
+    timeout_ms: 1800000
+
+  - id: ci-gate-acceptance
+    title: 'CI-Gate, Abnahme-Evidenz und Testlücken schließen'
+    prompt: |
+      Baue das CI-Gate von PhairPlayRust, schließe die Testlücken und schreibe die Abnahme.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien: .github/workflows/**, scripts/**, tests/**, docs/acceptance/**,
+      docs/audit/**, docs/guides/DEVICE_TEST_PLAN.md, deny.toml
+
+      Aufgaben:
+      1. **Baseline messen.** `cargo test --workspace` im Ausgangszustand. Testanzahl, Fehler,
+         Dauer, grün/rot. Speichere die Ausgabe unter docs/audit/. Ohne diese Referenz ist jede
+         spätere Aussage wertlos.
+      2. **CI-Gate** (.github/workflows/ci.yml) mit Jobs: `quality-gate` (fmt --check, clippy
+         --workspace --all-targets -- -D warnings, test --workspace, doc --workspace --no-deps),
+         `licenses` (cargo-deny), `audit` (cargo audit — falls nicht verfügbar, ehrlich als
+         NOT RUN mit Grund), `structure` (die Prüfskripte).
+         **Das Gate darf nicht grün sein, wenn eine Regel verletzt ist.** Beweise das mit einem
+         echten Negativtest: Regel verletzen → Gate rot → zurückbauen → Gate grün. Protokolliere
+         **beide** Ausgaben wörtlich.
+      3. **cargo-deny-Version pinnen.** `deny.toml` wird von verschiedenen cargo-deny-Versionen
+         verschieden gelesen. Pinne die Version im Prüfskript (`scripts/audit-licenses.sh`) auf
+         eine, die mit dem `deny.toml` des Projekts zusammenpasst — und verifiziere das durch
+         einen echten Lauf. Eine andere Version → NOT RUN mit Grund, nicht ein falscher Fehler.
+      4. **Testlücken schließen.** Für jeden geänderten Bereich: fehlen Unit-, Integrations- oder
+         Negativtests? Schreibe sie. Du hast die Hoheit, Tests in fremden Crates zu ergänzen.
+         Jede Härtung braucht einen Negativtest, der den Angriff real ausführt.
+      5. **Abnahme** docs/acceptance/M0-ACCEPTANCE.md im Vocument-Format (Funktional / Technik /
+         Performance / Usability / Accessibility / Security-Privacy / Interoperabilität /
+         Known limitations / Decision). Jede Aussage braucht konkrete Evidenz (Testname,
+         Kommando-Ausgabe) — keine Behauptung "implemented".
+      6. **Device-Test-Plan** docs/guides/DEVICE_TEST_PLAN.md: welche Abnahmekriterien brauchen
+         echte Hardware (macOS-/iOS-Sender, Windows-11-"Cast to Device", VLC, Chromecast)? Mit
+         exaktem Testskript.
+
+      Regeln: keine Tests als `#[ignore]`/auskommentiert. Keine erfundenen Zahlen, keine
+      Coverage-Prozentzahl ohne Messung. Repo ENGLISCH, deliverable.md DEUTSCH.
+    assigned_to: 'Rust QA Engineer'
+    depends_on: [formats-media, engines-discovery-dlna, engines-airplay, engines-cast-miracast, platform-ffi]
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe das CI-Gate read-only und adversarial.
+      (a) Führe `cargo test --workspace` aus und vergleiche die Testanzahl mit der Behauptung
+      des Produzenten — weicht sie ab, ist das ein FAIL.
+      (b) Prüfe, ob das Gate **wirklich** rot wird: baue in $TMPDIR eine Kopie eines
+      violating Verstoßes (z.B. ein `unwrap()` in einem Crate) und führe das Gate-Skript
+      dagegen aus — es muss mit Exit-Code ≠ 0 abbrechen. Ein Gate, das immer grün ist, ist
+      kein Gate.
+      (c) Suche im ganzen Workspace nach `#[ignore]`, `#[should_panic]` ohne Aussage und
+      auskommentierten Tests.
+      (d) Prüfe, ob die Abnahme Behauptungen ohne Evidenz enthält (Stichwortsuche nach
+      "implemented", "complete", "verified" ohne nahen Testnamen/Kommando).
+      (e) Prüfe die gepinnte cargo-deny-Version: installiere sie nicht neu, aber verifiziere,
+      dass die Version im Skript zur `deny.toml` passt.
+      Verändere KEINE Projektdateien. Bei Lücke: FAIL mit exaktem Fund.
+    timeout_ms: 1800000
+
+  - id: native-shells
+    title: 'Native Shells für Android und macOS'
+    prompt: |
+      Baue die nativen Shells von PhairPlayRust auf Basis des FFI-Vertrags.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Deine Dateien (nur diese): apps/android/**, apps/macos/**
+
+      Umfang:
+      1. **Android-Shell** (Kotlin + Jetpack Compose): Anwendungsstart, Foreground-Service mit
+         der passenden Android-Berechtigung (WAKE_LOCK, ACCESS_NETWORK_STATE, CHANGE_WIFI_MULTICAST_STATE
+         und INTERNET — prüfe, ob die Liste wirklich minimal ist), Status-Oberfläche mit einer
+         Karte je Protokoll (Zustand Advertising/Streaming/Disabled/Error — "Dienst gestoppt"
+         und "in den Einstellungen deaktiviert" müssen unterscheidbar sein), Ein/Aus-Schalter
+         je Protokoll, Now-Playing-Ansicht.
+      2. **macOS-Shell** (SwiftUI + AppKit): dieselbe Informationsarchitektur, nativ für macOS.
+      3. **Bindungsgenerierung**: ein Skript `scripts/generate-bindings.sh`, das die
+         UniFFI-Bindungen für Kotlin und Swift erzeugt (Vorbild:
+         /workspace/repos/Vocument/scripts/generate-bindings.sh).
+
+      Realistisch einordnen: Der **FFI-Vertrag** (Signaturen, DTOs, Generierung) muss
+      vollständig und korrekt sein. Die UI-Shells müssen strukturell kompilierbar sein.
+      Wenn der Sandbox-Build für Gradle oder Xcode nicht durchführbar ist, dokumentiere das
+      ehrlich als **NOT RUN mit exaktem Grund** und einer vollständigen Grundanleitung —
+      niemals als "fertig" behaupten. Erfinde keine Build-Ausgabe.
+
+      Regeln: keine Stubs, keine Dummy-Returns. Strings in Ressourcendateien, keine
+      hartkodierten Texte in der UI. Repo ENGLISCH, deliverable.md DEUTSCH.
+    assigned_to: 'Rust Platform Engineer'
+    depends_on: [platform-ffi]
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe die nativen Shells read-only.
+      (a) Suche nach erfundenen Build-Ausgaben: vergleiche jede behauptete "gebaut"-Aussage mit
+      dem deliverable.md — fehlt eine echte Kommando-Ausgabe, ist es ein FAIL.
+      (b) Prüfe, dass das Generierungsskript existiert und die erwarteten Pfade nennt.
+      (c) Prüfe die Android-Manifest-Datei auf eine **minimale** Permission-Liste: keine
+      unnötigen Berechtigungen, keine Tracking-/Internet-Zugriffe über die Receiver-Funktion
+      hinaus. `ACCESS_FINE_LOCATION` oder `RECORD_AUDIO` wären ein FAIL.
+      (d) Prüfe, dass die Oberfläche die Zustände Advertising/Streaming/Disabled/Error
+      unterscheidet und "Dienst gestoppt" nicht mit "deaktiviert" verwechselt.
+      (e) Prüfe auf hartkodierte UI-Texte (keine string literals in der UI-Schicht).
+      Verändere KEINE Projektdateien. Bei Lücke: FAIL mit exaktem Fund.
+    timeout_ms: 1800000
+
+  # ───────────── Zyklus 3: unabhängige Endabnahme ─────────────
+  - id: final-acceptance
+    title: 'Unabhängige Endabnahme des gesamten Workspaces'
+    prompt: |
+      Nimm den gesamten Workspace von PhairPlayRust unabhängig ab.
+
+      Arbeitsverzeichnis: /workspace/PhairPlayRust
+      Keine Produktionsdateien ändern — du prüfst, veränderst nicht.
+
+      Durchzuführen:
+      1. `cargo build --workspace`, `cargo test --workspace`,
+         `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --check`.
+         Jede Abweichung vom Grün ist ein Befund.
+      2. Prüfe die **Vertragskonformität**: hält sich jeder Crate an
+         docs/design/BUILD-CONTRACT.md? Dependency-Regeln, `unsafe_code = deny`, keine
+         `unwrap()`/`expect()`, `missing_docs`, Dateilängen, Test-Pflicht, Negativtest-Pflicht?
+      3. Prüfe die **Doku-Genauigkeit**: sind alle Behauptungen in README.md, ARCHITECTURE.md,
+         REQUIREMENTS.md und ROADMAP.md durch Code oder Tests gedeckt? Finde Widersprüche
+         zwischen Code und Doku.
+      4. Prüfe die **AGPL-Konformität**: LICENSE, REUSE.toml, Lizenzangaben in allen
+         Cargo.toml, `deny.toml`, `THIRD_PARTY.md`, Attributierung des ALAC-Ports.
+      5. Prüfe die **Sicherheitsbehauptungen**: Security.md/Privacy.md gegen den Code.
+      6. Schreibe `docs/acceptance/M0-ACCEPTANCE.md` im Vocument-Format — mit echter Evidenz
+         je Aussage. Erfinde nichts.
+
+      Ergebnis: ein ehrliches Abnahmebergebnis. "PASS mit Vorbehalten" ist ein gültiges
+      Ergebnis, solange die Vorbehalte konkret benannt sind. Erfinde kein grünes Licht.
+    assigned_to: 'Rust QA Engineer'
+    depends_on: [security-hardening, architecture-integration, ci-gate-acceptance, native-shells, dashboard-visual, docs-suite]
+    verified_by: 'Verifier'
+    verify_prompt: |
+      Prüfe die Endabnahme selbst read-only. (a) Führe die vier Cargo-Kommandos selbst aus.
+      (b) Stichprobe: wähle 5 zufällige Behauptungen aus der Abnahme und prüfe jede gegen den
+      Code. (c) Prüfe, dass die Abnahme keine "Known limitations" ausblendet, die im Code
+      sichtbar sind. (d) Prüfe, dass kein `#[ignore]`, kein `todo!()` und kein `unimplemented!()`
+      im Workspace steht — suche danach. (e) Prüfe, dass keine Datei die Grenze von 550 Zeilen
+      überschreitet. Bei Lücke: FAIL mit exaktem Fund.
+    timeout_ms: 1800000

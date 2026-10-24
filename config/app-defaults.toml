@@ -1,0 +1,100 @@
+# Central Application Defaults (Documentation Baseline 0.1)
+#
+# The single documented owner of the user-visible default behaviour of
+# PhairPlayRust. The typed mirror of this file lives in the Rust core:
+#   core/phairplay-core/src/config.rs  ->  DeviceConfig, ProtocolConfig
+#   core/phairplay-core/src/identity.rs ->  DeviceIdentity
+# A change to a value here MUST change the matching Rust default in the same
+# change (see docs/DOCUMENTATION_POLICY.md, "Single Source of Truth").
+
+# ── The identity that is advertised to senders ───────────────────────────────
+[device]
+# The name the sender shows in its device picker. The name is sanitised by
+# `phairplay_core::identity::sanitize_service_name` before it is used as a
+# DNS-SD instance name.
+name = "PhairPlay"
+model = "PhairPlay Rust Receiver"
+manufacturer = "PhairPlayRust"
+protocol_version = "1.0"
+# The maximum length of the DNS-SD service instance name is not configured
+# here: the owner of that limit is the constant
+# `phairplay_core::identity::MAX_SERVICE_NAME_LENGTH`, because the limit is a
+# property of the DNS-SD protocol, not a product decision.
+
+# ── Per-protocol defaults ────────────────────────────────────────────────────
+# Every protocol can be switched on and off independently. A protocol that is
+# switched off is neither advertised nor bound to a socket.
+#
+# `port = 0` means that no port is pinned by the configuration; the port the
+# engine actually listens on is reported by `ProtocolStatus::tcp_port`.
+[protocols.airplay]
+enabled = true
+port = 0
+# A PIN is not required by default: the threat model is "any device on the
+# local network", and the product promise is that a plain home network works
+# without ceremony. The owner of this switch is FR-011 (the per-protocol
+# switch); the access control itself is NFR-SEC-004.
+require_pin = false
+# The AirPlay receiver advertises two DNS-SD service types. A receiver that
+# omits `_raop._tcp` is invisible to some senders.
+mdns_service_types = ["_airplay._tcp", "_raop._tcp"]
+
+[protocols.miracast]
+enabled = true
+port = 0
+require_pin = false
+mdns_service_types = ["_miracast._tcp"]
+
+[protocols.cast]
+enabled = true
+port = 0
+require_pin = false
+mdns_service_types = ["_googlecast._tcp"]
+
+[protocols.dlna]
+enabled = true
+port = 0
+require_pin = false
+# DLNA/UPnP is discovered with SSDP, not with mDNS. The entry is kept so that
+# every protocol is described in exactly one place.
+discovery = "ssdp"
+
+# ── Session behaviour ────────────────────────────────────────────────────────
+[session]
+# AirPlay, Miracast and DLNA serve one peer at a time. A second concurrent
+# peer is rejected, not queued. Google Cast is the documented exception: a
+# Cast receiver may serve several senders at the same time.
+max_concurrent_peers = 1
+# Protocols that may serve more than one peer at the same time.
+multi_peer_protocols = ["cast"]
+# A session that ends leaves the receiver in this state.
+state_after_session_end = "advertising"
+
+# ── Discovery behaviour ──────────────────────────────────────────────────────
+[discovery]
+# The receiver re-advertises when the network changes (a Wi-Fi reconnect or a
+# resume from standby) instead of waiting for the sender to retry.
+re_advertise_on_network_change = true
+# How often the receiver checks whether its own advertisement is still alive.
+advertisement_check_interval_seconds = 5
+
+# ── Web dashboard ────────────────────────────────────────────────────────────
+# The dashboard is a local control panel, not a network service. It binds on
+# the loopback interface only.
+[web]
+enabled = true
+bind_address = "127.0.0.1"
+bind_port = 8787
+# The dashboard never accepts a connection from a foreign address.
+allow_remote_access = false
+
+# ── Logging ──────────────────────────────────────────────────────────────────
+[logging]
+# The log level of the receiver. The receiver never logs the content of a
+# stream and never logs a complete device name or an IP address.
+#
+# The masking of the sender name and of the IP address is owned by the
+# privacy section of config/security-policy.toml
+# (`privacy.mask_device_names`, `privacy.mask_ip_addresses`). It is not
+# repeated here.
+default_level = "info"

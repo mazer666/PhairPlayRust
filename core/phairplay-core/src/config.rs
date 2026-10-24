@@ -226,11 +226,10 @@ impl AppConfig {
     /// [`AppConfig::validate`].
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, ConfigError> {
         let path = path.as_ref();
-        let text = std::fs::read_to_string(path)
-            .map_err(|error| match error.kind() {
-                std::io::ErrorKind::NotFound => ConfigError::NotFound(path.display().to_string()),
-                _ => ConfigError::Io(error),
-            })?;
+        let text = std::fs::read_to_string(path).map_err(|error| match error.kind() {
+            std::io::ErrorKind::NotFound => ConfigError::NotFound(path.display().to_string()),
+            _ => ConfigError::Io(error),
+        })?;
         let config: AppConfig = toml::from_str(&text)?;
         config.validate()?;
         Ok(config)
@@ -262,10 +261,9 @@ mod tests {
     #[test]
     fn an_unknown_protocol_name_is_rejected() {
         let mut config = AppConfig::default();
-        config.protocols.insert(
-            "telepathy".to_string(),
-            ProtocolConfig::default(),
-        );
+        config
+            .protocols
+            .insert("telepathy".to_string(), ProtocolConfig::default());
         let error = config.validate().expect_err("must fail");
         assert!(error.to_string().contains("unknown protocol name"));
     }
@@ -292,5 +290,41 @@ mod tests {
         let text = config.to_toml().expect("serialise");
         let parsed: AppConfig = toml::from_str(&text).expect("parse");
         assert_eq!(config, parsed);
+    }
+
+    #[test]
+    fn an_unknown_key_is_rejected() {
+        // WHY: a typo in a configuration file must not be ignored silently.
+        // The model is derived with `deny_unknown_fields`, so the parser
+        // refuses a key that the model does not know and names it in the
+        // error message.
+        let text = r#"
+            [device]
+            name = "Living Room"
+            manufakturer = "PhairPlayRust"
+        "#;
+
+        let error = toml::from_str::<AppConfig>(text).expect_err("must fail");
+        let message = error.to_string();
+        assert!(
+            message.contains("manufakturer"),
+            "the error must name the unknown key: {message}"
+        );
+    }
+
+    #[test]
+    fn a_missing_key_yields_the_default() {
+        // WHY: a configuration file that names only what it wants to change
+        // must stay valid. A missing key is not an error, a wrong value is.
+        let text = r#"
+            [device]
+            name = "Living Room"
+        "#;
+
+        let config: AppConfig = toml::from_str(text).expect("parse");
+        assert_eq!(config.device.name, "Living Room");
+        assert_eq!(config.device.model, DeviceConfig::default().model);
+        assert_eq!(config.device.manufacturer, DeviceConfig::default().manufacturer);
+        assert!(config.validate().is_ok());
     }
 }

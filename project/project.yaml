@@ -1,0 +1,176 @@
+project:
+  name: PhairPlayRust
+  baseline_version: "0.1"
+  product_status: "m0-in-progress"
+  current_milestone: "M0"
+  current_milestone_name: "Foundation"
+  current_submilestone: "M0.0"
+  completed_milestones: []
+  completed_submilestones: []
+  in_progress_submilestones:
+    - "M0.0"
+  license: "AGPL-3.0-or-later"
+  contribution_model: "DCO"
+  # The last time this file was written by hand. The state of the project
+  # lives here; the narrative of the milestones lives in ROADMAP.md.
+  state_updated: "2026-10-24"
+
+product:
+  summary: "A free, open-source, privacy-first receiver for AirPlay 2, Miracast, Google Cast and DLNA/UPnP on the local network."
+  principles:
+    - "no account"
+    - "no telemetry"
+    - "no advertising"
+    - "no cloud dependency"
+    - "local network only"
+    - "honest limits, documented from the first line"
+  explicit_boundaries:
+    - id: "EXC-001"
+      subject: "FairPlay DRM content"
+      statement: "Not decryptable. FairPlay Streaming is Apple's DRM; no open-source receiver can decrypt it."
+    - id: "EXC-002"
+      subject: "Apple Music in-app audio"
+      statement: "Protected on every AirPlay path. The system audio output of the sender is the workaround."
+    - id: "EXC-003"
+      subject: "HDCP 2.x link protection"
+      statement: "Negotiated in the WFD handshake and enforced by the hardware. A session that cannot be protected is refused cleanly."
+    - id: "EXC-004"
+      subject: "Widevine and PlayReady"
+      statement: "Belong to the DRM framework of the device, not to the receiver."
+    - id: "EXC-005"
+      subject: "Cloud and remote streaming"
+      statement: "The receiver is a device on the local network."
+    - id: "EXC-006"
+      subject: "Publishing the receiver to the internet"
+      statement: "The receiver is not designed for a port forwarding and is not hardened against an exposure to the internet."
+    - id: "EXC-007"
+      subject: "Buffered audio playback (AirPlay mode 103)"
+      statement: "Accepted by the handshake, not played back."
+    - id: "EXC-008"
+      subject: "Several peers on a single-session protocol"
+      statement: "AirPlay, Miracast and DLNA serve one peer at a time. Google Cast is the documented exception."
+    - id: "EXC-009"
+      subject: "Transcoding"
+      statement: "The receiver decodes what it advertised. It does not transcode a format into another one."
+    - id: "EXC-010"
+      subject: "Google Cast application identifier"
+      statement: "The end-to-end test needs an identifier that is registered with Google. The project does not ship one and does not fake one."
+
+platforms:
+  phase_1:
+    android:
+      minimum_api_family: "Android 13+"
+      primary_abi: "arm64-v8a"
+      status: "planned"
+      milestone: "M3"
+    macos:
+      minimum: "13"
+      architecture: "arm64"
+      status: "planned"
+      milestone: "M3"
+  phase_2:
+    linux:
+      status: "planned"
+      entry_condition: "a green M4"
+    windows:
+      status: "planned"
+      entry_condition: "a green Linux track"
+
+architecture:
+  shared_core: "Rust"
+  core_crate: "core/phairplay-core"
+  platform_bridge: "UniFFI"
+  bridge_crate: "platform/phairplay-ffi"
+  android_ui: "Kotlin + Jetpack Compose"
+  macos_ui: "SwiftUI + AppKit"
+  dashboard: "Rust HTTP/WebSocket backend with static assets, loopback only"
+  engines:
+    airplay: "engines/airplay"
+    miracast: "engines/miracast"
+    cast: "engines/cast"
+    dlna: "engines/dlna"
+    discovery: "engines/discovery"
+  formats:
+    plist: "formats/plist"
+    h264: "formats/h264"
+    aac: "formats/aac"
+    alac: "formats/alac"
+  dependency_direction: "apps/* -> platform/* -> core/* ; engines/* -> core/*, formats/* ; formats/* -> nothing"
+  build_contract: "docs/design/BUILD-CONTRACT.md"
+
+protocols:
+  - name: "airplay"
+    display_name: "AirPlay 2"
+    service_types: ["_airplay._tcp", "_raop._tcp"]
+    carries_video: true
+    carries_audio: true
+    max_concurrent_peers: 1
+    milestone: "M1"
+  - name: "miracast"
+    display_name: "Miracast"
+    service_types: ["_miracast._tcp"]
+    carries_video: true
+    carries_audio: true
+    max_concurrent_peers: 1
+    requires_platform_permission: "WFD (Wi-Fi Display)"
+    milestone: "M2"
+  - name: "cast"
+    display_name: "Google Cast"
+    service_types: ["_googlecast._tcp"]
+    carries_video: true
+    carries_audio: true
+    max_concurrent_peers: 0
+    note: "The Cast protocol allows several senders. The limit is derived from session.multi_peer_protocols, not from a literal."
+    milestone: "M2"
+  - name: "dlna"
+    display_name: "DLNA / UPnP"
+    service_types: []
+    discovery: "ssdp"
+    carries_video: false
+    carries_audio: true
+    max_concurrent_peers: 1
+    note: "The renderer serves audio and pictures."
+    milestone: "M2"
+
+milestones:
+  M0: "Foundation"
+  M1: "AirPlay 2 receiver"
+  M2: "Protocol breadth and local control"
+  M3: "Native shells"
+  M4: "Hardening, interoperability and release readiness"
+
+documentation:
+  requirements_version: "0.1"
+  architecture_version: "0.1"
+  roadmap_version: "0.1"
+  quality_version: "0.1"
+  index: "docs/README.md"
+  policy: "docs/DOCUMENTATION_POLICY.md"
+  link_check: "scripts/check-docs-links.sh"
+
+configuration:
+  defaults: "config/app-defaults.toml"
+  budgets: "config/performance-budgets.toml"
+  policy: "config/security-policy.toml"
+  typed_model: "core/phairplay-core/src/config.rs"
+
+gates:
+  documentation_links:
+    command: "bash scripts/check-docs-links.sh"
+    state: "implemented"
+  crate_boundaries:
+    command: "bash scripts/check-crate-boundaries.sh"
+    state: "planned"
+  quality:
+    commands:
+      - "cargo fmt --all --check"
+      - "cargo clippy --workspace --all-targets -- -D warnings"
+      - "cargo test --workspace"
+      - "cargo doc --workspace --no-deps"
+    state: "planned"
+
+continuous_integration:
+  state: "planned"
+  workflows: []
+  secrets: "none"
+  publishes_anything: false

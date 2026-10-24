@@ -1,0 +1,41 @@
+[package]
+name = "phairplay-web"
+description = "The Rust backend of the PhairPlayRust dashboard: a local HTTP and WebSocket API."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "phairplay_web"
+path = "src/lib.rs"
+
+[[bin]]
+name = "phairplay-web"
+path = "src/main.rs"
+
+[dependencies]
+phairplay-core = { path = "../../core/phairplay-core" }
+phairplay-ffi = { path = "../../platform/phairplay-ffi" }
+
+# The versions of the web stack are declared here and not in the shared
+# manifest: no other crate of the workspace needs a web server, and the
+# manifest of the workspace stays free of a dependency that only the
+# dashboard uses.
+axum = { version = "0.8", features = ["ws"] }
+tower-http = { version = "0.7", features = ["fs"] }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["signal", "fs"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tokio-tungstenite = "0.30"
+tower = { version = "0.5", features = ["util"] }
+
+[lints]
+workspace = true

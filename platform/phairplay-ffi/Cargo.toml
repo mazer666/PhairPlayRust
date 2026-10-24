@@ -7,11 +7,36 @@ license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 
+[lib]
+name = "phairplay_ffi"
+# The native shells load the shared library; the dashboard links the static
+# library into its binary. The plain library is what the Rust tests use.
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+
 [dependencies]
 phairplay-core = { path = "../../core/phairplay-core" }
+uniffi.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tokio = { workspace = true }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["test-util"] }
+tokio = { workspace = true, features = ["test-util", "rt-multi-thread"] }
+async-trait.workspace = true
 
-[lints]
-workspace = true
+[lints.rust]
+# The scaffolding that UniFFI generates contains `unsafe` blocks. The code of
+# this crate does not: the exemption covers the generated code, which is
+# foreign code and is never edited here.
+unsafe_code = "allow"
+missing_debug_implementations = "warn"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"

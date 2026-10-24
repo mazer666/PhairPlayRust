@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PhairPlayRust — favicon.
+
+  WHAT: the 16–32 px icon of the project.
+  WHY: the mark has to survive being scaled down to a browser tab, so the
+  favicon drops the incoming beam and keeps the prism with its three rays.
+  The deep plate makes the icon readable on light and on dark browser chrome.
+  HOW: geometry only, no text, no fonts, no external resources.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="phairplayrust-favicon-title">
+  <title id="phairplayrust-favicon-title">PhairPlayRust</title>
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="#0a0b10"/>
+  <path d="M30 13 15 47h30Z" fill="none" stroke="#a78bfa" stroke-width="5" stroke-linejoin="round"/>
+  <g fill="none" stroke="#a78bfa" stroke-linecap="round" stroke-width="4">
+    <path d="M42 32 56 20"/>
+    <path d="M42 32h14"/>
+    <path d="M42 32 56 44"/>
+  </g>
+</svg>

@@ -1,0 +1,165 @@
+/*
+ * PhairPlayRust — design tokens.
+ *
+ * WHAT: the single source of truth for colour, type, spacing, radii and
+ * motion of the web dashboard.
+ * WHY: a palette that is written down in one place can be measured. Every
+ * colour below was checked with the WCAG 2.1 formula; the measured ratios
+ * are recorded in docs/design notes and in the deliverable.
+ * HOW: the dark theme is the default (a deep, calm base for a control panel
+ * that is often watched at night). The light theme is a full re-mapping, not
+ * an inversion, so both themes carry the same contrast guarantees.
+ *
+ * RULE: no hex literal outside this file. Components reference the roles.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Surfaces ────────────────────────────────────────────────────────
+   * surface          the page itself, the deepest plane
+   * surface-raised   cards, panels, the header — one plane above
+   * surface-sunken   insets: code, the chart plot area, table stripes
+   */
+  --surface: #0a0b10;
+  --surface-raised: #12141c;
+  --surface-sunken: #07080c;
+
+  /* ── Lines ───────────────────────────────────────────────────────────
+   * border         hairline separator, decorative only
+   * border-strong  a boundary that carries meaning (control outlines);
+   *                measured >= 3:1 against surface and surface-raised
+   */
+  --border: #232838;
+  --border-strong: #6a7186;
+
+  /* ── Text ────────────────────────────────────────────────────────────
+   * text         primary, measured 15.5:1 on surface-raised
+   * text-muted   secondary, measured  8.3:1 on surface-raised
+   * text-subtle  tertiary, measured  5.4:1 on surface-raised
+   */
+  --text: #e9ecf4;
+  --text-muted: #a7aec0;
+  --text-subtle: #838ba1;
+
+  /* ── Accent ──────────────────────────────────────────────────────────
+   * The single accent of the product. One hue, used for the live state,
+   * focus rings, the primary action and the chart stroke.
+   * accent        text-safe on every surface (6.7:1 on surface-raised)
+   * accent-strong solid fill; carries white labels at 5.3:1
+   * accent-soft   16 % wash used behind accent labels
+   */
+  --accent: #a78bfa;
+  --accent-strong: #6d4df0;
+  --accent-soft: rgba(167, 139, 250, 0.16);
+  --on-accent: #ffffff;
+
+  /* ── Semantic state ──────────────────────────────────────────────────
+   * Each state has a text colour, a soft wash and a shape. State is never
+   * carried by colour alone — the label and the glyph carry it too.
+   */
+  --success: #3ecf8e;
+  --success-soft: rgba(62, 207, 142, 0.16);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.16);
+  --danger: #ff7a7a;
+  --danger-soft: rgba(255, 122, 122, 0.16);
+  --neutral: #a7aec0;
+  --neutral-soft: rgba(167, 174, 192, 0.14);
+
+  /* ── Typography ─────────────────────────────────────────────────────
+   * System fonts only. No web font is downloaded, ever.
+   */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --text-2xs: 0.6875rem; /* 11 px — meta rows, axis ticks      */
+  --text-xs: 0.75rem; /* 12 px — labels, badges                */
+  --text-sm: 0.8125rem; /* 13 px — table cells, helper text      */
+  --text-base: 0.9375rem; /* 15 px — body                        */
+  --text-md: 1.0625rem; /* 17 px — card titles                   */
+  --text-lg: 1.375rem; /* 22 px — section titles                */
+  --text-xl: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem); /* hero     */
+  --leading-tight: 1.15;
+  --leading-normal: 1.55;
+  --tracking-wide: 0.08em;
+  --tracking-caps: 0.14em;
+
+  /* ── Spacing — 4 px base ─────────────────────────────────────────── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* ── Radii ─────────────────────────────────────────────────────────── */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* ── Elevation ───────────────────────────────────────────────────────
+   * Shadows stay quiet: one soft drop for cards, one hairline highlight
+   * that separates a raised plane from the base.
+   */
+  --shadow-card: 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+  --shadow-pop: 0 24px 60px -30px rgba(0, 0, 0, 0.95);
+  --highlight-hairline: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* ── Motion ─────────────────────────────────────────────────────────
+   * Slow enough to read as calm, short enough to feel alive.
+   * `prefers-reduced-motion: reduce` collapses every duration to 0.
+   */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 420ms;
+  --ease: cubic-bezier(0.2, 0.6, 0.25, 1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --surface: #f4f3ef;
+  --surface-raised: #ffffff;
+  --surface-sunken: #eae8e1;
+
+  --border: #d8d5cb;
+  --border-strong: #787466;
+
+  --text: #14151a;
+  --text-muted: #4e5361;
+  --text-subtle: #5f6573;
+
+  --accent: #5a3fd0;
+  --accent-strong: #4b31be;
+  --accent-soft: rgba(90, 63, 208, 0.12);
+  --on-accent: #ffffff;
+
+  --success: #0a6b42;
+  --success-soft: rgba(10, 107, 66, 0.12);
+  --warning: #7a4e00;
+  --warning-soft: rgba(122, 78, 0, 0.12);
+  --danger: #a81e17;
+  --danger-soft: rgba(168, 30, 23, 0.12);
+  --neutral: #4e5361;
+  --neutral-soft: rgba(78, 83, 97, 0.1);
+
+  --shadow-card: 0 16px 34px -30px rgba(20, 21, 26, 0.55);
+  --shadow-pop: 0 24px 60px -34px rgba(20, 21, 26, 0.5);
+  --highlight-hairline: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Users who ask for less motion get none. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
+}

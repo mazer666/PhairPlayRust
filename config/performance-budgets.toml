@@ -1,0 +1,95 @@
+# Central Performance Budgets & Resource Limits (Documentation Baseline 0.1)
+#
+# This file is the single documented owner of every numeric performance budget
+# and every numeric resource limit of PhairPlayRust. Other documents refer to
+# the keys below instead of repeating the values.
+#
+# The typed mirror of this file lives in the Rust core:
+#   core/phairplay-core/src/config.rs  ->  PerformanceConfig, LimitsConfig
+# A change to a value here MUST change the matching Rust default in the same
+# change (see docs/DOCUMENTATION_POLICY.md, "Single Source of Truth").
+#
+# Nothing in this file is a promise about a measurement. A budget is a target
+# that an acceptance document has to prove with a command and its output.
+
+# ── Time to the first picture ────────────────────────────────────────────────
+[latency]
+# Maximum time from "a peer has been accepted" to "the first decoded frame is
+# handed to the output surface". Source of the NFR-PERF-001 requirement.
+first_frame_ms = 100
+# Maximum time between the first and the last frame of a one-minute recording
+# of the received stream, measured as the deviation of the presentation
+# timestamps. Source of the NFR-PERF-005 requirement.
+audio_video_sync_ms = 40
+# Maximum time a peer may stay connected without sending anything. The engines
+# read this value as the deadline of every blocking read.
+idle_timeout_ms = 30000
+
+# ── Sustained throughput ─────────────────────────────────────────────────────
+[throughput]
+# Minimum sustained frame rate during a mirroring session. Source of the
+# NFR-PERF-002 requirement.
+minimum_fps = 25
+# Number of seconds over which the sustained frame rate is measured.
+measurement_window_seconds = 60
+
+# ── Resource footprint of the receiver process ───────────────────────────────
+[resources]
+# Maximum resident memory of the receiver process. Source of the
+# NFR-PERF-003 requirement.
+max_memory_mb = 150
+# Maximum sustained CPU usage of the receiver process in percent of one core.
+# Source of the NFR-PERF-004 requirement.
+max_cpu_percent = 30
+
+# ── Bounded queues ───────────────────────────────────────────────────────────
+# A queue is bounded by an item count AND by a byte budget. A queue that is
+# bounded by the item count alone can be filled with hundreds of megabytes by
+# a peer that sends maximum-size frames.
+[queues]
+# Maximum number of decoded video frames buffered in the sink queue.
+video_queue_frames = 90
+# Maximum number of bytes buffered in the video sink queue.
+video_queue_bytes = 67108864
+# Maximum number of audio packets buffered in the sink queue.
+audio_queue_packets = 200
+# Maximum number of bytes buffered in the audio sink queue.
+audio_queue_bytes = 4194304
+
+# ── Limits on untrusted network input ────────────────────────────────────────
+# Every value in this section is a hard limit. A peer that exceeds a limit is
+# rejected; the receiver never allocates a buffer that a peer sized.
+[limits]
+# Maximum number of bytes accepted in a single protocol message.
+max_message_bytes = 1048576
+# Maximum number of headers accepted in one HTTP-like request.
+max_header_count = 64
+# Maximum length of a single header line in bytes.
+max_header_bytes = 8192
+# Maximum number of pairing attempts before the sender is locked out. The
+# owner of this limit is this key; the security policy refers to it
+# (config/security-policy.toml, section `[pairing]`).
+max_pairing_attempts = 5
+# Maximum size of an album artwork payload in bytes.
+max_artwork_bytes = 8388608
+# Maximum size of a photo payload in bytes.
+max_photo_bytes = 20971520
+# Maximum size of a DLNA media payload in bytes.
+max_media_bytes = 536870912
+
+# ── Background work ──────────────────────────────────────────────────────────
+# The job executor of the core is bounded. Submitting beyond the limit is
+# rejected with a typed error instead of growing the queue silently.
+[jobs]
+max_concurrent_workers = 4
+max_queued_jobs = 256
+# Longest time a job waits in the queue before it is executed.
+max_queue_wait_ms = 250
+
+# ── Code limits ──────────────────────────────────────────────────────────────
+[code_limits]
+# Soft limit per hand-written source file.
+target_max_lines_per_file = 400
+# Hard limit per hand-written source file. A file above this limit is a
+# finding, not a style question.
+hard_max_lines_per_file = 550

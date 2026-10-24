@@ -13,12 +13,12 @@
 //! than growing without limit, because a stalled decoder must never turn into
 //! an out-of-memory kill of the whole receiver.
 
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
-use crate::error::MediaError;
 pub use crate::capabilities::{AudioCodec, VideoCodec};
+use crate::error::MediaError;
 
 /// A monotonically increasing frame counter.
 static FRAME_SEQUENCE: AtomicU64 = AtomicU64::new(1);
@@ -237,8 +237,8 @@ mod tests {
     fn null_sinks_accept_everything() {
         let sink = NullVideoSink;
         assert!(sink.submit(EncodedVideoFrame::new(0, vec![])).is_ok());
-        assert!(sink
-            .set_format(&VideoFormat {
+        assert!(
+            sink.set_format(&VideoFormat {
                 codec: VideoCodec::H264,
                 width: 1920,
                 height: 1080,
@@ -246,6 +246,7 @@ mod tests {
                 sps: None,
                 pps: None,
             })
-            .is_ok());
+            .is_ok()
+        );
     }
 }

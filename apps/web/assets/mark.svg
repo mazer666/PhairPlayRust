@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PhairPlayRust — pictorial mark.
+
+  WHAT: the brand mark of the project, geometry only, no text and no fonts.
+  WHY: the mark has to survive a 16 px favicon, a 34 px header slot and a
+  1024 px print without redrawing, so it is built from five strokes that
+  scale without losing their character.
+  HOW: a beam enters an outlined prism from the left and leaves it as a fan
+  of three rays — one incoming stream, distributed to many receivers. The
+  single accent colour of the product is the only colour in the file.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="phairplayrust-mark-title">
+  <title id="phairplayrust-mark-title">PhairPlayRust</title>
+  <g fill="none" stroke="#a78bfa" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 32h38" stroke-width="3.5"/>
+    <path d="M42 32 61 17" stroke-width="3"/>
+    <path d="M42 32h19" stroke-width="3"/>
+    <path d="M42 32 61 47" stroke-width="3"/>
+    <path d="M31 9 12 49h38Z" stroke-width="3.5"/>
+  </g>
+</svg>

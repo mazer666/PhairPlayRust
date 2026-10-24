@@ -225,7 +225,7 @@ and the workspace lint must be overridden locally, never globally.
 | `unsafe_code` | denied workspace-wide |
 | `unwrap()` / `expect()` | denied workspace-wide |
 | `missing_docs` | warn — **every public item is documented** |
-| File length | ≤ 400 lines soft, ≤ 550 lines hard |
+| File length | `code_limits.target_max_lines_per_file` (soft) and `code_limits.hard_max_lines_per_file` (hard) in `config/performance-budgets.toml` |
 | Formatting | `cargo fmt` |
 | Lints | `cargo clippy -- -D warnings` |
 

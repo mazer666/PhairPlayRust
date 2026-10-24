@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PhairPlayRust — AirPlay 2, Miracast, Google Cast und DLNA im eigenen Netzwerk</title>
+    <meta
+      name="description"
+      content="PhairPlayRust ist ein freier Empfänger für AirPlay 2, Miracast, Google Cast und DLNA/UPnP. Kein Konto, keine Werbung, keine Telemetrie, keine Cloud-Abhängigkeit — der Empfänger spricht nur mit den Geräten im lokalen Netzwerk."
+    />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="site.css" />
+    <link rel="stylesheet" href="sections.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.de.html">
+          <img src="../assets/phairplayrust-mark.svg" alt="" width="28" height="28" />
+          <span>PhairPlayRust</span>
+        </a>
+        <nav class="site-nav" aria-label="Abschnitte">
+          <a href="#versprechen">Versprechen</a>
+          <a href="#protokolle">Protokolle</a>
+          <a href="#architektur">Architektur</a>
+          <a href="#schnellstart">Schnellstart</a>
+        </nav>
+        <nav class="lang" aria-label="Sprachauswahl">
+          <a href="index.html" hreflang="en">EN</a>
+          <a href="index.de.html" hreflang="de" aria-current="page">DE</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="wrap">
+          <h1 class="hero__title">Phair<span>Rust</span></h1>
+          <p class="hero__lead">
+            Ein Empfänger für AirPlay&nbsp;2, Miracast, Google Cast und DLNA/UPnP. Er läuft auf
+            deinem Rechner, spricht nur mit den Geräten im lokalen Netzwerk — und verlangt
+            nichts: kein Konto, keine Werbung, keine Telemetrie, keine Cloud.
+          </p>
+          <p class="hero__actions">
+            <a class="button" href="../../apps/web/index.html">Dashboard öffnen</a>
+            <a class="button button--ghost" href="https://github.com/mazer666/PhairPlayRust"
+              >Quelltext ansehen</a
+            >
+          </p>
+          <p class="facts">
+            <span>AGPL-3.0-or-later</span>
+            <span>Rust 2024 · Edition 1.85+</span>
+            <span>Nur lokales Netzwerk</span>
+            <span>Linux · macOS · Windows · Android</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="versprechen">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Die Versprechen</span>
+            <h2>Vier Dinge, die dieses Projekt nicht tut</h2>
+            <p class="lead">
+              Ein Empfänger steht zwischen deinem Telefon und deinem Bildschirm. Alles, was er
+              tut, ist sichtbar — genau das ist der Punkt eines selbst gehosteten Empfängers.
+              Diese vier Versprechen sind der Grund, warum es das Projekt gibt.
+            </p>
+          </div>
+
+          <div class="promises">
+            <article class="promise">
+              <h3 class="promise__title">Kein Konto</h3>
+              <p>
+                Keine Registrierung, keine Anmeldung, kein Lizenzserver, der angerufen werden
+                müsste. Du installierst den Empfänger, er erscheint im Netzwerk, und das ist
+                die komplette Einrichtung.
+              </p>
+            </article>
+            <article class="promise">
+              <h3 class="promise__title">Keine Werbung</h3>
+              <p>
+                Keine Anzeigen, keine gesponserten Einträge, keine Partnerintegrationen, kein
+                Telemetrie-SDK. Das Projekt finanziert sich nicht über Werbung, und im Code
+                spricht nichts mit einem Werbekunden.
+              </p>
+            </article>
+            <article class="promise">
+              <h3 class="promise__title">Keine Telemetrie</h3>
+              <p>
+                Der Empfänger misst nicht, was du abspielst, meldet keine Nutzung irgendwohin
+                und schreibt keine Statistiken außerhalb deines Rechners. Die einzigen Daten,
+                die entstehen, sind das Bild und der Ton, um die es gebeten wurde.
+              </p>
+            </article>
+            <article class="promise">
+              <h3 class="promise__title">Keine Cloud-Abhängigkeit</h3>
+              <p>
+                Der Empfänger funktioniert auch mit gezogenem Netzkabel. Es gibt keinen
+                Server dazwischen, der das Projekt abschalten, bremsen oder verändern könnte —
+                du führst den Code aus, das Ergebnis gehört dir.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="protokolle">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Die Protokolle</span>
+            <h2>Was die Empfänger sprechen</h2>
+            <p class="lead">
+              Vier Protokoll-Engines teilen sich einen Kern: dasselbe Sitzungsmodell, dieselben
+              Zähler, dieselben Härtungsregeln. Jede Engine meldet sich im lokalen Netzwerk an
+              und nimmt dort einen Sender an.
+            </p>
+          </div>
+
+          <div class="matrix">
+            <table>
+              <caption class="visually-hidden">
+                Die Protokolle, die PhairPlayRust umsetzt, mit Dienstsuche, Transport, den
+                transportierten Medien und der jeweiligen Regel.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Protokoll</th>
+                  <th scope="col">Dienstsuche</th>
+                  <th scope="col">Transport</th>
+                  <th scope="col">Medien</th>
+                  <th scope="col">Regel</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>AirPlay 2</td>
+                  <td><code>_airplay._tcp</code>, <code>_raop._tcp</code></td>
+                  <td>RTSP mit RTP über UDP</td>
+                  <td>H.264-Video, AAC-LC / AAC-ELD, Apple Lossless</td>
+                  <td>Ein Sender zur Zeit</td>
+                </tr>
+                <tr>
+                  <td>Miracast / WFD</td>
+                  <td><code>_miracast._tcp</code></td>
+                  <td>RTSP-Steuerkanal mit RTP</td>
+                  <td>H.264-Video, Linear PCM</td>
+                  <td>Ein Sender zur Zeit</td>
+                </tr>
+                <tr>
+                  <td>Google Cast</td>
+                  <td><code>_googlecast._tcp</code></td>
+                  <td>CastV2 über TLS</td>
+                  <td>H.264, VP8, AAC-LC, MP3, Linear PCM</td>
+                  <td>Mehrere Sender gleichzeitig</td>
+                </tr>
+                <tr>
+                  <td>DLNA / UPnP</td>
+                  <td>SSDP</td>
+                  <td>HTTP mit SOAP und GENA</td>
+                  <td>Audio-Wiedergabe: AAC, Opus, MP3, FLAC, Linear PCM</td>
+                  <td>Ein Sender zur Zeit</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="matrix__note">
+            AirPlay meldet <em>zwei</em> Diensttypen an: Wer nur <code>_airplay._tcp</code>
+            ankündigt, bleibt für manche Sender unsichtbar. Google Cast ist die dokumentierte
+            Ausnahme von der Ein-Sender-Regel — ein Cast-Empfänger bedient mehrere Sender
+            gleichzeitig.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="architektur">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Die Architektur</span>
+            <h2>Fünf Schichten, eine Richtung</h2>
+            <p class="lead">
+              Abhängigkeiten zeigen ausschließlich nach unten. Ein Format-Crate kennt nie ein
+              Protokoll, ein Protokoll greift nie in die Plattform, und der Kern kennt nie eine
+              Engine. Diese Regel steht in <code>docs/design/BUILD-CONTRACT.md</code>, und gegen
+              sie wird jedes Crate gebaut.
+            </p>
+          </div>
+
+          <figure class="figure">
+            <img
+              src="architecture.svg"
+              alt="Fünf gestapelte Schichten: die Anwendungen android, macos und web; die
+                   Plattformbrücke phairplay-ffi; der Kern phairplay-core; die Engines airplay,
+                   miracast, cast, dlna und discovery; sowie die Formate plist, h264, aac und
+                   alac. Die Pfeile zeigen ausschließlich nach unten."
+              width="900"
+              height="520"
+            />
+            <figcaption>
+              Die Anwendungen teilen sich einen Kern. Das Web-Dashboard ist die dritte
+              Anwendung darüber — dieselbe Begriffswelt, dasselbe Sitzungsmodell, dieselben
+              Härtungsregeln, nur mit einem Browser davor.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section" id="schnellstart">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Der Schnellstart</span>
+            <h2>Vom Klon zum laufenden Empfänger</h2>
+            <p class="lead">
+              Das Projekt ist ein reiner Cargo-Workspace. Es gibt keinen Installer, keinen
+              Dienst-Installer und kein Konto, das angelegt werden müsste.
+            </p>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <h3>Quelltext holen</h3>
+              <p>
+                Das Repository enthält den ganzen Stack: den Kern, die vier Engines, die Formate
+                und das Dashboard.
+              </p>
+              <pre class="code"><code>git clone https://github.com/mazer666/PhairPlayRust.git
+cd PhairPlayRust</code></pre>
+            </div>
+            <div class="step">
+              <h3>Bauen und testen</h3>
+              <p>
+                Jedes Crate ist getestet — auch die Negativtests, die die Parser angreifen. Der
+                Build-Contract ist die Referenz für den Aufbau des Workspace.
+              </p>
+              <pre class="code"><code>cargo build --release
+cargo test --workspace</code></pre>
+            </div>
+            <div class="step">
+              <h3>Empfänger starten</h3>
+              <p>
+                Die Web-Anwendung startet die Engines, liefert das Dashboard aus und bindet
+                ausschließlich auf das Loopback-Interface — das Bedienpanel ist ein lokales
+                Werkzeug, kein Netzwerkdienst.
+              </p>
+              <pre class="code"><code>cargo run --release --manifest-path apps/web/Cargo.toml</code></pre>
+            </div>
+            <div class="step">
+              <h3>Dashboard öffnen</h3>
+              <p>
+                Das Panel wird auf der Loopback-Adresse des Prozesses ausgeliefert. Es zeigt den
+                Zustand der vier Empfänger, die laufenden Sitzungen, den Durchsatz des
+                laufenden Streams und die Codec-Referenz — und es kann einen Empfänger ein- und
+                ausschalten.
+              </p>
+            </div>
+          </div>
+
+          <p class="callout">
+            <strong>Offene Grenzen.</strong> FairPlay-geschützte Streams bleiben verschlüsselt:
+            Der Empfänger kann DRM-Inhalte nicht entschlüsseln. AirPlay 2, Miracast und DLNA
+            nehmen einen Sender zur Zeit an; Google Cast ist die dokumentierte Ausnahme und
+            bedient mehrere Sender gleichzeitig. Das Dashboard sagt dir immer, welches der
+            beiden Fälle du gerade siehst.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="datenschutz">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Das Bedrohungsmodell</span>
+            <h2>Jedes Gerät im Netzwerk gilt als nicht vertrauenswürdig</h2>
+            <p class="lead">
+              Ein Empfänger in einem Heimnetz ist für jedes Gerät darin erreichbar. Das
+              Bedrohungsmodell sagt das, und die Grenzen im Code folgen daraus.
+            </p>
+          </div>
+          <ul class="facts-list">
+            <li>Jede Netzwerkeingabe ist längen-, header- und zeitbegrenzt.</li>
+            <li>Parser lehnen fehlerhafte Eingaben ab, statt zu raten, was gemeint war.</li>
+            <li>Warteschlangen sind sowohl über die Anzahl der Frames als auch über ein Byte-Budget begrenzt.</li>
+            <li>Die DLNA-Engine lehnt externe Entitäten und Callback-Adressen außerhalb des lokalen Subnetzes ab.</li>
+            <li>Das Dashboard wird nur auf dem Loopback-Interface ausgeliefert; kein anderes Gerät erreicht es.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <span>PhairPlayRust — freie Software unter der Lizenz AGPL-3.0-or-later.</span>
+        <a href="https://github.com/mazer666/PhairPlayRust">Repository</a>
+        <a href="../../apps/web/index.html">Dashboard</a>
+        <span>Kein Konto · Keine Werbung · Keine Telemetrie · Keine Cloud</span>
+      </div>
+    </footer>
+  </body>
+</html>

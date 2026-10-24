@@ -1,0 +1,286 @@
+# PhairPlayRust
+
+**PhairPlayRust** is a free, open-source, privacy-first receiver for **AirPlay 2**,
+**Miracast**, **Google Cast** and **DLNA/UPnP**. It has **no account, no
+telemetry, no advertising and no cloud dependency** — it only ever speaks to
+devices on your local network.
+
+> **Product principle:** A receiver that does not want anything from you.
+
+The receiver is written in Rust. The native shells are Kotlin/Compose
+(Android) and SwiftUI (macOS); the local dashboard is a small Rust web
+backend with static assets. One shared Rust core carries the protocol logic,
+so the four protocols behave the same way and the logic is testable without a
+network and without a decoder.
+
+---
+
+## Current project status
+
+- **Baseline:** Documentation Baseline 0.1
+- **Current milestone:** **M0 — Foundation** (see [`ROADMAP.md`](ROADMAP.md))
+- **Shared core:** Rust (`core/phairplay-core`)
+- **Protocol engines:** `engines/{airplay,miracast,cast,dlna,discovery}`
+- **Format layer:** `formats/{plist,h264,aac,alac}`
+- **Platform bridge:** UniFFI (`platform/phairplay-ffi`)
+- **License:** AGPL-3.0-or-later, DCO, no CLA
+- **Machine-readable state:** [`project/project.yaml`](project/project.yaml)
+
+### What is in the repository
+
+| Part | State |
+|---|---|
+| Cargo workspace with eleven crates | in place |
+| Shared core: protocol trait, session registry, media sinks, capabilities, configuration, identity, metrics, error hierarchy, job executor | in place, with unit tests |
+| Build contract for the crate interfaces | in place: [`docs/design/BUILD-CONTRACT.md`](docs/design/BUILD-CONTRACT.md) |
+| Central configuration: defaults, performance budgets, security policy | in place: [`config/`](config/README.md) |
+| Documentation landscape in the house format | in place: [`docs/`](docs/README.md) |
+| The four protocol engines and the five format crates | the crates exist; the implementation is the work of M1 and M2 |
+| The platform bridge and the local dashboard | planned — M2 |
+| Native shells for Android and macOS | planned — M3 |
+| Hardening, gate and release readiness | planned — M4 |
+
+The table names the parts of the repository, not the completeness of an
+implementation. The machine-readable state is
+[`project/project.yaml`](project/project.yaml); the narrative of the
+milestones is in [`ROADMAP.md`](ROADMAP.md).
+
+The rules of the project are written down before the code exists. A milestone
+is not "done" because the picture appears; it is done when its gates are
+green and the evidence is in
+[`docs/acceptance/`](docs/acceptance/ACCEPTANCE_TEMPLATE.md).
+
+---
+
+## The four protocols
+
+| Protocol | Service | Picture | Sound | Milestone |
+|---|---|---|---|---|
+| AirPlay 2 | `_airplay._tcp` + `_raop._tcp` | yes | yes | M1 |
+| Miracast / Wi-Fi Display | `_miracast._tcp` | yes | yes | M2 |
+| Google Cast | `_googlecast._tcp` | yes | yes | M2 |
+| DLNA / UPnP MediaRenderer | SSDP | no (audio and pictures) | yes | M2 |
+
+Every protocol can be switched on and off independently, and a disabled
+protocol is neither advertised nor bound to a socket.
+
+---
+
+## What PhairPlayRust does **not** do
+
+These are product boundaries, not open defects. They are stated with the same
+words in the requirements (`EXC-001` … `EXC-010` in
+[`REQUIREMENTS.md`](REQUIREMENTS.md)), in the acceptance records and in the
+user-facing documentation.
+
+- **FairPlay DRM content** (Apple TV+, Netflix, Disney+) is **not
+  decryptable**. FairPlay Streaming is Apple's DRM; no open-source receiver
+  can decrypt it without a licence from Apple. The *session* encryption of
+  the AirPlay mirroring path is a different mechanism and is not affected.
+- **Apple Music in-app audio** is protected on every AirPlay path. The
+  workaround is the system audio output of the sender.
+- **HDCP 2.x link protection** of Miracast is negotiated inside the WFD
+  handshake and enforced by the hardware. The receiver does not implement the
+  key exchange; a session that requires HDCP and that the platform cannot
+  protect is refused cleanly.
+- **Widevine and PlayReady** belong to the DRM framework of the device, not
+  to the receiver.
+- **No cloud, no remote streaming, no internet exposure.** The receiver is a
+  device on your local network.
+- **No transcode.** The receiver decodes what it advertised.
+- **A Google Cast application identifier is not invented.** The end-to-end
+  test of the Cast path needs an identifier that is registered with Google.
+
+The complete list is in the exclusion section of
+[`REQUIREMENTS.md`](REQUIREMENTS.md).
+
+---
+
+## Quickstart
+
+You need a stable Rust toolchain (the workspace pins `stable` in
+[`rust-toolchain.toml`](rust-toolchain.toml)) and nothing else for the core.
+
+```bash
+git clone https://github.com/mazer666/PhairPlayRust.git
+cd PhairPlayRust
+
+cargo build --workspace      # build every crate
+cargo test  --workspace      # run the whole test suite
+make check                   # format + lint + test + documentation check
+```
+
+The individual commands:
+
+| Command | What it does |
+|---|---|
+| `make help` | list the developer commands |
+| `make build` | `cargo build --workspace` |
+| `make test` | `cargo test --workspace` |
+| `make fmt` | `cargo fmt --all` |
+| `make lint` | `cargo clippy --workspace --all-targets -- -D warnings` |
+| `make docs` | `cargo doc --workspace --no-deps` |
+| `make docs-links` | check that every internal link of the documentation resolves |
+| `make check` | everything above that can fail a change |
+| `make clean` | remove the build artefacts |
+
+A newcomer who wants the reasoning behind the layout starts with
+[`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md).
+
+---
+
+## If you are new to coding: start here
+
+You do not need to understand the whole codebase before changing one thing.
+
+1. Read this file.
+2. Read [`WHERE_TO_CHANGE.md`](WHERE_TO_CHANGE.md) when you want to change
+   something specific — it names the right entry point for every kind of
+   change.
+3. Read [`ROADMAP.md`](ROADMAP.md) to understand what is being built now and
+   what comes later.
+4. Read [`REQUIREMENTS.md`](REQUIREMENTS.md) before changing behaviour.
+5. Read [`ARCHITECTURE.md`](ARCHITECTURE.md) before changing structure,
+   dependencies or technical boundaries.
+6. Read [`AGENTS.md`](AGENTS.md) if you are using a coding agent.
+7. Run `make check` before you hand your change over.
+
+### Golden rule
+
+**Do not "just make it work" by bypassing the architecture, the requirements
+or the tests.**
+
+If a requirement is wrong, change the requirement through the documented
+change process first. If an architecture rule blocks a correct
+implementation, the rule is wrong — and it is changed in
+`docs/design/BUILD-CONTRACT.md` first, through a change request.
+
+---
+
+## Repository map
+
+```text
+PhairPlayRust/
+├─ README.md                  ← Start here
+├─ ARCHITECTURE.md            ← Technical system design
+├─ ROADMAP.md                 ← Milestones and gates
+├─ REQUIREMENTS.md            ← Product requirements (source of truth)
+├─ AGENTS.md                  ← Rules and roles for coding agents
+├─ PROJECT_MANAGEMENT.md      ← How the project is managed
+├─ QUALITY.md                 ← Acceptance and quality model
+├─ WHERE_TO_CHANGE.md         ← "I want to change X — where do I go?"
+├─ GLOSSARY.md                ← The terms of the protocols
+├─ CONTRIBUTING.md            ← Contribution rules / DCO
+├─ CHANGELOG.md               ← Human-readable project changes
+├─ Makefile                   ← The developer commands
+├─ VERSION                    ← The version of the workspace
+│
+├─ project/project.yaml       ← Machine-readable project state
+├─ config/                    ← Central defaults, budgets and policy
+├─ docs/                      ← Detailed living documentation
+├─ scripts/                   ← Developer and validation helpers
+│
+├─ apps/                      ← Native apps and the dashboard (planned: M2, M3)
+├─ core/phairplay-core/       ← The shared Rust core
+├─ engines/                   ← The protocol state machines
+├─ formats/                   ← The wire and media codecs
+├─ platform/phairplay-ffi/    ← The UniFFI bridge to the native shells
+└─ tests/                     ← Cross-crate and corpus suites
+```
+
+---
+
+## Central configuration rule
+
+Defaults, limits and policy must not be scattered through the codebase.
+
+They belong under [`config/`](config/README.md), with a typed model in the
+core that corresponds to them:
+
+| File | Owns |
+|---|---|
+| [`config/app-defaults.toml`](config/app-defaults.toml) | the user-visible default behaviour |
+| [`config/performance-budgets.toml`](config/performance-budgets.toml) | the latency, throughput, resource, queue and input limits |
+| [`config/security-policy.toml`](config/security-policy.toml) | the threat model, the privacy promise and the parser rules |
+
+User-specific secrets never belong there. Pairing keys, PINs and
+certificates belong into the secure storage of the platform.
+
+---
+
+## Documentation is part of the product
+
+**A code change is not finished if the documentation became wrong.**
+
+Every change asks:
+
+- Does a requirement change?
+- Does the architecture change?
+- Does a default, a limit or a policy change?
+- Does the milestone or the state change?
+- Does `WHERE_TO_CHANGE.md` need an update?
+
+If yes, the documentation is updated **in the same change**. The rule and the
+mechanics live in [`docs/DOCUMENTATION_POLICY.md`](docs/DOCUMENTATION_POLICY.md).
+
+Every number and every rule is written down **exactly once**. The other
+documents link to it. A budget that is written in two places is a budget that
+drifts.
+
+---
+
+## Current roadmap
+
+1. **M0 — Foundation** *(in progress)* — the workspace, the shared core, the
+   build contract, the central configuration, the documentation landscape, the
+   gate
+2. **M1 — AirPlay 2 receiver** *(planned)* — the format layer, the discovery,
+   the AirPlay engine, the evidence
+3. **M2 — Protocol breadth and local control** *(planned)* — Google Cast,
+   Miracast, the DLNA renderer, the platform bridge, the local dashboard
+4. **M3 — Native shells** *(planned)* — the Android and the macOS application
+5. **M4 — Hardening, interoperability and release readiness** *(planned)*
+
+The gates of every milestone are in [`ROADMAP.md`](ROADMAP.md), the quality
+model in [`QUALITY.md`](QUALITY.md).
+
+---
+
+## Documentation index
+
+| Document | What it is for |
+|---|---|
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | The layers, the crate graph, the data flow of every protocol, the threading model, the error and event flow |
+| [`REQUIREMENTS.md`](REQUIREMENTS.md) | Every requirement with an identifier, a *How to Verify* and a *Pass Condition* |
+| [`ROADMAP.md`](ROADMAP.md) | The milestones, the gates, the state |
+| [`QUALITY.md`](QUALITY.md) | The six dimensions of the acceptance model, the severity levels |
+| [`AGENTS.md`](AGENTS.md) | The roles, the universal rules, the review matrix, the definition of done |
+| [`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md) | The sources of truth, the change requests, the ADRs, the archive |
+| [`WHERE_TO_CHANGE.md`](WHERE_TO_CHANGE.md) | The navigation for a newcomer |
+| [`GLOSSARY.md`](GLOSSARY.md) | AirPlay, RAOP, FairPlay, WFD, SSDP, GENA, SDP, RTP, DACP, UniFFI and the rest |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | The DCO, the checklist before a change |
+| [`CHANGELOG.md`](CHANGELOG.md) | What changed, in the order a human reads it |
+| [`docs/README.md`](docs/README.md) | The index of the detailed living documentation |
+| [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md) | The guide for a newcomer |
+| [`docs/BEST_IN_CLASS.md`](docs/BEST_IN_CLASS.md) | The measurable quality grid |
+| [`docs/DOCUMENTATION_POLICY.md`](docs/DOCUMENTATION_POLICY.md) | The same-change rule and the single-source rule |
+| [`docs/design/BUILD-CONTRACT.md`](docs/design/BUILD-CONTRACT.md) | The binding interfaces between the crates |
+
+The licence inventory of the third-party components is
+[`THIRD_PARTY.md`](THIRD_PARTY.md). The user-facing security and privacy
+statements arrive with the M4 gate and are listed in the roadmap of this
+file.
+
+---
+
+## License
+
+PhairPlayRust is licensed under the **AGPL-3.0-or-later**. See
+[`LICENSE`](LICENSE) and [`REUSE.toml`](REUSE.toml).
+
+External contributions use the **Developer Certificate of Origin (DCO)** rather
+than a CLA. Contributors retain their copyright. See
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+Third-party dependencies keep their own licenses and notices. The inventory of
+the workspace is [`THIRD_PARTY.md`](THIRD_PARTY.md).

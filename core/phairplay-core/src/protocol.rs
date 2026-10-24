@@ -83,7 +83,10 @@ impl ProtocolKind {
     /// Whether this protocol carries a video stream.
     #[must_use]
     pub const fn carries_video(self) -> bool {
-        matches!(self, ProtocolKind::AirPlay | ProtocolKind::Miracast | ProtocolKind::Cast)
+        matches!(
+            self,
+            ProtocolKind::AirPlay | ProtocolKind::Miracast | ProtocolKind::Cast
+        )
     }
 
     /// Whether this protocol carries an audio stream.
@@ -235,8 +238,14 @@ mod tests {
 
     #[test]
     fn protocol_kind_accepts_common_aliases() {
-        assert_eq!("WFD".parse::<ProtocolKind>().unwrap(), ProtocolKind::Miracast);
-        assert_eq!("googlecast".parse::<ProtocolKind>().unwrap(), ProtocolKind::Cast);
+        assert_eq!(
+            "WFD".parse::<ProtocolKind>().unwrap(),
+            ProtocolKind::Miracast
+        );
+        assert_eq!(
+            "googlecast".parse::<ProtocolKind>().unwrap(),
+            ProtocolKind::Cast
+        );
         assert_eq!("upnp".parse::<ProtocolKind>().unwrap(), ProtocolKind::Dlna);
         assert!("nonsense".parse::<ProtocolKind>().is_err());
     }

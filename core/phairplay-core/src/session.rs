@@ -224,7 +224,7 @@ impl SessionRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::media::{AudioFormat, AudioCodec};
+    use crate::media::{AudioCodec, AudioFormat};
 
     fn snapshot(protocol: ProtocolKind) -> SessionSnapshot {
         SessionSnapshot {
@@ -297,6 +297,9 @@ mod tests {
             session: session.id,
             format: format.clone(),
         });
-        assert_eq!(registry.get(ProtocolKind::Dlna).unwrap().audio, Some(format));
+        assert_eq!(
+            registry.get(ProtocolKind::Dlna).unwrap().audio,
+            Some(format)
+        );
     }
 }

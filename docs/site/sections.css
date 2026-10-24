@@ -1,0 +1,259 @@
+/*
+ * PhairPlayRust — the sections of the static landing page.
+ *
+ * WHY: the promises, the protocol matrix, the architecture figure, the
+ * quickstart and the threat model are the substance of the page. They get
+ * their own file so that the shell stays readable.
+ * HOW: the colours come from the token block of site.css; nothing here
+ * introduces a second palette.
+ */
+
+/* ── Promise cards ──────────────────────────────────────────────────── */
+
+.promises {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+}
+
+.promise {
+  padding: var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.promise__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.promise__title::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.promise p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* ── Protocol matrix ────────────────────────────────────────────────── */
+
+.matrix {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+
+th {
+  color: var(--text-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+td {
+  color: var(--text-muted);
+}
+
+td:first-child {
+  color: var(--text);
+  font-weight: 560;
+  white-space: nowrap;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.matrix__note {
+  margin-top: var(--space-3);
+  color: var(--text-subtle);
+  font-size: var(--text-sm);
+}
+
+/* ── Figure ─────────────────────────────────────────────────────────── */
+
+.figure {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.figure img {
+  width: 100%;
+  height: auto;
+}
+
+.figure figcaption {
+  margin-top: var(--space-4);
+  color: var(--text-subtle);
+  font-size: var(--text-sm);
+}
+
+/* ── Code ───────────────────────────────────────────────────────────── */
+
+.code {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  overflow-x: auto;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.code .comment {
+  color: var(--text-subtle);
+}
+
+.steps {
+  counter-reset: step;
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+.step h3 {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.step h3::before {
+  counter-increment: step;
+  content: counter(step, decimal-leading-zero) " ";
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.step p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* ── Lists and callouts ─────────────────────────────────────────────── */
+
+.facts-list {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.facts-list li {
+  display: grid;
+  grid-template-columns: 1.2rem 1fr;
+  gap: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.facts-list li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-top: 0.55em;
+  background: var(--success);
+  border-radius: 50%;
+}
+
+.callout {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.callout strong {
+  color: var(--text);
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+
+.site-footer {
+  padding: var(--space-7) 0 var(--space-8);
+  border-top: 1px solid var(--border);
+  color: var(--text-subtle);
+  font-size: var(--text-sm);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.site-footer a {
+  color: var(--text-muted);
+}
+
+/* ── Narrow viewports ───────────────────────────────────────────────── */
+
+@media (max-width: 48rem) {
+  .site-nav {
+    display: none;
+  }
+
+  .site-header__inner,
+  .wrap,
+  .site-footer__inner {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .lang {
+    margin-left: auto;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .hero {
+    padding-top: var(--space-8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -12,6 +12,7 @@ members = [
     "formats/aac",
     "formats/alac",
     "platform/phairplay-ffi",
+    "apps/web",
 ]
 
 [workspace.package]

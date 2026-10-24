@@ -5,8 +5,8 @@
 //! are more useful than a spinner, and they are the evidence an acceptance
 //! document needs.
 
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// A snapshot of the counters of one session.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]

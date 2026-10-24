@@ -56,7 +56,9 @@
 //! assert!(status.state.accepts_peers());
 //! ```
 
-#![doc(html_logo_url = "https://raw.githubusercontent.com/mazer666/PhairPlayRust/main/docs/assets/phairplayrust-logo.svg")]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/mazer666/PhairPlayRust/main/docs/assets/phairplayrust-logo.svg"
+)]
 
 pub mod build_info;
 pub mod capabilities;

@@ -11,7 +11,6 @@
 //! which adds the protocol-specific variants. The FFI bridge never sees an
 //! engine error directly — it sees [`CoreError::Engine`].
 
-
 /// The root error type of the PhairPlayRust core.
 #[derive(Debug, thiserror::Error)]
 pub enum CoreError {
@@ -355,7 +354,10 @@ mod tests {
     #[test]
     fn error_codes_are_stable() {
         // These numbers are part of the UniFFI contract. Changing one is a breaking change.
-        assert_eq!(ErrorCode::from(ErrorKind::InvalidInput), ErrorCode::InvalidInput);
+        assert_eq!(
+            ErrorCode::from(ErrorKind::InvalidInput),
+            ErrorCode::InvalidInput
+        );
         assert_eq!(ErrorCode::InvalidInput.as_i32(), 1);
         assert_eq!(ErrorCode::Internal.as_i32(), 9);
     }

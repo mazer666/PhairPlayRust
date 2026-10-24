@@ -1,0 +1,114 @@
+# Central Security & Privacy Policy Defaults (Documentation Baseline 0.1)
+#
+# The single documented owner of the security and privacy policy of
+# PhairPlayRust. The typed mirror of the parts that belong to the runtime
+# lives in the Rust core:
+#   core/phairplay-core/src/config.rs  ->  AppConfig, LimitsConfig
+# The values that describe a policy and not a runtime knob stay here and are
+# enforced by the engines, the format crates and the platform bridge.
+
+# ── The threat model ─────────────────────────────────────────────────────────
+# The attacker of PhairPlayRust is normally a device in the same local
+# network. Every byte that arrives over a socket is untrusted.
+[threat_model]
+treat_all_network_input_as_untrusted = true
+# The receiver is reachable from the local network by design. It is never
+# reachable from the internet, and it never initiates a connection to a host
+# outside the local subnet.
+local_network_only = true
+# The receiver answers only to peers of the local subnet. A peer address
+# outside the permitted subnet is rejected.
+reject_peers_outside_local_subnet = true
+
+# ── Privacy ──────────────────────────────────────────────────────────────────
+[privacy]
+# The product promise: no telemetry, no analytics, no crash upload, no account.
+enable_telemetry = false
+enable_analytics = false
+enable_automatic_crash_upload = false
+require_account = false
+# The receiver never opens an outbound connection to a host outside the local
+# subnet.
+allow_outbound_connections_except_local_subnet = false
+# Sender names and IP addresses are masked in every log line.
+mask_device_names = true
+mask_ip_addresses = true
+# The content of a stream never reaches the log.
+log_stream_content = false
+
+# ── Parsers ──────────────────────────────────────────────────────────────────
+# A parser rejects; it never repairs. A malformed message is an error, not
+# something to guess at.
+[parsers]
+# The maximum nesting depth of a parsed document. A document that is deeper is
+# rejected instead of being parsed on an unbounded stack.
+max_recursion_depth = 32
+# A property list that declares an object graph with a cycle is rejected.
+reject_cyclic_references = true
+# A property list whose declared size exceeds the message limit is rejected
+# before a single byte is allocated.
+reject_oversized_declared_length = true
+# A length field in a parsed structure is never used unchecked as an
+# allocation size.
+reject_unvalidated_length_fields = true
+
+# ── XML / SOAP ───────────────────────────────────────────────────────────────
+# The DLNA control plane carries XML. External entities are a denial of
+# service and an information leak; they are switched off.
+[xml]
+allow_doctype = false
+allow_external_entities = false
+allow_network_entity_resolution = false
+max_entity_expansion = 0
+
+# ── Callbacks and redirects ──────────────────────────────────────────────────
+# A GENA callback points at an address that the receiver then connects to.
+# That is a server-side request forgery vector and is therefore restricted to
+# the local subnet.
+[callbacks]
+# Only private IPv4 addresses inside the local subnet are accepted.
+allowed_cidr = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+# Addresses that are refused even when they are inside an allowed range.
+blocked_addresses = ["169.254.169.254", "127.0.0.1", "::1", "0.0.0.0"]
+# A callback URL must use one of these schemes.
+allowed_schemes = ["http", "https"]
+
+# ── Pairing ──────────────────────────────────────────────────────────────────
+[pairing]
+# A PIN is not required by default. The product promise is that a plain home
+# network works without ceremony; the price is that every device in the local
+# network may stream. The pairing attempts are counted and a sender that
+# fails repeatedly is locked out.
+#
+# The two values of this policy are owned elsewhere and are not repeated here:
+#   * whether a PIN is required at all
+#     -> config/app-defaults.toml, `protocols.<name>.require_pin`
+#   * how many failed attempts are tolerated before the lockout
+#     -> config/performance-budgets.toml, `limits.max_pairing_attempts`
+# The rule that a failed attempt is counted and that a repeated failure leads
+# to a lockout is stated in REQUIREMENTS.md (FR-023, NFR-SEC-004).
+#
+# The pairing material is stored with owner-only permissions.
+store_permissions = "0600"
+
+# ── Transport encryption ─────────────────────────────────────────────────────
+[transport]
+# The FairPlay session key of AirPlay is used to decrypt the stream, not to
+# protect the control plane. The control plane itself is plaintext RTSP.
+# A transport-level TLS listener is part of the Google Cast engine, because the
+# Cast protocol requires it.
+cast_control_plane_tls = true
+airplay_control_plane_tls = false
+
+# ── Copy protection ──────────────────────────────────────────────────────────
+# HDCP and FairPlay DRM are enforced by the sender and by the hardware. The
+# receiver does not implement them and does not pretend to implement them.
+# The product boundaries are stated in REQUIREMENTS.md: EXC-003 (HDCP) and
+# EXC-001 (FairPlay DRM). The two switches of the section below are their
+# machine-readable form.
+[copy_protection]
+# The receiver answers a session that requires HDCP with a clean rejection
+# instead of accepting a stream it cannot protect.
+reject_sessions_requiring_hdcp = true
+# The receiver never claims to decrypt FairPlay DRM content.
+supports_fairplay_drm = false

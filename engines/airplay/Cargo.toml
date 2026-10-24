@@ -9,10 +9,34 @@ rust-version.workspace = true
 
 [dependencies]
 phairplay-core = { path = "../../core/phairplay-core" }
-phairplay-plist = { path = "../../formats/plist" }
-phairplay-h264 = { path = "../../formats/h264" }
-phairplay-aac = { path = "../../formats/aac" }
-phairplay-alac = { path = "../../formats/alac" }
+
+# Async runtime and the engine trait.
+async-trait = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "net", "io-util", "sync", "time", "macros"] }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+
+# Wire formats: Base64 for the SDP attributes, SHA-2 for the key derivations.
+base64 = { workspace = true }
+sha2 = { workspace = true }
+rand = { workspace = true }
+
+# Pairing: Ed25519 signatures and X25519 key agreement.
+ed25519-dalek = { workspace = true }
+x25519-dalek = { workspace = true }
+
+# FairPlay / RAOP transport crypto and the legacy AirPort RSA key unwrap.
+aes = { workspace = true }
+ctr = { workspace = true }
+cbc = { workspace = true }
+rsa = { workspace = true }
+
+# The legacy AirPlay protocols (SRP-6a pairing, OAEP key unwrap, the PIN key
+# exchange) are specified with SHA-1 and AES-GCM. Both crates are already in
+# the dependency tree of the workspace (rsa pulls in sha1); they are declared
+# here directly because the workspace does not list them yet.
+sha1 = "0.10"
+aes-gcm = "0.10"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["test-util"] }

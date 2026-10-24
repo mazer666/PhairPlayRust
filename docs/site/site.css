@@ -1,0 +1,323 @@
+/*
+ * PhairPlayRust — the style of the static landing page.
+ *
+ * WHAT: the design of docs/site — a single dark page that introduces the
+ * project.
+ * WHY: the page has to work without a script, without a network and without
+ * a build step: it is read on GitHub, in a browser and in a text mode.
+ * HOW: plain HTML and CSS, one accent, hairline lines, system fonts.
+ *
+ * NOTE: the palette is the same as the one of the dashboard
+ * (apps/web/assets/theme.css). The two files are the same values in two
+ * places because the dashboard is served by the Rust process from
+ * apps/web, while this page is served as a static file from docs/site.
+ * A change to one belongs to the other.
+ */
+
+:root {
+  color-scheme: dark;
+
+  --surface: #0a0b10;
+  --surface-raised: #12141c;
+  --surface-sunken: #07080c;
+  --border: #232838;
+  --border-strong: #6a7186;
+  --text: #e9ecf4;
+  --text-muted: #a7aec0;
+  --text-subtle: #838ba1;
+  --accent: #a78bfa;
+  --accent-strong: #6d4df0;
+  --accent-soft: rgba(167, 139, 250, 0.16);
+  --success: #3ecf8e;
+  --on-accent: #ffffff;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.375rem;
+  --text-xl: clamp(1.75rem, 1.1rem + 2.6vw, 3rem);
+  --text-hero: clamp(2.25rem, 1.2rem + 4.4vw, 4rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 6rem;
+
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 999px;
+  --duration-base: 200ms;
+  --ease: cubic-bezier(0.2, 0.6, 0.25, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+figure,
+pre {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--duration-base) var(--ease);
+}
+
+a:hover {
+  border-bottom-color: var(--accent);
+}
+
+code,
+pre,
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+
+.wrap {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.section {
+  padding: var(--space-8) 0;
+  border-top: 1px solid var(--border);
+}
+
+.section__head {
+  max-width: 46rem;
+  margin-bottom: var(--space-6);
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.lead {
+  color: var(--text-muted);
+  font-size: var(--text-md);
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-5);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.brand:hover {
+  border-bottom-color: transparent;
+}
+
+.brand img {
+  width: 28px;
+  height: 28px;
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-5);
+  margin-left: auto;
+  font-size: var(--text-sm);
+}
+
+.site-nav a {
+  color: var(--text-muted);
+}
+
+.site-nav a:hover {
+  color: var(--text);
+  border-bottom-color: var(--border-strong);
+}
+
+.lang {
+  display: flex;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--border);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+}
+
+.lang a {
+  color: var(--text-subtle);
+}
+
+.lang a[aria-current="page"] {
+  color: var(--accent);
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────── */
+
+.hero {
+  padding: var(--space-9) 0 var(--space-8);
+  border-bottom: 1px solid var(--border);
+}
+
+.hero__title {
+  font-size: var(--text-hero);
+  font-weight: 620;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.hero__title span {
+  color: var(--accent);
+}
+
+.hero__lead {
+  max-width: 44rem;
+  margin-top: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-md);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  color: var(--on-accent);
+  background: var(--accent-strong);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 560;
+  transition: filter var(--duration-base) var(--ease);
+}
+
+.button:hover {
+  border-bottom-color: var(--accent);
+  filter: brightness(1.12);
+}
+
+.button--ghost {
+  color: var(--text);
+  background: transparent;
+  border-color: var(--border-strong);
+}
+
+.button--ghost:hover {
+  border-bottom-color: var(--border-strong);
+  filter: none;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-6);
+  color: var(--text-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
