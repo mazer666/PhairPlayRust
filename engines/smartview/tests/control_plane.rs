@@ -120,9 +120,7 @@ async fn the_channel_under_its_own_name_opens_and_greets_the_sender() {
         .await
         .expect("the connection opens");
     stream
-        .write_all(
-            upgrade_request_for_channel("samsung.remote.control").as_bytes(),
-        )
+        .write_all(upgrade_request_for_channel("samsung.remote.control").as_bytes())
         .await
         .expect("the upgrade is sent");
     stream.flush().await.expect("the upgrade is flushed");

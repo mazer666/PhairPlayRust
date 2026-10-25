@@ -51,9 +51,7 @@ mod types;
 pub use channel::{Frame, accept_key};
 pub use message::{ChannelEvent, ChannelMessage};
 pub use reader::read_request;
-pub use routes::{
-    RouteOutcome, is_channel_path, is_websocket_upgrade, route, upgrade_response,
-};
+pub use routes::{RouteOutcome, is_channel_path, is_websocket_upgrade, route, upgrade_response};
 pub use server::ApiServer;
 pub use types::{ApiLimits, ApiRequest, ApiResponse, Method};
 
@@ -140,6 +138,10 @@ async fn handle_connection(stream: TcpStream, peer: SocketAddr, context: Arc<Api
                 token: session.id.to_string(),
             };
             if let Err(error) = channel::write_event(reader.get_mut(), &event).await {
+                // WHY the reason is logged: the greeting of the channel did
+                // not reach the sender, and the reason of that is the only
+                // thing that tells a user why the phone does not connect.
+                tracing::warn!(reason = %error, "the greeting of the channel could not be sent");
                 context.sessions.close(session.id);
                 report_ended(&context, session.id, false).await;
                 return;

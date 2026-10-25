@@ -66,8 +66,10 @@ fn a_method_without_a_key_is_no_key_press() {
         .expect("the method must be read");
     assert_eq!(message.remote_control_key(), None);
 
-    let other = ChannelMessage::parse(r#"{"method":"ms.something.else","params":{"DataOfCmd":"KEY_POWER"}}"#)
-        .expect("the method must be read");
+    let other = ChannelMessage::parse(
+        r#"{"method":"ms.something.else","params":{"DataOfCmd":"KEY_POWER"}}"#,
+    )
+    .expect("the method must be read");
     assert_eq!(other.remote_control_key(), None);
 }
 

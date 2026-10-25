@@ -347,8 +347,29 @@ this decision:**
 |---|---|---|
 | Android | `./gradlew :app:compileDebugKotlin` | `BUILD SUCCESSFUL in 4m 48s` |
 | Android | `./gradlew :app:testDebugUnitTest` | **39 tests, 0 failures, 0 errors, 0 skipped** |
+| Android | `./gradlew :app:assembleRelease` | `BUILD SUCCESSFUL in 12m 39s` — the APK is built |
 | macOS | `swift build` | `Build complete!` |
 | macOS | `swift test` | **102 tests, 0 failures** — the 101 of the kit and the new test of the checksum of the bindings |
+
+**The APK of the release is built and it carries what a television needs:**
+
+| What | The measurement |
+|---|---|
+| the package | `org.phairplay.receiver`, `versionName='0.3.0'`, `versionCode='1'` |
+| the architecture | `native-code: 'arm64-v8a'` — the library of the bridge is in the package: `lib/arm64-v8a/libphairplay_ffi.so` |
+| the launcher of the television | `leanback-launchable-activity: name='org.phairplay.receiver.MainActivity'` — the application appears in the list of the applications of a Google TV and of a Fire TV |
+| the permissions | nine, and **no** location and **no** microphone: `INTERNET`, `ACCESS_NETWORK_STATE`, `CHANGE_WIFI_MULTICAST_STATE`, `WAKE_LOCK`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `NEARBY_WIFI_DEVICES` (with `neverForLocation`), `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE` |
+| the signature | `apksigner verify` → **Verifies**, the scheme **v2**, one signer — the RSA key of 4096 bits of the test store |
+| the target | `targetSdkVersion='35'`, `minSdkVersion='33'` |
+
+**The signature of the test store is not the signature of a release.** The
+key of a release belongs to the owner of the project and does not live in
+the repository; the build reads it from the machine (the properties
+`phairplay.signing.*` — see `apps/android/app/build.gradle.kts`). The APK of
+this measurement is signed with a **test key** that was made for the
+measurement and that signs nothing else. The signature of a release is the
+trigger of the beta in the release plan — and that trigger has **not**
+been reached, because the device test of §9 has not been run.
 
 The four places that the first version of this record named are the four
 places that carried the defect; they carry the repair now. The cause was
@@ -362,6 +383,11 @@ sender, a television, a device or a Mac. They are **NOT RUN**, and they are
 the limitation that travels with this acceptance. The SwiftUI part of the
 macOS application is still **NOT RUN**: the machine of this measurement has
 Swift for Linux and no macOS SDK.
+
+**The APK that is built here is not a release.** It is signed with a test
+key, it was never installed on a device, and the application was never
+started. It is the proof that the shell **can** be built for a television —
+not the proof that it **works** on one.
 
 **What the record does accept:**
 

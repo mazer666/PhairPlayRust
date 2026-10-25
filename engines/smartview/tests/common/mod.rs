@@ -180,12 +180,18 @@ pub async fn read_frame(stream: &mut tokio::net::TcpStream) -> Vec<u8> {
     let length = match header[1] & 0x7F {
         126 => {
             let mut extended = [0u8; 2];
-            stream.read_exact(&mut extended).await.expect("the length is read");
+            stream
+                .read_exact(&mut extended)
+                .await
+                .expect("the length is read");
             u16::from_be_bytes(extended) as usize
         }
         127 => {
             let mut extended = [0u8; 8];
-            stream.read_exact(&mut extended).await.expect("the length is read");
+            stream
+                .read_exact(&mut extended)
+                .await
+                .expect("the length is read");
             u64::from_be_bytes(extended) as usize
         }
         short => short as usize,

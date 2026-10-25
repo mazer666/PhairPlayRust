@@ -1260,8 +1260,8 @@ sender is not disturbed, and the status of the protocol reports one peer.
 
 ### FR-107 — The receiver never claims a picture that it cannot deliver
 The state of the Smart View protocol reports the session of the sender, but
-the receiver never claims to deliver a picture over the channel: the message
-format of the channel is proprietary and not implemented. The limit is
+the receiver never claims to deliver a picture over the channel: the
+transport of the picture is proprietary and not implemented. The limit is
 written down — in the requirements, in the glossary, in the architecture and
 in the user-facing documentation — with the same words.
 
@@ -1271,6 +1271,40 @@ the entry of the glossary.
 **Pass Condition:** No document, no status and no log claims that a picture
 of a Galaxy device flows; the limit is stated with the same words in every
 place that names the protocol.
+
+### FR-108 — The channel of a sender is served under the name that it gives
+The client library of Samsung builds the URL of the channel from the base URL
+of the service and the name of the channel — the remote control of a
+television is `samsung.remote.control`, and the URL is
+`ws://<host>/api/v2/channels/<name>`. The receiver therefore serves **every**
+name under that prefix and not one fixed path, and it greets the sender with
+the event `ms.channel.connect` — the event that the library waits for before
+it says anything on the channel.
+
+**How to Verify:** The test `the_channel_under_its_own_name_opens_and_greets_the_sender`
+of the crate `engines/smartview` — over a real connection, with the greeting
+read out of the socket.
+**Pass Condition:** A sender that names its channel finds the channel, and the
+first frame that it reads is the event `ms.channel.connect` with the token of
+the session.
+
+### FR-109 — The receiver understands the keys of the remote control
+The keys of the remote control of a television travel as the method
+`ms.remote.control` on the channel, with the key in the parameter
+`DataOfCmd` — for example `KEY_POWER`. The receiver reads the method and
+hands the key to the platform, which decides what the key does. The messages
+of the channel are JSON objects, and a message that the receiver does not
+know is ignored — a sender that sends one unknown message has not broken the
+channel.
+
+**How to Verify:** The test `the_key_of_the_remote_control_is_found` and the
+test `a_method_without_a_key_is_no_key_press` of the crate
+`engines/smartview`, and the test
+`a_key_press_of_the_remote_control_reaches_the_sender` over a real
+connection.
+**Pass Condition:** The key of a method `ms.remote.control` is found, a
+method without that parameter is not a key press, and the channel stays open
+when the receiver reads a key.
 
 ---
 
@@ -1327,19 +1361,47 @@ The end-to-end test of the Google Cast path needs an application identifier
 that is registered with Google. The project does not ship one and does not
 fake one.
 
-### EXC-011 — The message format of the Samsung Smart View channel
-The channel of the Samsung Smart View protocol carries its messages in a
-format that Samsung does not document; the Smart View SDK realises it as
-closed `.jar` libraries. The **discovery** of a receiver and the **handshake**
-of the sender are implemented and covered by tests; **the content of the
-channel is not implemented**. A Galaxy device finds the receiver, connects to
-it and establishes the channel — but no picture flows over it yet.
+### EXC-011 — The picture of the screen of a Galaxy device
+
+**WHAT is excluded:** the transport of the **picture of the screen** of a
+Galaxy device to the receiver. The format of that transport is proprietary
+and Samsung does not document it; the Smart View SDK realises it as closed
+`.jar` libraries. A receiver therefore **finds** the sender, **connects** to
+it, **holds** the channel open and **understands** what travels on it — but
+no picture of the screen flows over it.
+
+**WHAT is NOT excluded — and is implemented:**
+
+- the **discovery** of the receiver and the **announcement** of it,
+- the **description document** and the **API** below `/api/v2/`,
+- the **handshake** of the sender,
+- the **channel** itself under the name that the sender gives it —
+  `ws://<host>/api/v2/channels/<name>`, which is the URL that the client
+  library of Samsung builds,
+- the **events** of the channel — `ms.channel.connect`, `ms.channel.ready`,
+  `ms.channel.unauthorized` and the heartbeat `__ping` — as the JSON
+  objects that the client library expects,
+- the **keys of the remote control** — the method `ms.remote.control` with
+  its parameter `DataOfCmd`, for example `KEY_POWER`.
+
+**WHY the exclusion is narrower than it was.** The first version of this
+document excluded "the message format of the channel". That was too broad:
+the messages of the channel are JSON objects with an `event` or a `method`
+and a `data` or a `params`, and the names of the events and the methods are
+observable on the network and are the ones the client library of Samsung
+uses. A proprietary format is not an unimplementable one — the Miracast
+receiver, the Google Cast receiver and the AirPlay receiver of this project
+are all implementations of formats that nobody documents either. The
+exclusion therefore names **the one thing** that is not implemented: the
+picture of the screen.
 
 This is a limit of the format, not a DRM: Smart View is an open feature of
 the Galaxy devices, and nothing in this project invents a restriction that
-the protocol does not have. The limit stays until the format is documented by
-Samsung or until another implementation exists under a licence that allows
-the port. A format that nobody documents is not guessed.
+the protocol does not have. The limit stays until the format is documented
+by Samsung, until another implementation exists under a licence that allows
+the port, or until the observations of the transport are complete enough to
+implement it as a clean-room implementation from the documentation of the
+observations.
 
 ---
 

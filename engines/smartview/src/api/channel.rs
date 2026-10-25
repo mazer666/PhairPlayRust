@@ -291,10 +291,7 @@ pub async fn hold_channel_with(
 ///
 /// # Errors
 /// Returns [`SmartViewError`] when the frame cannot be written.
-pub async fn write_text_frame(
-    writer: &mut TcpStream,
-    text: &str,
-) -> Result<(), SmartViewError> {
+pub async fn write_text_frame(writer: &mut TcpStream, text: &str) -> Result<(), SmartViewError> {
     let payload = text.as_bytes();
     let mut frame = Vec::with_capacity(payload.len() + 10);
     frame.push(0x80 | OPCODE_TEXT);

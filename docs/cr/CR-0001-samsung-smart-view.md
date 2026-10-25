@@ -1,6 +1,6 @@
 # CR-0001 — Samsung Smart View as the fifth protocol
 
-**Status:** implemented
+**Status:** implemented — amended on 2026-10-25, see "The amendment" below
 **Date:** 2026-10-24
 **Proposer role:** product and requirements role
 **Reviewer roles:** Rust architect, Rust QA engineer, documentation role
@@ -115,9 +115,43 @@ The milestones M0 to M4 are not changed by this request.
 | The port of the API collides with another service of the device | low | the port is owned by `config::ports`, and the profile of the device can switch the protocol off |
 | The exclusion is read as "the feature is broken" | medium | the wording of `EXC-011` says what is implemented and what is not, in the same sentence |
 
+## The amendment (2026-10-25)
+
+The first version of this request said that the **message format** of the
+channel is proprietary and that it is therefore not implemented. That was too
+broad, and the exclusion `EXC-011` was narrowed with it.
+
+The messages of the channel are **JSON objects** with an `event` or a
+`method` and a `data` or a `params`. The names of the events and the methods
+are observable on the network, and they are the ones that the client library
+of Samsung uses. The URL of the channel is built by that library as
+`ws://<host>/api/v2/channels/<name>` — the receiver served a fixed path
+instead and was therefore **not found** by a sender that names its channel.
+
+The amendment delivers:
+
+- the channel under **every** name under `/api/v2/channels/` (FR-108),
+- the greeting `ms.channel.connect` and the events `ms.channel.ready`,
+  `ms.channel.unauthorized` and the heartbeat `__ping` (FR-108),
+- the **keys of the remote control** — the method `ms.remote.control` with
+  the key in the parameter `DataOfCmd` (FR-109).
+
+**What stays excluded** is now exactly one thing: the **transport of the
+picture of the screen** of a Galaxy device (`EXC-011`).
+
+The reasoning is the same as for every other protocol of this project: a
+proprietary format is not an unimplementable one. The Miracast receiver, the
+Google Cast receiver and the AirPlay receiver are implementations of formats
+that nobody documents either — they were written from the observation of the
+network.
+
 ## Decision
 
 **Accepted and implemented** on 2026-10-24 by the product role, after the
 review of the architect and of the QA engineer. The engine is delivered; the
 acceptance record of the milestone M5 and the device test with a Galaxy
 device are still open and are carried by the milestone.
+
+**Amended on 2026-10-25:** the exclusion of the message format is narrowed to
+the transport of the picture, and the channel is served under the name that
+the sender gives it.

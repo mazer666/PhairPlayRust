@@ -851,6 +851,21 @@ binary is therefore **its own platform**, not the release as a whole.
 |---|---|---|---|
 | **v0.3.0-alpha.1** | M5 is delivered — the fifth protocol is in the vocabulary of the core, in the bridge and in the dashboard; the gate of the workspace is green; the acceptance record of M5 is written and names its open points | **Linux (x86-64, aarch64)**, **Windows (x86-64)** — the headless receiver | the source, the tarball of the receiver with its `systemd` unit and its compose file, the checksums |
 | **v0.3.0-beta.1** | the first device test of a shell is green — the shell is built from the tag, installed on a real device and operated with a remote control | **Android TV / Fire TV (arm64-v8a)** — the first binary of a shell — plus **Linux** and **Windows** | the APK with the native bridge, the headless receiver, the checksums |
+
+**What is already true on the way to the beta.** The APK of the Android
+shell **is built** — `BUILD SUCCESSFUL`, and the package carries the library
+of the bridge for `arm64-v8a`, the Leanback launcher of the television, the
+nine permissions without a location and without a microphone, and a
+signature. The build of the release is in the continuous integration, so a
+break of it stops the push.
+
+**What is missing for the beta is exactly one thing: the device.** The APK
+has never been installed, the application has never been started, and no
+sender has ever been seen. The script that closes this gap is the section
+2.5 of the device test plan — the path of a Galaxy phone, of a Google TV
+and of a Fire TV. The signature of the release is the second half: the key
+belongs to the owner of the project, and the measurement in the acceptance
+record uses a **test key** that signs nothing else.
 | **v0.3.0-beta.2** | the device test of the second shell is green | **macOS 13+ (Apple silicon)** — the `.app` — plus the artefacts of beta.1 | the signed and notarised `.app` in the `.dmg`, the headless receiver, the checksums |
 | **v0.4.0** | the picture of the Smart View channel flows — the message format is implemented, or the format stays an exclusion and the release says so | **Android**, **macOS**, **Linux**, **Windows** | the source, every binary, the checksums, the signatures |
 | **v1.0.0** | the milestones **M0 to M5** are `done`; every acceptance record is green; every budget is measured; the device test plan is complete | **Android**, **macOS**, **Linux**, **Windows** | the source, every binary, the checksums, the signatures, the signatures of the licences |

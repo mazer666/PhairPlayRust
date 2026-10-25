@@ -193,13 +193,37 @@ The "peers at a time" rule is data, not code: the
 - answers the routes of the API below `/api/v2/`,
 - performs the handshake of the sender and holds the channel open.
 
+### The channel
+
+The client library of Samsung builds the URL of the channel from the base URL
+of the service and the name of the channel:
+
+```text
+ws://192.168.1.10:8001/api/v2/channels/samsung.remote.control
+```
+
+The receiver serves **every** name under that prefix and greets the sender
+with the event `ms.channel.connect` — the event that the library waits for
+before it says anything. The messages on the channel are JSON objects with
+an `event` or a `method` and a `data` or a `params`:
+
+| Who | What | Example |
+|---|---|---|
+| the receiver | the greeting of the channel | `{"event":"ms.channel.connect","data":{"id":"…","token":"…"}}` |
+| the receiver | the refusal of the channel | `{"event":"ms.channel.unauthorized","data":{"reason":"…"}}` |
+| the sender | the readiness of the sender | `{"event":"ms.channel.ready","data":{}}` |
+| the sender | the heartbeat | `{"event":"__ping","data":{}}` |
+| the sender | a key of the remote control | `{"method":"ms.remote.control","params":{"Cmd":"Click","DataOfCmd":"KEY_POWER","Option":"false","TypeOfRemote":"SendRemoteKey"}}` |
+
 ### The limits
 
-- **The message format of the channel is not implemented** (`EXC-011`). The
-  framework of Samsung is proprietary and only documented through the closed
-  SDK. The receiver therefore **finds** the sender and **holds** the channel,
-  but it does not deliver a picture. The device appears in the list of a
-  Galaxy phone and connects — and no picture flows.
+- **The picture of the screen is not implemented** (`EXC-011`). The
+  *transport* of the picture is proprietary and only documented through the
+  closed SDK. Everything else on the channel is implemented — the receiver
+  finds the sender, holds the channel open, and understands the keys of the
+  remote control. A proprietary format is not an unimplementable one: the
+  Miracast, the Cast and the AirPlay receivers of this project are
+  implementations of formats that nobody documents either.
 - **One peer at a time.**
 - **The channel is not a DRM path.** The exclusion of FairPlay (`EXC-001`)
   does not apply to it.

@@ -224,6 +224,10 @@ jobs:
         run: |
           rustup toolchain install stable --profile minimal --no-self-update
           rustup default stable
+          # WHY the target of Android: the native bridge of the shell is
+          # built for `aarch64-linux-android`, and the build of the
+          # release of the APK needs it.
+          rustup target add aarch64-linux-android
           rustc --version
 
       # WHY the shared library before the tests of the macOS shell: the tests
@@ -268,10 +272,36 @@ jobs:
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
           sdkmanager --list_installed | grep -E "platforms;android-35|build-tools;35.0.0"
 
+      # WHY the NDK with the exact version: the plugin of Android wants
+      # `android.ndkVersion` 27.0.12077973, and a different version is
+      # refused with "NDK is not installed" — even when the directory of
+      # a neighbouring version is there. The build of the native bridge for
+      # the device needs it.
+      - name: The NDK of the build
+        run: |
+          SDK_ROOT=/usr/local/lib/android/sdk
+          export ANDROID_HOME="$SDK_ROOT"
+          export ANDROID_SDK_ROOT="$SDK_ROOT"
+          export PATH="$SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "ndk;27.0.12077973"
+          sdkmanager --list_installed | grep "ndk;27.0.12077973"
+
       - name: The unit tests of the Android shell
         run: |
           cd apps/android
           ./gradlew --no-daemon :app:testDebugUnitTest
+
+      # WHY the release build is built here: the debug variant does not
+      # build the native bridge for the device, and the release variant
+      # did — and it failed on three defects that the gate of the debug
+      # variant never saw. The release build is the build that a user
+      # installs, so the gate has to build it.
+      - name: The release build of the Android shell
+        run: |
+          cd apps/android
+          ./gradlew --no-daemon :app:assembleRelease
+          ls -la app/build/outputs/apk/release/
 
       - name: The summary of the run
         if: always()
@@ -280,7 +310,7 @@ jobs:
             echo "### The shells"
             echo ""
             echo "- The macOS shell: \`swift build\` and \`swift test\` in \`apps/macos\`"
-            echo "- The Android shell: \`./gradlew :app:testDebugUnitTest\` in \`apps/android\`"
+            echo "- The Android shell: \`./gradlew :app:testDebugUnitTest\` and \`:app:assembleRelease\` in \`apps/android\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ── the shape of the repository ───────────────────────────────────────────

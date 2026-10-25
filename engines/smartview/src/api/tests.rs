@@ -225,10 +225,9 @@ fn the_channel_of_a_sender_is_accepted_under_its_own_name() {
         RouteOutcome::Upgrade { key, .. } => {
             assert_eq!(key, "dGhlIHNhbXBsZSBub25jZQ==");
         }
-        RouteOutcome::Response(response) => panic!(
-            "the channel of the sender was refused: {}",
-            response.status
-        ),
+        RouteOutcome::Response(response) => {
+            panic!("the channel of the sender was refused: {}", response.status)
+        }
     }
 }
 
