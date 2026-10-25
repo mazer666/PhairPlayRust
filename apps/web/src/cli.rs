@@ -247,6 +247,18 @@ pub fn help() -> String {
          cannot start — because the device has no multicast, for example — is reported as an\n\
          error and does not stop the other protocols.\n\
          \n\
+         THE PROTOCOLS:\n\
+         Every protocol has its own switch in the configuration, and the switch of a protocol is\n\
+         the key `enabled` in its section:\n\
+         \n\
+         [protocols.dlna]\n\
+         enabled = false\n\
+         \n\
+         The sections are `airplay`, `miracast`, `cast`, `dlna` and `smartview`. The receiver\n\
+         starts every protocol whose switch is on, and the protocols that share a discovery\n\
+         port — DLNA and Smart View — are served by ONE listener, so switching one of them off\n\
+         does not take the other one with it.\n\
+         \n\
          The default interface is {LOOPBACK}: the dashboard is a local control panel. A\n\
          different interface puts the control panel of the receiver into the network, and the\n\
          program says so on stderr.\n\

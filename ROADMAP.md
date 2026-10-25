@@ -717,8 +717,8 @@ Framework* (MSF).
   answered. **Green** — the tests of the API of the engine.
 - The engine starts, advertises, stops and frees its ports. **Green** — the
   tests of the engine.
-- The protocol is among the protocols that the receiver starts. **NOT met in
-  the default configuration** — the run of the receiver shows it:
+- The protocol is among the protocols that the receiver starts. **Green** —
+  the run of the receiver shows it:
 
   ```text
   $ phairplay-web --profile generic --no-dashboard --port 7879
@@ -727,19 +727,26 @@ Framework* (MSF).
     Miracast         advertising
     Google Cast      advertising
     DLNA / UPnP      advertising
-    Samsung Smart View not started — … the SSDP socket could not be opened:
-    Address already in use (os error 98)
-  phairplay-web: 4 of 5 protocols are running; the reason of every failure
-  is in the status of the protocol.
+    Samsung Smart View advertising
+  phairplay-web: 5 of 5 protocols are running.
   ```
 
-  The reason is a conflict of two responders: the DLNA renderer and the
-  Smart View responder both want the SSDP port of the workspace, and the
-  renderer holds it first. With the renderer switched off, the fifth protocol
-  reaches the advertising state — the same run with
-  `[protocols.dlna] enabled = false` reports `Samsung Smart View
-  advertising`. **The conflict belongs to the engines, not to the
-  documentation; it is an open point for the owner.**
+  The conflict of the two responders is resolved. DLNA and Smart View are
+  both discovered over SSDP, and SSDP lives on one multicast group — and
+  **Linux allows only one socket per multicast group**. The receiver
+  therefore owns **one** listener for the whole process, and every service
+  registers itself with it
+  ([`ADR-0007`](docs/adr/ADR-0007-one-ssdp-listener-for-the-whole-receiver.md)).
+  The proof is in the network and not only in the status: a search for the
+  renderer is answered by the renderer and by nothing else, a search for the
+  framework is answered by the framework and by nothing else, and a search
+  for `ssdp:all` is answered by both — once per service type, as the UPnP
+  device architecture asks.
+
+  **The user decides which protocols run.** The switch of a protocol is the
+  key `enabled` in its section of the configuration, and switching one of
+  the two off keeps the other one running — the listener belongs to the
+  process, not to one protocol.
 
 ### Technical
 
@@ -801,6 +808,83 @@ Framework* (MSF).
   documents is not guessed.
 - No DRM of any kind: Smart View is an open feature of the Galaxy devices,
   not a DRM pipeline like FairPlay (`EXC-001`).
+
+---
+
+# The release plan
+
+> **What this section is:** the plan of the releases — when each kind of
+> release happens, what triggers it, and which platform ships a binary with
+> it.
+>
+> **The rule that governs this section:** a release is triggered by a
+> **state**, not by a date. The project has no deadline and promises none.
+> What is written here is the *condition* under which a release happens —
+> and a condition that is met can be checked by anybody, while a date can
+> only be waited for.
+>
+> **The process that owns the steps** is
+> [`docs/releasing/RELEASING.md`](docs/releasing/RELEASING.md). The process
+> says *how*; this section says *when* and *what*.
+
+## The three kinds of a release
+
+| Kind | What it means | What it ships |
+|---|---|---|
+| **Alpha** | the code of the milestones that are delivered is in the tree and the gate of the workspace is green; the device evidence is missing | the **source** and the **headless receiver** as a binary for the server platforms. **No** binary of a shell |
+| **Beta** | the shells build and their tests are green; the device tests of **some** milestones are run | the source, the headless receiver, and the **first binary of a shell** — the platform whose device test is green |
+| **Release** | every milestone the release carries has a green acceptance record, the device tests are run, and the budgets are measured | the source, the headless receiver, and the **binaries of every shell** whose device test is green |
+
+**A binary is never published before its own device test is green.** The
+rule of [`docs/releasing/RELEASING.md`](docs/releasing/RELEASING.md) §8: a
+binary that nobody checked is a promise that nobody made. The trigger of a
+binary is therefore **its own platform**, not the release as a whole.
+
+## The plan
+
+| Release | The trigger — the condition that has to be met | The platforms that ship a binary | The artefacts |
+|---|---|---|---|
+| **v0.3.0-alpha.1** | M5 is delivered — the fifth protocol is in the vocabulary of the core, in the bridge and in the dashboard; the gate of the workspace is green; the acceptance record of M5 is written and names its open points | **Linux (x86-64, aarch64)**, **Windows (x86-64)** — the headless receiver | the source, the tarball of the receiver with its `systemd` unit and its compose file, the checksums |
+| **v0.3.0-beta.1** | the first device test of a shell is green — the shell is built from the tag, installed on a real device and operated with a remote control | **Android TV / Fire TV (arm64-v8a)** — the first binary of a shell — plus **Linux** and **Windows** | the APK with the native bridge, the headless receiver, the checksums |
+| **v0.3.0-beta.2** | the device test of the second shell is green | **macOS 13+ (Apple silicon)** — the `.app` — plus the artefacts of beta.1 | the signed and notarised `.app` in the `.dmg`, the headless receiver, the checksums |
+| **v0.4.0** | the picture of the Smart View channel flows — the message format is implemented, or the format stays an exclusion and the release says so | **Android**, **macOS**, **Linux**, **Windows** | the source, every binary, the checksums, the signatures |
+| **v1.0.0** | the milestones **M0 to M5** are `done`; every acceptance record is green; every budget is measured; the device test plan is complete | **Android**, **macOS**, **Linux**, **Windows** | the source, every binary, the checksums, the signatures, the signatures of the licences |
+
+**Why the numbers move.** The version is not decided in advance — it is the
+consequence of the state. `0.3` is the first version after the `0.2`
+pre-release, `0.4` carries the picture of the fifth protocol, and `1.0` is
+the version that says: the milestones are done. The single owner of the
+number is [`VERSION`](VERSION) and the decision belongs to the owner
+([`docs/releasing/RELEASING.md`](docs/releasing/RELEASING.md) §4).
+
+## What each platform needs before it ships a binary
+
+The trigger above is the same for every platform — the device test of *that*
+platform. What differs is what has to be true before the binary can be
+built at all.
+
+| Platform | The binary | What has to be true before it is built | What has to be true before it is published |
+|---|---|---|---|
+| **Linux** (x86-64, aarch64) | `phairplay-web` — the headless receiver with the dashboard | the crate builds for the target with the pinned dependencies of [`Cargo.lock`](Cargo.lock) | the binary is started on the target, the protocols advertise themselves, and the install script of [`deploy/`](deploy/) works |
+| **Windows** (x86-64) | `phairplay-web.exe` | the crate builds for the Rust target of Windows on the 64-bit architecture; the service installation is written down | the binary is started on the target and the protocols advertise themselves |
+| **Android** (arm64-v8a, API 33+) | the APK with the native bridge of [`platform/phairplay-ffi/`](platform/phairplay-ffi/) | the NDK builds `libphairplay_ffi.so` for `aarch64-linux-android`; the Kotlin compiles; the unit tests are green | the APK is installed on a **Google TV or Fire TV**; a sender connects and a picture flows; the remote control operates the shell |
+| **macOS** (13+, Apple silicon) | the `.app` of [`apps/macos/`](apps/macos/) | the Swift package builds on a machine with the macOS SDK; the kit tests are green; the application is signed | the `.app` is notarised and opens on a Mac; a sender connects and a picture flows; the remote control operates the shell |
+
+**The binaries of a release are built from the tag**, with the pinned
+dependencies of [`Cargo.lock`](Cargo.lock) and with the toolchain that the
+tag names. The notes of the release name the toolchain of every binary — a
+binary without its toolchain is not reproducible.
+
+## What is not in the plan
+
+- **A binary of a shell without its device test.** The device test is the
+  trigger; there is no other path.
+- **A date.** The project promises no date and this plan promises none. The
+  condition is checked; the date is waited for.
+- **A binary of a platform whose milestone is not done.** The Linux shell is
+  a later track
+  ([`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md)); the headless receiver
+  on Linux is not that track.
 
 ---
 
