@@ -49,6 +49,12 @@ here go deeper.
   architecture decision record
 - [`cr/CR_TEMPLATE.md`](cr/CR_TEMPLATE.md) — the template for a change request
 
+### The state of the project
+
+- [`OPEN-POINTS.md`](OPEN-POINTS.md) — the things that are known to be
+  missing, in the order of the damage they do, with the evidence and the
+  work that closes each one
+
 ### The guides
 
 - [`guides/PLATFORMS.md`](guides/PLATFORMS.md) — the devices the project

@@ -388,6 +388,13 @@ device can produce. The script that closes the gap is the device test plan
 the list of the devices with their artefacts is in
 [`docs/guides/PLATFORMS.md`](docs/guides/PLATFORMS.md).
 
+**The list of the things that are known to be missing**, in the order of the
+damage they do, with the evidence and the work that closes each one, is in
+[`docs/OPEN-POINTS.md`](docs/OPEN-POINTS.md). The two that matter most are
+the first two: the picture of a Galaxy device does not flow yet
+(`EXC-011`), and **no sender has ever been tested** — every row of the
+device test plan is NOT RUN.
+
 The gates of every milestone are in [`ROADMAP.md`](ROADMAP.md), the quality
 model in [`QUALITY.md`](QUALITY.md).
 
