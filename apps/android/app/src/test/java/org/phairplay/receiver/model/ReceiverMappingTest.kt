@@ -11,6 +11,7 @@ import uniffi.phairplay_ffi.FfiDeviceConfig
 import uniffi.phairplay_ffi.FfiLimitsConfig
 import uniffi.phairplay_ffi.FfiPerformanceConfig
 import uniffi.phairplay_ffi.FfiProtocolConfig
+import uniffi.phairplay_ffi.FfiSessionConfig
 import uniffi.phairplay_ffi.FfiVideoCodec
 import uniffi.phairplay_ffi.FfiVideoFormat
 
@@ -53,6 +54,9 @@ class ReceiverMappingTest {
             maxMemoryMb = 150u,
             maxCpuPercent = 30u,
             idleTimeoutMs = 30000uL,
+        ),
+        session = FfiSessionConfig(
+            multiPeerProtocols = listOf("cast"),
         ),
     )
 

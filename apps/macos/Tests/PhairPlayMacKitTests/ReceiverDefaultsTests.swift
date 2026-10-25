@@ -98,6 +98,7 @@ final class ReceiverDefaultsTests: XCTestCase {
             limits.video_queue_frames = 90
             limits.video_queue_bytes = 67108864
             limits.audio_queue_packets = 200
+            session.multi_peer_protocols = cast
             limits.audio_queue_bytes = 4194304
             limits.max_pairing_attempts = 5
             limits.max_artwork_bytes = 8388608

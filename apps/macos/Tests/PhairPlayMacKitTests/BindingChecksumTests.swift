@@ -50,6 +50,9 @@ final class BindingChecksumTests: XCTestCase {
                 maxMemoryMb: 150,
                 maxCpuPercent: 30,
                 idleTimeoutMs: 30_000
+            ),
+            session: FfiSessionConfig(
+                multiPeerProtocols: ["cast"]
             )
         )
     }

@@ -6,6 +6,7 @@ import uniffi.phairplay_ffi.FfiDeviceConfig
 import uniffi.phairplay_ffi.FfiLimitsConfig
 import uniffi.phairplay_ffi.FfiPerformanceConfig
 import uniffi.phairplay_ffi.FfiProtocolConfig
+import uniffi.phairplay_ffi.FfiSessionConfig
 
 /**
  * The default configuration of the receiver.
@@ -105,6 +106,12 @@ object ReceiverDefaults {
                 maxHeaderCount = ulong(values, "limits.max_header_count"),
                 maxHeaderBytes = ulong(values, "limits.max_header_bytes"),
             ),
+            // WHY the rule travels with the configuration: the list
+            // `session.multi_peer_protocols` says which protocols may serve
+            // several peers, and the shell must not decide that on its own.
+            session = FfiSessionConfig(
+                multiPeerProtocols = list(values, "session.multi_peer_protocols"),
+            ),
             performance = FfiPerformanceConfig(
                 firstFrameLatencyMs = ulong(values, "performance.first_frame_latency_ms"),
                 minimumFps = uint(values, "performance.minimum_fps"),
@@ -132,6 +139,23 @@ object ReceiverDefaults {
      */
     private fun string(values: Map<String, String>, key: String): String =
         values[key] ?: throw IllegalArgumentException("the defaults do not contain the key `$key`")
+
+    /**
+     * The value of a key that is a list of names.
+     *
+     * WHY the list is comma-separated: the format of the file is a
+     * properties file, and a list of names is a value of it. The names are
+     * trimmed, and an empty name is refused — a list with a hole in it is
+     * a typo that nobody would notice.
+     */
+    private fun list(values: Map<String, String>, key: String): List<String> {
+        val value = string(values, key)
+        return value.split(",").map { it.trim() }.also { names ->
+            if (names.any { it.isEmpty() }) {
+                throw IllegalArgumentException("the value of `$key` is not a list of names: $value")
+            }
+        }
+    }
 
     /**
      * The value of a key that is a number of 64 bits.

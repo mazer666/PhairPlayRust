@@ -2249,7 +2249,11 @@ data class FfiAppConfig (
     /**
      * The performance budgets the implementation is measured against.
      */
-    var `performance`: FfiPerformanceConfig
+    var `performance`: FfiPerformanceConfig, 
+    /**
+     * The rule that says how many peers a protocol serves at the same time.
+     */
+    var `session`: FfiSessionConfig
 ) {
     
     companion object
@@ -2265,6 +2269,7 @@ public object FfiConverterTypeFfiAppConfig: FfiConverterRustBuffer<FfiAppConfig>
             FfiConverterSequenceTypeFfiProtocolConfig.read(buf),
             FfiConverterTypeFfiLimitsConfig.read(buf),
             FfiConverterTypeFfiPerformanceConfig.read(buf),
+            FfiConverterTypeFfiSessionConfig.read(buf),
         )
     }
 
@@ -2272,7 +2277,8 @@ public object FfiConverterTypeFfiAppConfig: FfiConverterRustBuffer<FfiAppConfig>
             FfiConverterTypeFfiDeviceConfig.allocationSize(value.`device`) +
             FfiConverterSequenceTypeFfiProtocolConfig.allocationSize(value.`protocols`) +
             FfiConverterTypeFfiLimitsConfig.allocationSize(value.`limits`) +
-            FfiConverterTypeFfiPerformanceConfig.allocationSize(value.`performance`)
+            FfiConverterTypeFfiPerformanceConfig.allocationSize(value.`performance`) +
+            FfiConverterTypeFfiSessionConfig.allocationSize(value.`session`)
     )
 
     override fun write(value: FfiAppConfig, buf: ByteBuffer) {
@@ -2280,6 +2286,7 @@ public object FfiConverterTypeFfiAppConfig: FfiConverterRustBuffer<FfiAppConfig>
             FfiConverterSequenceTypeFfiProtocolConfig.write(value.`protocols`, buf)
             FfiConverterTypeFfiLimitsConfig.write(value.`limits`, buf)
             FfiConverterTypeFfiPerformanceConfig.write(value.`performance`, buf)
+            FfiConverterTypeFfiSessionConfig.write(value.`session`, buf)
     }
 }
 
@@ -2976,6 +2983,45 @@ public object FfiConverterTypeFfiProtocolStatus: FfiConverterRustBuffer<FfiProto
             FfiConverterOptionalUShort.write(value.`udpPort`, buf)
             FfiConverterUInt.write(value.`peerCount`, buf)
             FfiConverterOptionalString.write(value.`lastError`, buf)
+    }
+}
+
+
+
+/**
+ * The rule that says how many peers a protocol serves at the same time.
+ *
+ * WHY the rule travels over the bridge: the native shells read the
+ * configuration of the receiver, and a configuration without the rule
+ * would leave the shells guessing — the same guessing that the engines
+ * of the workspace did before the rule had one owner.
+ */
+data class FfiSessionConfig (
+    /**
+     * The protocols that may serve more than one peer at the same time.
+     */
+    var `multiPeerProtocols`: List<kotlin.String>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiSessionConfig: FfiConverterRustBuffer<FfiSessionConfig> {
+    override fun read(buf: ByteBuffer): FfiSessionConfig {
+        return FfiSessionConfig(
+            FfiConverterSequenceString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FfiSessionConfig) = (
+            FfiConverterSequenceString.allocationSize(value.`multiPeerProtocols`)
+    )
+
+    override fun write(value: FfiSessionConfig, buf: ByteBuffer) {
+            FfiConverterSequenceString.write(value.`multiPeerProtocols`, buf)
     }
 }
 
@@ -4441,6 +4487,34 @@ public object FfiConverterOptionalTypeFfiVideoFormat: FfiConverterRustBuffer<Ffi
         } else {
             buf.put(1)
             FfiConverterTypeFfiVideoFormat.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceString: FfiConverterRustBuffer<List<kotlin.String>> {
+    override fun read(buf: ByteBuffer): List<kotlin.String> {
+        val len = buf.getInt()
+        return List<kotlin.String>(len) {
+            FfiConverterString.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.String>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterString.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.String>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterString.write(it, buf)
         }
     }
 }

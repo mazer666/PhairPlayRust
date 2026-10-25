@@ -1027,6 +1027,10 @@ public struct FfiAppConfig {
      * The performance budgets the implementation is measured against.
      */
     public var performance: FfiPerformanceConfig
+    /**
+     * The rule that says how many peers a protocol serves at the same time.
+     */
+    public var session: FfiSessionConfig
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
@@ -1042,11 +1046,15 @@ public struct FfiAppConfig {
          */limits: FfiLimitsConfig, 
         /**
          * The performance budgets the implementation is measured against.
-         */performance: FfiPerformanceConfig) {
+         */performance: FfiPerformanceConfig, 
+        /**
+         * The rule that says how many peers a protocol serves at the same time.
+         */session: FfiSessionConfig) {
         self.device = device
         self.protocols = protocols
         self.limits = limits
         self.performance = performance
+        self.session = session
     }
 }
 
@@ -1069,6 +1077,9 @@ extension FfiAppConfig: Equatable, Hashable {
         if lhs.performance != rhs.performance {
             return false
         }
+        if lhs.session != rhs.session {
+            return false
+        }
         return true
     }
 
@@ -1077,6 +1088,7 @@ extension FfiAppConfig: Equatable, Hashable {
         hasher.combine(protocols)
         hasher.combine(limits)
         hasher.combine(performance)
+        hasher.combine(session)
     }
 }
 
@@ -1092,7 +1104,8 @@ public struct FfiConverterTypeFfiAppConfig: FfiConverterRustBuffer {
                 device: FfiConverterTypeFfiDeviceConfig.read(from: &buf), 
                 protocols: FfiConverterSequenceTypeFfiProtocolConfig.read(from: &buf), 
                 limits: FfiConverterTypeFfiLimitsConfig.read(from: &buf), 
-                performance: FfiConverterTypeFfiPerformanceConfig.read(from: &buf)
+                performance: FfiConverterTypeFfiPerformanceConfig.read(from: &buf), 
+                session: FfiConverterTypeFfiSessionConfig.read(from: &buf)
         )
     }
 
@@ -1101,6 +1114,7 @@ public struct FfiConverterTypeFfiAppConfig: FfiConverterRustBuffer {
         FfiConverterSequenceTypeFfiProtocolConfig.write(value.protocols, into: &buf)
         FfiConverterTypeFfiLimitsConfig.write(value.limits, into: &buf)
         FfiConverterTypeFfiPerformanceConfig.write(value.performance, into: &buf)
+        FfiConverterTypeFfiSessionConfig.write(value.session, into: &buf)
     }
 }
 
@@ -2542,6 +2556,82 @@ public func FfiConverterTypeFfiProtocolStatus_lift(_ buf: RustBuffer) throws -> 
 #endif
 public func FfiConverterTypeFfiProtocolStatus_lower(_ value: FfiProtocolStatus) -> RustBuffer {
     return FfiConverterTypeFfiProtocolStatus.lower(value)
+}
+
+
+/**
+ * The rule that says how many peers a protocol serves at the same time.
+ *
+ * WHY the rule travels over the bridge: the native shells read the
+ * configuration of the receiver, and a configuration without the rule
+ * would leave the shells guessing — the same guessing that the engines
+ * of the workspace did before the rule had one owner.
+ */
+public struct FfiSessionConfig {
+    /**
+     * The protocols that may serve more than one peer at the same time.
+     */
+    public var multiPeerProtocols: [String]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * The protocols that may serve more than one peer at the same time.
+         */multiPeerProtocols: [String]) {
+        self.multiPeerProtocols = multiPeerProtocols
+    }
+}
+
+#if compiler(>=6)
+extension FfiSessionConfig: Sendable {}
+#endif
+
+
+extension FfiSessionConfig: Equatable, Hashable {
+    public static func ==(lhs: FfiSessionConfig, rhs: FfiSessionConfig) -> Bool {
+        if lhs.multiPeerProtocols != rhs.multiPeerProtocols {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(multiPeerProtocols)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiSessionConfig: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiSessionConfig {
+        return
+            try FfiSessionConfig(
+                multiPeerProtocols: FfiConverterSequenceString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: FfiSessionConfig, into buf: inout [UInt8]) {
+        FfiConverterSequenceString.write(value.multiPeerProtocols, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiSessionConfig_lift(_ buf: RustBuffer) throws -> FfiSessionConfig {
+    return try FfiConverterTypeFfiSessionConfig.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiSessionConfig_lower(_ value: FfiSessionConfig) -> RustBuffer {
+    return FfiConverterTypeFfiSessionConfig.lower(value)
 }
 
 
@@ -4749,6 +4839,31 @@ fileprivate struct FfiConverterOptionTypeFfiVideoFormat: FfiConverterRustBuffer 
         case 1: return try FfiConverterTypeFfiVideoFormat.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceString: FfiConverterRustBuffer {
+    typealias SwiftType = [String]
+
+    public static func write(_ value: [String], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterString.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [String] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [String]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterString.read(from: &buf))
+        }
+        return seq
     }
 }
 

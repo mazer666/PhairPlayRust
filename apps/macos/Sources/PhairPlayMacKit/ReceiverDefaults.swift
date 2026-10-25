@@ -136,6 +136,12 @@ public enum ReceiverDefaults {
                 maxMemoryMb: try uint(values, "performance.max_memory_mb"),
                 maxCpuPercent: try uint(values, "performance.max_cpu_percent"),
                 idleTimeoutMs: try ulong(values, "performance.idle_timeout_ms")
+            ),
+            // WHY the rule travels with the configuration: the list
+            // `session.multi_peer_protocols` says which protocols may serve
+            // several peers, and the shell must not decide that on its own.
+            session: FfiSessionConfig(
+                multiPeerProtocols: try list(values, "session.multi_peer_protocols")
             )
         )
     }
@@ -183,6 +189,25 @@ public enum ReceiverDefaults {
             throw ReceiverDefaultsError.missingKey(key)
         }
         return value
+    }
+
+    /// The value of a key that is a list of names.
+    ///
+    /// WHY the list is comma-separated: the format of the file is a
+    /// properties file, and a list of names is a value of it. The names are
+    /// trimmed, and an empty name is refused — a list with a hole in it is
+    /// a typo that nobody would notice.
+    private static func list(_ values: [String: String], _ key: String) throws -> [String] {
+        let value = try string(values, key)
+        var names: [String] = []
+        for part in value.split(separator: ",") {
+            let name = part.trimmingCharacters(in: .whitespaces)
+            guard !name.isEmpty else {
+                throw ReceiverDefaultsError.malformedValue(key: key, value: value)
+            }
+            names.append(name)
+        }
+        return names
     }
 
     /// The value of a key that is a number of 64 bits.
