@@ -38,6 +38,9 @@ pub mod timeouts;
 
 pub use engine_limits::EngineLimits;
 pub use profiles::DeviceProfile;
+pub use session::SessionConfig;
+
+mod session;
 
 /// The top-level configuration of the receiver.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -51,6 +54,8 @@ pub struct AppConfig {
     pub limits: LimitsConfig,
     /// The performance budgets the implementation is measured against.
     pub performance: PerformanceConfig,
+    /// The rule that says how many peers a protocol serves at the same time.
+    pub session: SessionConfig,
 }
 
 /// The identity configuration.
@@ -201,6 +206,19 @@ impl AppConfig {
     #[must_use]
     pub fn is_enabled(&self, protocol: ProtocolKind) -> bool {
         self.protocol(protocol).enabled
+    }
+
+    /// Whether a protocol may serve more than one peer at the same time.
+    ///
+    /// WHY the method on the configuration and not in the engines: the rule
+    /// has **one** owner — the list `session.multi_peer_protocols` — and every
+    /// engine asks it. A rule that is written twice is a rule that drifts.
+    ///
+    /// WHY the comparison ignores the case: the name of a protocol comes
+    /// from a configuration file.
+    #[must_use]
+    pub fn serves_several_peers(&self, protocol: ProtocolKind) -> bool {
+        self.session.serves_several_peers(protocol)
     }
 
     /// Validates the configuration.

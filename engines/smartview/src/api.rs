@@ -32,7 +32,7 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use phairplay_core::protocol::ProtocolKind;
+use phairplay_core::protocol::{PeerLimit, ProtocolKind};
 use phairplay_core::session::{SessionEndReason, SessionEvent, SessionSnapshot};
 use tokio::io::{AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
@@ -99,6 +99,14 @@ pub struct ApiContext {
     pub events: tokio::sync::mpsc::Sender<SessionEvent>,
     /// The limits of the reader.
     pub limits: ApiLimits,
+    /// The rule that says how many peers the receiver serves at the same
+    /// time.
+    ///
+    /// WHY the rule is here: the rule that says how many peers a protocol
+    /// serves has **one** owner — the list
+    /// `session.multi_peer_protocols` of the configuration — and the engine
+    /// asks it instead of carrying a number of its own.
+    pub peer_limit: PeerLimit,
 }
 
 /// Handles one client connection.

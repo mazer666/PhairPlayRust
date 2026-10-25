@@ -28,7 +28,7 @@ use std::time::Duration;
 use phairplay_core::error::EngineError;
 use phairplay_core::identity::sanitize_service_name;
 use phairplay_core::protocol::{
-    EngineContext, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus,
+    EngineContext, PeerLimit, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus,
 };
 
 use crate::gena::GenaEventManager;
@@ -227,7 +227,7 @@ impl ProtocolEngine for DlnaEngine {
         let udn = format!("uuid:{}", ctx.identity.device_id);
 
         let server = match HttpServer::bind(self.config.http_port, |port| {
-            self.server_context(&friendly_name, &udn, port)
+            self.server_context(&friendly_name, &udn, port, ctx.peer_limit)
         })
         .await
         {
@@ -309,7 +309,13 @@ impl ProtocolEngine for DlnaEngine {
 
 impl DlnaEngine {
     /// Builds the context the HTTP server works with.
-    fn server_context(&self, friendly_name: &str, udn: &str, port: u16) -> Arc<ServerContext> {
+    fn server_context(
+        &self,
+        friendly_name: &str,
+        udn: &str,
+        port: u16,
+        peer_limit: PeerLimit,
+    ) -> Arc<ServerContext> {
         Arc::new(ServerContext {
             friendly_name: friendly_name.to_string(),
             udn: udn.to_string(),
@@ -319,6 +325,11 @@ impl DlnaEngine {
             dispatcher: Arc::clone(&self.dispatcher),
             limits: self.config.limits.clone(),
             lifecycle: Arc::clone(&self.lifecycle),
+            // WHY the rule comes from the context of the engine: the list
+            // `session.multi_peer_protocols` of the configuration is the
+            // single owner of the question "may this protocol serve
+            // several peers".
+            peer_limit,
         })
     }
 

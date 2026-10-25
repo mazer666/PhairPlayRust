@@ -266,7 +266,7 @@ fn upgrade(request: &ApiRequest, context: &ApiContext) -> RouteOutcome {
             &json!({ "error": "the request carries no WebSocket key" }),
         ));
     };
-    match context.sessions.open(request.peer) {
+    match context.sessions.open(request.peer, context.peer_limit) {
         Ok(session) => RouteOutcome::Upgrade {
             key: key.to_string(),
             session,

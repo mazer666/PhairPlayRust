@@ -27,7 +27,7 @@
 use std::collections::BTreeMap;
 
 use phairplay_core::config::{
-    AppConfig, DeviceConfig, LimitsConfig, PerformanceConfig, ProtocolConfig,
+    AppConfig, DeviceConfig, LimitsConfig, PerformanceConfig, ProtocolConfig, SessionConfig,
 };
 
 use crate::error::FfiError;
@@ -43,6 +43,26 @@ pub struct FfiAppConfig {
     pub limits: FfiLimitsConfig,
     /// The performance budgets the implementation is measured against.
     pub performance: FfiPerformanceConfig,
+    /// The rule that says how many peers a protocol serves at the same time.
+    pub session: FfiSessionConfig,
+}
+
+/// The rule that says how many peers a protocol serves at the same time.
+///
+/// WHY the rule travels over the bridge: the native shells read the
+/// configuration of the receiver, and a configuration without the rule
+/// would leave the shells guessing — the same guessing that the engines
+/// of the workspace did before the rule had one owner.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct FfiSessionConfig {
+    /// The protocols that may serve more than one peer at the same time.
+    pub multi_peer_protocols: Vec<String>,
+}
+
+impl From<AppConfig> for FfiAppConfig {
+    fn from(config: AppConfig) -> Self {
+        FfiAppConfig::from(&config)
+    }
 }
 
 impl From<&AppConfig> for FfiAppConfig {
@@ -62,13 +82,10 @@ impl From<&AppConfig> for FfiAppConfig {
                 .collect(),
             limits: FfiLimitsConfig::from(&config.limits),
             performance: FfiPerformanceConfig::from(&config.performance),
+            session: FfiSessionConfig {
+                multi_peer_protocols: config.session.multi_peer_protocols.clone(),
+            },
         }
-    }
-}
-
-impl From<AppConfig> for FfiAppConfig {
-    fn from(config: AppConfig) -> Self {
-        FfiAppConfig::from(&config)
     }
 }
 
@@ -105,6 +122,9 @@ impl TryFrom<&FfiAppConfig> for AppConfig {
             protocols,
             limits: LimitsConfig::from(&config.limits),
             performance: PerformanceConfig::from(&config.performance),
+            session: SessionConfig {
+                multi_peer_protocols: config.session.multi_peer_protocols.clone(),
+            },
         })
     }
 }
@@ -296,6 +316,9 @@ mod tests {
     fn a_protocol_that_is_configured_twice_is_rejected() {
         let config = FfiAppConfig {
             device: FfiDeviceConfig::from(&DeviceConfig::default()),
+            session: FfiSessionConfig {
+                multi_peer_protocols: vec!["cast".to_string()],
+            },
             protocols: vec![
                 FfiProtocolConfig {
                     name: "airplay".into(),

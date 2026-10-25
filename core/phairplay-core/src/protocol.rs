@@ -95,6 +95,27 @@ impl ProtocolKind {
         }
     }
 
+    /// The number of peers this protocol serves at the same time, when the
+    /// configuration allows it to serve several.
+    ///
+    /// WHY the number lives here and not in the configuration: the
+    /// configuration says **whether** a protocol may serve several peers —
+    /// the list `session.multi_peer_protocols` — and the number of peers
+    /// that the *machine* carries is a property of the protocol. The two
+    /// answers meet in [`PeerLimit`].
+    ///
+    /// WHY eight: Google Cast is the only protocol of the product that
+    /// serves several senders, and a Cast receiver that carries one sender
+    /// is a receiver that refuses a sender for no reason. The number is the
+    /// one that the engine of Cast used before the rule had one owner.
+    #[must_use]
+    pub const fn default_peer_limit(self) -> usize {
+        match self {
+            Self::Cast => 8,
+            _ => 1,
+        }
+    }
+
     /// Whether this protocol carries a video stream.
     #[must_use]
     pub const fn carries_video(self) -> bool {
@@ -219,6 +240,73 @@ pub struct EngineContext {
     pub audio_sink: Arc<dyn AudioSink>,
     /// The channel on which the engine reports session events.
     pub events: tokio::sync::mpsc::Sender<SessionEvent>,
+    /// The rule that says how many peers this protocol serves at the same
+    /// time.
+    ///
+    /// WHY the rule is in the context and not in the engine: the rule has
+    /// **one** owner — the list `session.multi_peer_protocols` of the
+    /// configuration — and every engine asks it. A rule that is written in
+    /// every engine is a rule that drifts: the engine of Cast carried the
+    /// number eight and the engine of Miracast the number one, and neither
+    /// of them knew about the configuration that was supposed to decide.
+    ///
+    /// WHY the engine may still refuse a peer that the rule allows: the
+    /// rule says what the *protocol* permits, and the engine still has its
+    /// own limits — the budget of the machine, the number of sockets.
+    pub peer_limit: PeerLimit,
+}
+
+/// The rule that says how many peers a protocol serves at the same time.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeerLimit {
+    /// The protocol serves **one** peer at a time. A second peer is
+    /// refused, not queued.
+    ///
+    /// WHY: a queued second peer waits for a session that may never end,
+    /// and the sender sees a device that hangs.
+    One,
+    /// The protocol may serve several peers at the same time.
+    ///
+    /// WHY the number: the limit of the machine belongs to the
+    /// configuration of the engine; the rule that the protocol *may* serve
+    /// several peers is what this value carries.
+    Several {
+        /// The number of peers the engine accepts at the same time.
+        max: usize,
+    },
+}
+
+impl PeerLimit {
+    /// The limit of the protocol, read from the configuration.
+    ///
+    /// WHY the number comes from the engine and not from here: the list of
+    /// the configuration says *whether* a protocol may serve several peers;
+    /// the engine knows how many of them the machine can carry.
+    #[must_use]
+    pub fn from_config(config: &crate::config::AppConfig, protocol: ProtocolKind) -> Self {
+        if config.serves_several_peers(protocol) {
+            Self::Several {
+                max: protocol.default_peer_limit(),
+            }
+        } else {
+            Self::One
+        }
+    }
+
+    /// Whether the protocol may serve more than one peer at the same time.
+    #[must_use]
+    pub fn allows_several_peers(&self) -> bool {
+        matches!(self, Self::Several { .. })
+    }
+
+    /// The number of peers the protocol accepts at the same time.
+    #[must_use]
+    pub fn max_peers(&self) -> usize {
+        match self {
+            Self::One => 1,
+            Self::Several { max } => *max,
+        }
+    }
 }
 
 impl std::fmt::Debug for EngineContext {

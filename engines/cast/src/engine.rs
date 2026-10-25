@@ -91,8 +91,6 @@ pub struct CastConfig {
     pub app_id: String,
     /// The name of the application the receiver offers.
     pub app_name: String,
-    /// The number of senders that may be connected at the same time.
-    pub max_sessions: usize,
     /// The largest message the receiver accepts.
     pub max_message_bytes: usize,
     /// The time a peer may stay silent before it is dropped.
@@ -110,7 +108,6 @@ impl Default for CastConfig {
             port: DEFAULT_PORT,
             app_id: DEFAULT_MEDIA_APP_ID.to_string(),
             app_name: crate::message::DEFAULT_MEDIA_APP_NAME.to_string(),
-            max_sessions: DEFAULT_MAX_SESSIONS,
             max_message_bytes: DEFAULT_MAX_MESSAGE_BYTES,
             idle_timeout_ms: 30_000,
             handshake_timeout_ms: DEFAULT_HANDSHAKE_TIMEOUT_MS,
@@ -470,7 +467,12 @@ async fn accept_loop(
                 continue;
             }
         };
-        if inner.peer_count() as usize >= inner.config.max_sessions {
+        // WHY the limit comes from the context: the rule that says how many
+        // peers a protocol serves has **one** owner — the list
+        // `session.multi_peer_protocols` of the configuration — and the
+        // engine asks it instead of carrying a number of its own. Cast is
+        // the protocol that the list names, and it is the only one.
+        if inner.peer_count() as usize >= ctx.peer_limit.max_peers() {
             tracing::warn!(peer = %mask_socket_addr(&address), "cast refused a peer: the session limit is reached");
             drop(stream);
             continue;
@@ -581,6 +583,7 @@ mod tests {
         let ctx = phairplay_core::protocol::EngineContext {
             identity: Arc::new(phairplay_core::identity::DeviceIdentity::default()),
             capabilities: Arc::new(phairplay_core::capabilities::MediaCapabilities::default()),
+            peer_limit: phairplay_core::protocol::PeerLimit::Several { max: 8 },
             video_sink: Arc::new(phairplay_core::media::NullVideoSink),
             audio_sink: Arc::new(phairplay_core::media::NullAudioSink),
             events: tokio::sync::mpsc::channel(16).0,
@@ -619,6 +622,7 @@ mod tests {
         let ctx = phairplay_core::protocol::EngineContext {
             identity: Arc::new(phairplay_core::identity::DeviceIdentity::default()),
             capabilities: Arc::new(phairplay_core::capabilities::MediaCapabilities::default()),
+            peer_limit: phairplay_core::protocol::PeerLimit::Several { max: 8 },
             video_sink: Arc::new(phairplay_core::media::NullVideoSink),
             audio_sink: Arc::new(phairplay_core::media::NullAudioSink),
             events: tokio::sync::mpsc::channel(16).0,
@@ -641,6 +645,7 @@ mod tests {
         let ctx = phairplay_core::protocol::EngineContext {
             identity: Arc::new(phairplay_core::identity::DeviceIdentity::default()),
             capabilities: Arc::new(phairplay_core::capabilities::MediaCapabilities::default()),
+            peer_limit: phairplay_core::protocol::PeerLimit::Several { max: 8 },
             video_sink: Arc::new(phairplay_core::media::NullVideoSink),
             audio_sink: Arc::new(phairplay_core::media::NullAudioSink),
             events: tokio::sync::mpsc::channel(16).0,

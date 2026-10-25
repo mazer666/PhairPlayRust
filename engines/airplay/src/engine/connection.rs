@@ -37,11 +37,15 @@ pub(super) async fn accept_loop(
                 return;
             }
         };
+        // WHY the limit comes from the context: the rule that says how many
+        // peers a protocol serves has **one** owner — the list
+        // `session.multi_peer_protocols` of the configuration — and the
+        // engine asks it instead of carrying a number of its own.
         let busy = {
             let Ok(mut state) = inner.state.lock() else {
                 return;
             };
-            if state.peer_count > 0 {
+            if state.peer_count as usize >= ctx.peer_limit.max_peers() {
                 true
             } else {
                 state.peer_count = 1;

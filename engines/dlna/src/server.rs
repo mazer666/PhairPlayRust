@@ -26,7 +26,8 @@ use std::net::SocketAddr;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
-use phairplay_core::protocol::ProtocolState;
+use phairplay_core::privacy::mask_socket_addr;
+use phairplay_core::protocol::{PeerLimit, ProtocolState};
 use tokio::io::BufReader;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::watch;
@@ -166,6 +167,14 @@ pub struct ServerContext {
     pub limits: HttpLimits,
     /// The shared lifecycle.
     pub lifecycle: Arc<Mutex<Lifecycle>>,
+    /// The rule that says how many peers the renderer serves at the same
+    /// time.
+    ///
+    /// WHY the rule is here: the rule that says how many peers a protocol
+    /// serves has **one** owner — the list
+    /// `session.multi_peer_protocols` of the configuration — and the engine
+    /// asks it instead of carrying a number of its own.
+    pub peer_limit: PeerLimit,
 }
 
 /// The HTTP server of the control plane.
@@ -272,11 +281,35 @@ use routing::route;
 
 /// Handles one client connection.
 async fn handle_connection(stream: TcpStream, peer: SocketAddr, context: Arc<ServerContext>) {
-    context
-        .lifecycle
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .connection_opened();
+    // WHY the second client is refused: DLNA is a single-session protocol.
+    // The second client is told so instead of being queued — a queued
+    // client waits for a session that may never end.
+    //
+    // WHY the limit comes from the context: the rule has **one** owner —
+    // the list `session.multi_peer_protocols` of the configuration.
+    let refused = {
+        let mut lifecycle = context.lifecycle.lock().unwrap_or_else(|e| e.into_inner());
+        if lifecycle.connections() as usize >= context.peer_limit.max_peers() {
+            true
+        } else {
+            lifecycle.connection_opened();
+            false
+        }
+    };
+    if refused {
+        tracing::warn!(peer = %mask_socket_addr(&peer), "the renderer refused a second client");
+        // WHY the answer and not a closed socket: a client that gets
+        // nothing cannot tell a busy renderer from a broken one. The status
+        // `503 Service Unavailable` says exactly that the renderer is busy.
+        let response = HttpResponse::text(
+            503,
+            "Service Unavailable",
+            "the renderer serves one client at a time",
+        );
+        let mut stream = stream;
+        let _ = write_response(&mut stream, &response, true).await;
+        return;
+    }
     let mut reader = BufReader::new(stream);
     let request = match read_request(&mut reader, &context.limits, peer).await {
         Ok(request) => request,

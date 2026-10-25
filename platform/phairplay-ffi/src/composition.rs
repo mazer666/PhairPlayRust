@@ -224,7 +224,6 @@ fn miracast(config: &AppConfig) -> MiracastConfig {
         },
         // WHY: Miracast serves one sender at a time. A second sender is
         // refused, not queued.
-        max_sessions: 1,
     }
 }
 

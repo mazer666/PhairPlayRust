@@ -40,7 +40,7 @@ use phairplay_core::error::CoreError;
 use phairplay_core::identity::DeviceIdentity;
 use phairplay_core::metrics::{SharedCounters, StreamStats, new_counters};
 use phairplay_core::protocol::{
-    EngineContext, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus,
+    EngineContext, PeerLimit, ProtocolEngine, ProtocolKind, ProtocolState, ProtocolStatus,
 };
 use phairplay_core::session::{SessionEvent, SessionRegistry, SessionSnapshot};
 use tokio::runtime::Runtime;
@@ -429,6 +429,7 @@ impl ReceiverCore {
                 .or_insert_with(new_counters)
                 .clone()
         };
+        let config = self.config();
         EngineContext {
             identity: Arc::new(self.identity()),
             capabilities: Arc::new(self.capabilities()),
@@ -441,6 +442,11 @@ impl ReceiverCore {
                 counters,
             )),
             events: self.inner.events.clone(),
+            // WHY the rule comes from the configuration: the list
+            // `session.multi_peer_protocols` is the single owner of the
+            // question "may this protocol serve several peers", and the
+            // supervisor is the place that has the configuration.
+            peer_limit: PeerLimit::from_config(&config, protocol),
         }
     }
 

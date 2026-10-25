@@ -50,11 +50,6 @@ pub struct MiracastConfig {
     /// The port the control plane listens on. Zero asks the kernel for a free
     /// port, which is what the tests use.
     pub port: u16,
-    /// The number of senders that may stream at the same time.
-    ///
-    /// WHY: Miracast is a single-session protocol. A second sender is
-    /// refused with `503 Service Unavailable`, not queued.
-    pub max_sessions: usize,
 }
 
 impl Default for MiracastConfig {
@@ -62,7 +57,6 @@ impl Default for MiracastConfig {
         Self {
             enabled: true,
             port: DEFAULT_WFD_PORT,
-            max_sessions: 1,
         }
     }
 }
@@ -289,7 +283,11 @@ async fn accept_loop(inner: Arc<Inner>, listener: TcpListener, ctx: EngineContex
             .lock()
             .map(|sessions| sessions.len())
             .unwrap_or(0);
-        if sessions >= inner.config.max_sessions {
+        // WHY the limit comes from the context: the rule that says how many
+        // peers a protocol serves has **one** owner — the list
+        // `session.multi_peer_protocols` of the configuration — and the
+        // engine asks it instead of carrying a number of its own.
+        if sessions >= ctx.peer_limit.max_peers() {
             tracing::warn!(peer = %mask_socket_addr(&address), "miracast refused a sender: a session is already active");
             crate::peer::refuse(stream).await;
             continue;
@@ -325,6 +323,7 @@ mod tests {
     fn context() -> EngineContext {
         let (events, _receiver) = tokio::sync::mpsc::channel(32);
         EngineContext {
+            peer_limit: phairplay_core::protocol::PeerLimit::One,
             identity: Arc::new(phairplay_core::identity::DeviceIdentity::default()),
             capabilities: Arc::new(phairplay_core::capabilities::MediaCapabilities::empty()),
             video_sink: Arc::new(NullVideoSink),
@@ -433,6 +432,57 @@ mod tests {
         assert!(
             matches!(event, SessionEvent::Ended { .. }),
             "expected an ended event, got {event:?}"
+        );
+
+        engine.stop().await.expect("stop");
+    }
+
+    #[tokio::test]
+    async fn the_rule_comes_from_the_configuration_and_not_from_the_engine() {
+        // WHY: the rule that says how many peers a protocol serves has one
+        // owner — the list `session.multi_peer_protocols` of the
+        // configuration. The engine of Miracast used to carry the number one
+        // in its own configuration, and the list of the receiver was never
+        // read. This test names Miracast in the list and proves that the
+        // engine obeys the list: the second sender is served.
+        //
+        // WHY the opposite matters: without this test, the rule could still
+        // live in the engine and the list would be a decoration.
+        let mut config = MiracastConfig {
+            port: 0,
+            ..MiracastConfig::default()
+        };
+        config.port = 0;
+        let engine = MiracastEngine::new(config);
+        let mut context = context();
+        context.peer_limit = phairplay_core::protocol::PeerLimit::Several { max: 2 };
+        engine.start(context).await.expect("start");
+        let port = engine.status().tcp_port.expect("port");
+
+        let mut first = TcpStream::connect(("127.0.0.1", port))
+            .await
+            .expect("connect");
+        first
+            .write_all(b"PLAY rtsp://x/ RTSP/1.0\r\nCSeq: 1\r\n\r\n")
+            .await
+            .expect("write");
+        tokio::time::sleep(Duration::from_millis(80)).await;
+
+        // The second sender is **not** refused: the configuration says that
+        // the protocol may serve two peers.
+        let mut second = TcpStream::connect(("127.0.0.1", port))
+            .await
+            .expect("connect");
+        second
+            .write_all(b"PLAY rtsp://y/ RTSP/1.0\r\nCSeq: 1\r\n\r\n")
+            .await
+            .expect("write");
+        tokio::time::sleep(Duration::from_millis(80)).await;
+
+        assert_eq!(
+            engine.status().peer_count,
+            2,
+            "the receiver must serve the second sender when the configuration names the protocol"
         );
 
         engine.stop().await.expect("stop");

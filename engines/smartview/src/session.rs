@@ -26,6 +26,7 @@ use std::net::SocketAddr;
 use std::sync::Mutex;
 use std::time::Instant;
 
+use phairplay_core::protocol::PeerLimit;
 use phairplay_core::session::SessionId;
 
 /// What the sender told the receiver about itself.
@@ -118,16 +119,29 @@ impl SessionRegistry {
 
     /// Opens the one session of the receiver.
     ///
+    /// WHY the limit is an argument and not a constant of this registry: the
+    /// rule that says how many peers a protocol serves has **one** owner —
+    /// the list `session.multi_peer_protocols` of the configuration — and
+    /// the registry asks it. Smart View is the protocol of the list that
+    /// serves **one** peer, and the registry has to know that from the
+    /// configuration and not from its own memory.
+    ///
     /// # Errors
     /// Returns [`crate::error::SmartViewError::Protocol`] when a session is
     /// already open. The second peer is **rejected**, never queued.
-    pub fn open(&self, address: SocketAddr) -> Result<ActiveSession, crate::error::SmartViewError> {
+    pub fn open(
+        &self,
+        address: SocketAddr,
+        limit: PeerLimit,
+    ) -> Result<ActiveSession, crate::error::SmartViewError> {
         let mut state = self.lock();
         if let Some(active) = &state.active {
-            return Err(crate::error::SmartViewError::Protocol(format!(
-                "a session with {} is already open",
-                active.id
-            )));
+            if limit.max_peers() <= 1 {
+                return Err(crate::error::SmartViewError::Protocol(format!(
+                    "a session with {} is already open",
+                    active.id
+                )));
+            }
         }
         let peer = state.announced.clone().unwrap_or_default();
         let session = ActiveSession {

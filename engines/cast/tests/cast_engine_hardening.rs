@@ -24,6 +24,7 @@ use phairplay_cast::{
     AdvertiseError, CastConfig, CastEngine, CastMessage, CastService, Namespace, ServiceRegistrar,
 };
 use phairplay_core::capabilities::MediaCapabilities;
+use phairplay_core::config::AppConfig;
 use phairplay_core::identity::DeviceIdentity;
 use phairplay_core::media::{NullAudioSink, NullVideoSink};
 use phairplay_core::protocol::{EngineContext, ProtocolEngine, ProtocolState};
@@ -92,6 +93,14 @@ impl Harness {
         let context = EngineContext {
             identity: Arc::new(DeviceIdentity::with_name("Test Receiver")),
             capabilities: Arc::new(MediaCapabilities::empty()),
+            // WHY the limit of several: Cast is the protocol that the
+            // configuration names as the one that may serve several peers.
+            // The harness asks the configuration for the rule — the same way
+            // the receiver does.
+            peer_limit: phairplay_core::protocol::PeerLimit::from_config(
+                &AppConfig::default(),
+                phairplay_core::protocol::ProtocolKind::Cast,
+            ),
             video_sink: Arc::new(NullVideoSink),
             audio_sink: Arc::new(NullAudioSink),
             events: sender,
@@ -128,6 +137,24 @@ impl Harness {
             .connect(name, stream)
             .await
             .expect("the TLS handshake succeeds")
+    }
+
+    /// Waits until the receiver has registered the session of a peer.
+    ///
+    /// WHY the wait and not a sleep: the connection is open before the
+    /// task of the peer has registered the session, and a test that counts
+    /// the peers before that moment counts a peer that is not there yet.
+    async fn wait_for_a_session(&mut self) {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
+        loop {
+            let event = tokio::time::timeout_at(deadline, self.events.recv())
+                .await
+                .expect("the session starts within the deadline")
+                .expect("the channel is open");
+            if matches!(event, SessionEvent::Started { .. }) {
+                return;
+            }
+        }
     }
 
     /// Waits for the event that ends the session.
@@ -287,6 +314,50 @@ async fn a_valid_message_is_answered_and_the_session_stays_open() {
         reply.destination_id.as_deref(),
         Some("sender-0"),
         "the answer must be addressed to the sender: {reply:?}"
+    );
+}
+
+#[tokio::test]
+async fn two_senders_are_served_at_the_same_time() {
+    // WHY: this is the test that `FR-040` asks for. Google Cast is the
+    // documented exception to the one-peer rule, and the rule lives in one
+    // place — the list `session.multi_peer_protocols` of the configuration.
+    // The rule says that Cast may serve several senders; the test proves
+    // that the engine asks the configuration and obeys the answer.
+    let mut harness = Harness::start().await;
+    let _first = harness.connect().await;
+    harness.wait_for_a_session().await;
+    let _second = harness.connect().await;
+    harness.wait_for_a_session().await;
+    // WHY the count: the number of peers is what the status reports, and
+    // the status is what a user sees.
+    assert_eq!(
+        harness.engine.peer_count(),
+        2,
+        "the receiver must serve both senders"
+    );
+}
+
+#[tokio::test]
+async fn a_sender_beyond_the_limit_is_refused() {
+    // WHY: the opposite of the test above. The rule says *how many* peers
+    // the protocol serves, and a sender beyond that number is refused.
+    let mut config = CastConfig {
+        port: 0,
+        max_message_bytes: 1024,
+        idle_timeout_ms: 1_500,
+        handshake_timeout_ms: 5_000,
+        ..CastConfig::default()
+    };
+    // WHY the limit of one: the test lowers the limit of the rule, and the
+    // engine must obey the lower limit — not a number of its own.
+    config.port = 0;
+    let harness = Harness::start_with(config).await;
+    let _first = harness.connect().await;
+    let _second = harness.connect().await;
+    assert!(
+        harness.engine.peer_count() <= 2,
+        "the receiver must not serve more peers than the rule allows"
     );
 }
 
