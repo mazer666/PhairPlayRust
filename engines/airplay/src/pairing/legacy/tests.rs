@@ -113,6 +113,42 @@ fn step_one_answers_with_a_key_and_a_salt() {
 }
 
 #[test]
+fn the_public_key_is_always_the_size_of_the_group() {
+    // WHY: the sender reads the public key as a fixed number of bytes. The
+    // minimal representation of a number drops the leading zeros, and a key
+    // that is one byte shorter than the group is a key that the sender
+    // reads as a different number — the pairing breaks. The probability of
+    // that is one in 256, and it broke the pairing of the sessions that
+    // were unlucky.
+    //
+    // WHY the loop runs the exchange many times: the key is random, and a
+    // single run does not reach the case that the test is about. The loop
+    // runs it often enough that the case is reached — and the test proves
+    // that it is not.
+    let mut lengths = std::collections::BTreeSet::new();
+    for _ in 0..2_000 {
+        let mut pairing = LegacyPinPairing::new("1234", [0u8; 32]);
+        let request = PlistValue::dictionary(vec![
+            ("method".into(), PlistValue::String("pin".into())),
+            ("user".into(), PlistValue::String("mac-1".into())),
+        ]);
+        let reply = pairing.handle(&request).expect("step 1");
+        let pk = reply
+            .values
+            .iter()
+            .find(|(key, _)| key == "pk")
+            .and_then(|(_, value)| value.as_data())
+            .expect("pk");
+        lengths.insert(pk.len());
+    }
+    assert_eq!(
+        lengths,
+        std::collections::BTreeSet::from([GROUP_BYTES]),
+        "the public key is not always the size of the group: {lengths:?}"
+    );
+}
+
+#[test]
 fn a_client_that_knows_the_pin_completes_the_exchange() {
     let accessory_public = [0x5Au8; 32];
     let mut pairing = LegacyPinPairing::new("1234", accessory_public);

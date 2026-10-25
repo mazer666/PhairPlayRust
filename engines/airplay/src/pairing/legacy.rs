@@ -166,7 +166,14 @@ impl LegacyPinPairing {
         let k = BigUint::from_bytes_be(&sha1(&[&pad(&group()), &pad(&BigUint::from(2u8))]));
         let server_public =
             (&k * &verifier + BigUint::from(2u8).modpow(&server_private, &group())) % group();
-        let server_public_bytes = to_bytes(&server_public);
+        // WHY the padded form: the number is left-padded to the size of the
+        // group, because the sender reads the key as a fixed number of
+        // bytes. The minimal representation of a number drops the leading
+        // zeros — and a key that is one byte shorter than the group is a
+        // key that the sender reads as a different number. The probability
+        // of that is one in 256, and it breaks the pairing of exactly the
+        // sessions that are unlucky.
+        let server_public_bytes = pad(&server_public);
 
         self.step_one = Some(StepOne {
             username,
