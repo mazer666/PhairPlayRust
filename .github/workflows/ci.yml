@@ -244,8 +244,29 @@ jobs:
           swift build
           swift test
 
-      - name: The Android shell
-        uses: android-actions/setup-android@v3
+      # WHY the packages are named explicitly and the path of the tool is
+      # set by hand: the action `android-actions/setup-android` installs a
+      # package named `tools` that the repository of Google does not carry
+      # any more, and the job fails before it builds anything. The runner
+      # image has the command line tools already, under a path that is not
+      # in the PATH of the shell.
+      - name: The Android SDK
+        run: |
+          SDK_ROOT=/usr/local/lib/android/sdk
+          if [ ! -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$SDK_ROOT}}"
+          fi
+          echo "The SDK root: $SDK_ROOT"
+          export ANDROID_HOME="$SDK_ROOT"
+          export ANDROID_SDK_ROOT="$SDK_ROOT"
+          export PATH="$SDK_ROOT/cmdline-tools/latest/bin:$SDK_ROOT/platform-tools:$PATH"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager --list_installed | grep -E "platforms;android-35|build-tools;35.0.0"
 
       - name: The unit tests of the Android shell
         run: |
