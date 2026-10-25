@@ -14,6 +14,16 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
 
 ## [Unreleased]
 
+### Notes
+
+- The section of the next release is written here. The section of the
+  release **v0.3.0** is below.
+
+---
+
+## [0.3.0] — 2026-10-25
+
+
 ### Added
 
 - **The fifth protocol: Samsung Smart View** — the MultiScreen Framework of
@@ -99,6 +109,24 @@ receiver, so a control point that asks for everything has to see it —
 otherwise the receiver is found only by a sender that already knows the name
 of the framework.
 
+**The bindings of the bridge were edited by hand instead of being
+generated.** The bindings that are checked into the repository carried the
+checksum `31533` for the constructor of the receiver; the library that is
+built from the sources of the same revision reports `5570`. UniFFI refuses
+to start when the two do not match — "UniFFI API checksum mismatch" — so
+**every** native shell died at the start, before it could show anything. The
+checksum covers the documentation of the function, because the documentation
+is part of the metadata: the comment of the constructor was changed in the
+Rust source, and the binding was edited by hand instead of being
+regenerated. The bindings are generated again, and a new test instantiates
+the receiver — which is what actually checks the checksum.
+
+**The version of the workspace was never set.** The release v0.2.0 was
+published with the file `VERSION` still carrying `0.1.0`, because nothing
+compared the three places that carry the version. The new gate
+`scripts/check-version-consistency.sh` compares them, and it runs in the
+continuous integration and in the gate of the project.
+
 The native shells did not compile against the bridge of the current core. The
 bridge requires the byte budget of the audio queue since the limits of the
 process were extended, and neither shell handed it over — the record of the
@@ -181,5 +209,7 @@ table in [`README.md`](README.md).
   Miracast session needs the WFD permission of the platform, and the
   receiver never talks to anything but the local network.
 
-[Unreleased]: https://github.com/mazer666/PhairPlayRust/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/mazer666/PhairPlayRust/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/mazer666/PhairPlayRust/releases/tag/v0.3.0
+[0.2.0]: https://github.com/mazer666/PhairPlayRust/releases/tag/v0.2.0
 [0.1.0]: https://github.com/mazer666/PhairPlayRust/releases/tag/v0.1.0

@@ -27,7 +27,7 @@ android {
         minSdk = 33
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "0.3.0"
 
         ndk {
             // The primary release ABI of the application.
