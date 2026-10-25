@@ -34,8 +34,10 @@ way to measure it.
 | The engine starts, advertises, stops and frees its ports | the state machine of the build contract | **pass** | `the_engine_advertises_after_it_started`, `the_engine_stops_and_frees_the_ports`, `the_engine_can_be_started_again_after_it_was_stopped` (75 unit tests, 0 failed) |
 | The status is readable from another thread during the transition | the state is visible, no deadlock | **pass** | `the_status_is_readable_while_the_engine_starts` |
 | The fifth protocol is registered with the supervisor | an engine for every protocol of the vocabulary | **pass** | `cargo test --offline -p phairplay-ffi --lib` → **43 passed, 0 failed** → `composition::tests::the_engines_are_registered_with_the_supervisor` — the loop covers `ProtocolKind::SmartView` |
-| The fifth protocol is among the protocols that the receiver starts | `advertising` | **NOT met in the default configuration** | the run of the receiver: `Samsung Smart View not started — … the SSDP socket could not be opened: Address already in use (os error 98)`; the same run with `[protocols.dlna] enabled = false` reports `Samsung Smart View advertising` |
-| The fifth protocol can be switched off in the configuration | `not started` + the reason | **pass** | the run of the receiver with `[protocols.smartview] enabled = false`: `Samsung Smart View not started — the protocol is switched off in the configuration`; `cargo test --offline -p phairplay-ffi --lib` → `composition::tests::a_protocol_that_is_switched_off_is_not_started` (43 passed, 0 failed) |
+| The fifth protocol is among the protocols that the receiver starts | `advertising` | **pass** | the run of the receiver: `Samsung Smart View advertising` — **5 of 5 protocols are running**. The two protocols that share the discovery port are served by **one** listener, and the network probe proves that each of them answers for its own target only: a search for `urn:schemas-upnp-org:device:MediaRenderer:1` is answered by the renderer and by nothing else, a search for `urn:samsung.com:service:MultiScreenService:1` by the framework and by nothing else, and a search for `ssdp:all` by both — once per service type. `ADR-0007` |
+| The fifth protocol can be switched off in the configuration | `not started` + the reason | **pass** | the run of the receiver with `[protocols.smartview] enabled = false`: `Samsung Smart View not started — the protocol is switched off in the configuration`; `cargo test --offline -p phairplay-ffi --lib` → `composition::tests::a_protocol_that_is_switched_off_is_not_started` |
+| **Switching one of the two protocols off keeps the other one running** | the other one still advertises | **pass** | `composition::tests::switching_one_protocol_off_does_not_take_the_other_one_with_it` — with `[protocols.smartview] enabled = false` the DLNA renderer still runs. The listener belongs to the process, not to one protocol: a service that stops leaves the registry, and the listener stays |
+| Both protocols of the shared listener run at the same time | both advertise | **pass** | `composition::tests::both_protocols_of_the_shared_listener_run_together` |
 | The fifth card is in the dashboard | five cards, one per protocol | **pass (the code)** — the browser check **NOT RUN** | `apps/web/assets/api.js:33` lists `smartview`, `apps/web/assets/protocol-cards.js:103` builds one card per entry of that list, `apps/web/index.html:77` carries the glyph, `apps/web/assets/lang/{en,de}.js` carry the name; the running receiver answers `GET http://127.0.0.1:7879/api/status` with the entry `{"protocol":"smartview","display_name":"Samsung Smart View","state":"advertising","enabled":true,"tcp_port":8001,"udp_port":1900,...}` |
 | A Galaxy device finds the receiver in the list of *Smart View* and connects to it | the receiver in the list of the phone, the phone connects | **NOT RUN** | no Galaxy phone or tablet and no second host in the sandbox. The device test plan has **no Smart View scenario** yet ([`docs/guides/DEVICE_TEST_PLAN.md`](../guides/DEVICE_TEST_PLAN.md) has the paths AirPlay 2, Miracast, Cast, DLNA) — an open point for the owner, §8 |
 | The picture of a Galaxy device reaches the display of the receiver | the picture | **NOT RUN — and not implementable yet** | the message format of the channel is proprietary: `EXC-011`, §8 and §10 |
@@ -50,11 +52,8 @@ phairplay-web: the receiver starts 5 protocols:
   Miracast         advertising
   Google Cast      advertising
   DLNA / UPnP      advertising
-  Samsung Smart View not started — protocol engine error: smartview engine could not be
-  started: the SSDP responder could not be started: the SSDP socket could not be opened:
-  Address already in use (os error 98) -> …
-phairplay-web: 4 of 5 protocols are running; the reason of every failure is in the status
-of the protocol.
+  Samsung Smart View advertising
+phairplay-web: 5 of 5 protocols are running.
 
 $ phairplay-web --profile generic --config <dlna off> --no-dashboard --port 7879
   DLNA / UPnP      not started — the protocol is switched off in the configuration
@@ -148,8 +147,8 @@ measured values.
   the generic profile, and the API root with the same name. The dashboard
   shows one card per protocol; the fifth card is built from the same list as
   the other four (`apps/web/assets/api.js:33`).
-- The distinction of the states ("disabled", "advertising", "streaming", "error"): **proved for the fifth protocol.** The run of the receiver shows three of the four states of the fifth protocol — `advertising` (DLNA off), `not started — the protocol is switched off in the configuration` (disabled) and `not started — … Address already in use (os error 98)` (error, with the reason). The state `streaming` is proved by the tests of the engine (`the_channel_is_held_open_and_the_sender_is_counted`), not on a device.
-- The clarity of an error message: **proved.** The reason of the failure of the fifth protocol reaches the status of the protocol and the summary of the receiver with the cause and the system error (`os error 98`); the composition root reports the failure of one protocol without stopping the others — *4 of 5 protocols are running*.
+- The distinction of the states ("disabled", "advertising", "streaming", "error"): **proved for the fifth protocol.** The run of the receiver shows two of the four states of the fifth protocol — `advertising` in the default configuration, and `not started — the protocol is switched off in the configuration` (disabled) when the user switches it off. The state `streaming` is proved by the tests of the engine (`the_channel_is_held_open_and_the_sender_is_counted`), not on a device. The state `error` is proved by the behaviour of the composition root, not by a failure of the fifth protocol: the receiver reports the reason of a protocol that cannot start and keeps the others running.
+- The clarity of an error message: **proved.** The reason of the failure of a protocol reaches the status of the protocol and the summary of the receiver with the cause and the system error; the composition root reports the failure of one protocol without stopping the others — the run of the receiver reports *5 of 5 protocols are running* in the default configuration, and a protocol that fails is named with its reason.
 - The mobile / native behaviour: **partly proved.** The native shells name the
   fifth protocol, map it from the kind of the bridge, read its configuration and
   draw it in the grid of the cards. The Android shell builds and its unit tests
@@ -281,7 +280,7 @@ limited, **S3** cosmetic, **S4** a wording.
 
 | # | Limitation | Severity | Evidence | Owner |
 |---|---|---|---|---|
-| L-1 | **The fifth protocol does not start in the default configuration.** The DLNA renderer and the Smart View responder both want the SSDP port 1900; the DLNA responder binds it without `SO_REUSEADDR` (`engines/dlna/src/ssdp.rs:184`), the Smart View responder with it (`engines/smartview/src/ssdp.rs:322`). On Linux two UDP sockets may share an address and a port only when **both** set the option. The DLNA engine is started first (`ProtocolKind::ALL`), so the Smart View responder is refused with `Address already in use (os error 98)` and the fifth protocol never reaches the advertising state. | **S1** | the run of the receiver (§1); the mechanism measured on this host: a socket without `SO_REUSEADDR` binds `0.0.0.0:1900`, a second one with the option is refused with errno 98, two with the option both bind | the owner: either the DLNA responder sets the option as well, or one shared responder in `engines/discovery` serves the group for every protocol of the host |
+| L-1 | **RESOLVED — the fifth protocol starts in the default configuration.** The DLNA renderer and the Smart View responder both wanted the SSDP port 1900. On Linux two sockets may share an address and a port only when **both** set `SO_REUSEADDR` — but the real restriction is stronger: `IP_ADD_MEMBERSHIP` answers `EADDRINUSE` for a second membership of the same multicast group, and the option does not lift that. The DLNA engine is started first (`ProtocolKind::ALL`), so the Smart View responder was refused with `Address already in use (os error 98)` and the fifth protocol never reached the advertising state. **The resolution:** the process owns **one** SSDP listener and every service registers itself with it (`core/phairplay-core/src/ssdp.rs`, `ADR-0007`). The run of the receiver now reports **5 of 5 protocols are running**, and the network probe proves that each service answers for its own target only. | **S1 — closed** | the run of the receiver (§1): `5 of 5 protocols are running`; the network probe: a search for the renderer is answered by the renderer and by nothing else, a search for the framework by the framework and by nothing else, a search for `ssdp:all` by both; the tests `both_protocols_of_the_shared_listener_run_together` and `switching_one_protocol_off_does_not_take_the_other_one_with_it` | closed — the listener lives in the core and the registry is keyed by the service, not by the device (`SsdpService::key`) |
 | L-2 | **The service type `_samsungmsf._tcp` is not published.** The type belongs to the vocabulary of the core (`ProtocolKind::SmartView::mdns_service_types()` — `core/phairplay-core/src/protocol.rs:94`), but no component of the receiver publishes an mDNS record for it: the discovery crate has no case for it (`engines/discovery/src/mdns/config.rs` — the `_ => continue` arm) and the discovery crate is not registered in the composition root. The discovery of the fifth protocol is therefore **SSDP-only**, which is the path Samsung documents. | **S2** | `core/phairplay-core/src/protocol.rs:94`; `engines/discovery/src/mdns/config.rs`; `platform/phairplay-ffi/src/composition.rs:123` (five engines, no discovery engine) | the owner: either the discovery crate gets a case for the type, or the vocabulary stops claiming that the type is advertised |
 | L-3 | **The device test plan has no Smart View scenario.** The gate that needs a Galaxy device therefore has no script to run. | **S2** | [`docs/guides/DEVICE_TEST_PLAN.md`](../guides/DEVICE_TEST_PLAN.md) — the sections 2.1 to 2.4 cover AirPlay 2, Miracast, Cast and DLNA | the owner: a section 2.5 for the path of Smart View, with the steps and the expected result |
 | L-4 | **The dashboard gate of the browser was not re-run** for the fifth card. The card is in the code and the API of the running receiver answers with the fifth entry, but the check of the layout, the contrast and the keyboard in a real browser belongs to the dashboard milestone. | **S3** | §5 | the dashboard milestone |
@@ -383,20 +382,23 @@ The limitation is named, not hidden:
 > the user, who taps the receiver in the list of the phone and sees nothing
 > happen.
 
-Three reservations travel with the acceptance:
+Two reservations travel with the acceptance:
 
-1. **The fifth protocol does not start in the default configuration** (L-1).
-   The SSDP port of the workspace is contested between the DLNA renderer and
-   the Smart View responder, and the renderer holds it first. The feature is
-   reachable — the same run with the DLNA renderer switched off reports
-   `Samsung Smart View advertising` — but it is not reachable out of the box,
-   and that is a defect of the receiver, not of the milestone.
-2. **The device test is outstanding** (L-3). This record proves the
+1. **The device test is outstanding** (L-3). This record proves the
    software, not the product on a television. A milestone may not be
    *announced* on the strength of this record; it may only be announced
    together with the device evidence of the device test plan.
-3. **The service type `_samsungmsf._tcp` is not published** (L-2). The
+2. **The service type `_samsungmsf._tcp` is not published** (L-2). The
    vocabulary of the core claims it, the receiver does not publish it.
+
+The third reservation of the first version of this record — *the fifth
+protocol does not start in the default configuration* (L-1) — **does not
+travel any more.** The conflict of the two responders is resolved: the
+process owns one SSDP listener, every service registers itself with it, and
+the run of the receiver reports **5 of 5 protocols are running**. The
+reservation is kept in the table of §8 with the note *RESOLVED*, because a
+limitation that was found has to stay visible in the record — with the
+truth about its state.
 
 **The decision names the role that took it:** the Rust QA Engineer, on
 2026-10-24, on the branch `feat/other-devices` at `2d0c4b4`, with the

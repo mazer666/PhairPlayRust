@@ -243,10 +243,49 @@ number.
 | AirPlay 2 | the audio path of RAOP | UDP 6000/7001 | used by the audio-only session |
 | Miracast | the WFD control plane | the port that the sink announced | the sender connects to the port of the Information Element; it is not a fixed number |
 | Google Cast | the CastV2 control plane | TCP 8009 | TLS |
-| DLNA / UPnP | SSDP discovery | UDP 1900 | multicast |
+| DLNA / UPnP | SSDP discovery | UDP 1900 | multicast; **one** listener serves this protocol and Smart View |
 | DLNA / UPnP | the description documents and the SOAP control | TCP 8200 | the conventional port of the media renderer |
+| Smart View | SSDP discovery | UDP 1900 | multicast; the same listener as the DLNA renderer |
 | Smart View | the API and the channel of the framework | TCP 8001 | the port of the MultiScreen Framework |
 | all | DNS-SD | UDP 5353 | multicast |
+
+### The one SSDP listener
+
+DLNA and Smart View are both discovered over SSDP, and SSDP lives on one
+multicast group: `239.255.255.250:1900`. **Linux allows only one socket per
+multicast group** — `IP_ADD_MEMBERSHIP` answers `EADDRINUSE` for a second
+membership of the same group, and `SO_REUSEADDR` does not lift that
+restriction, because it is the *membership* and not the port that is
+exclusive.
+
+The receiver therefore owns **one** listener for the whole process
+([`ADR-0007`](../../docs/adr/ADR-0007-one-ssdp-listener-for-the-whole-receiver.md)),
+and every service registers itself with it. The listener asks every service
+whether a message is a search that it answers:
+
+| The sender searches for | the renderer answers | the framework answers |
+|---|---|---|
+| `urn:schemas-upnp-org:device:MediaRenderer:1` | yes | no |
+| `urn:samsung.com:service:MultiScreenService:1` | no | yes |
+| `ssdp:all` | yes, with the type of the renderer | yes, with the type of the framework |
+
+A query for `ssdp:all` is answered once per service type of the device, as
+the UPnP device architecture asks. A service that answers for a type it does
+not have appears in the device list of every control point on the network —
+so the renderer does not answer for the framework and the framework does not
+answer for the renderer.
+
+**Switching one of the two off keeps the other one running.** The switch of
+a protocol is the key `enabled` in its section of the configuration:
+
+```toml
+[protocols.dlna]
+enabled = false
+```
+
+The listener belongs to the process, not to one protocol: a service that
+stops leaves the registry, and the listener stays and keeps answering for
+the services that are still registered.
 
 The receiver does not pin these ports in the configuration: the
 `protocols.<name>.port` key of

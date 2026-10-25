@@ -259,7 +259,17 @@ responder want the same SSDP port, and the renderer holds it first. The
 acceptance record of M5 names the mechanism: the DLNA responder binds its
 socket without `SO_REUSEADDR`, the Smart View responder with it, and on
 Linux two UDP sockets may share an address and a port only when **both** set
-the option. The run of the receiver shows it:
+the option.
+
+> **This open point was closed after this release.** The notes of a release
+> describe the release and are not rewritten afterwards — the run below is
+> the run of the revision `2d0c4b4`. The conflict was resolved by giving
+> the process **one** SSDP listener that every service registers itself with
+> ([`../adr/ADR-0007-one-ssdp-listener-for-the-whole-receiver.md`](../adr/ADR-0007-one-ssdp-listener-for-the-whole-receiver.md));
+> the current run of the receiver reports **5 of 5 protocols are running**.
+> See the acceptance record of M5, §8 (L-1).
+
+The run of the receiver at the revision of this release shows it:
 
 ```text
 $ phairplay-web --profile generic --no-dashboard --port 7879

@@ -60,6 +60,15 @@ not a receiver that is finished.
 4. **A service that stops leaves the registry; the listener stays.** The
    listener belongs to the process, not to one protocol. A receiver that
    switches DLNA off keeps announcing Smart View.
+5. **The registry is keyed by the service, not by the device.** The two
+   services belong to the **same** device and therefore carry the **same**
+   unique name — `uuid:<the device id>` names the device, not the service.
+   A registry that is keyed by the unique name alone holds only one of the
+   two services: the second one pushes the first out of it. Both protocols
+   would then report "advertising", and in the network the renderer would
+   answer for the framework and the framework for the renderer. The key is
+   therefore the unique name **and** the type of the service
+   (`SsdpService::key`).
 
 ## Consequences
 
@@ -74,6 +83,14 @@ not a receiver that is finished.
   and the rule of the protocol.
 - The tests of the responder moved with it. There is one implementation and
   one place that proves it behaves.
+- **The first version of the registry was keyed by the unique name alone.**
+  The two services of the device share that name, so one of them pushed the
+  other out of the registry — and the defect was invisible in the status of
+  the protocols, because both of them reported "advertising". It was found
+  by a network probe, not by a unit test: the test of the registry used two
+  *different* unique names, which is not what the receiver produces. The
+  test now uses the name that the receiver really produces, and the
+  registry is keyed by `SsdpService::key`.
 
 ## Alternatives Considered
 
@@ -99,5 +116,16 @@ not a receiver that is finished.
 - `cargo test -p phairplay-dlna --offline` and
   `cargo test -p phairplay-smartview --offline` — the protocols keep their
   own rules and their own answers.
+- `cargo test -p phairplay-core --offline ssdp` — the test
+  `two_services_of_the_same_device_stay_in_the_registry` uses the unique
+  name that the receiver really produces and proves that both services stay
+  in the registry, that each of them answers for its own target, and that
+  the removal of one does not take the other with it.
 - The receiver itself: `phairplay-web --profile generic --no-dashboard`
   reports **5 of 5 protocols are running**.
+- The network: an `M-SEARCH` for
+  `urn:schemas-upnp-org:device:MediaRenderer:1` is answered by the renderer
+  and by nothing else; an `M-SEARCH` for
+  `urn:samsung.com:service:MultiScreenService:1` is answered by the
+  framework and by nothing else; an `M-SEARCH` for `ssdp:all` is answered
+  by both, once per service type, as the UPnP device architecture asks.

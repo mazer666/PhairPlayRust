@@ -81,6 +81,24 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
 
 ### Fixed
 
+**The two protocols that share the discovery port kept each other out of the
+registry.** The DLNA renderer and the Samsung Smart View receiver belong to
+the **same** device and therefore carry the **same** unique name — the UDN
+names the device, not the service. The registry of the shared SSDP listener
+was keyed by that name, so the second service pushed the first one out of
+it. Both protocols reported "advertising", and the defect was invisible in
+the status: in the network the renderer answered for the framework and the
+framework answered for the renderer. The registry is now keyed by the
+service (`SsdpService::key`), and the test of it uses the unique name that
+the receiver really produces.
+
+**The framework of Samsung did not answer a search for `ssdp:all`.** The
+UPnP device architecture says that a query for the wildcard is answered once
+per service type of the device. The framework is a service type of this
+receiver, so a control point that asks for everything has to see it —
+otherwise the receiver is found only by a sender that already knows the name
+of the framework.
+
 The native shells did not compile against the bridge of the current core. The
 bridge requires the byte budget of the audio queue since the limits of the
 process were extended, and neither shell handed it over — the record of the
