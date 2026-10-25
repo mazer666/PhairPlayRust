@@ -132,6 +132,8 @@ commands are the ones that were run.
 | The continuous integration | the run of the commit of this release | **all five jobs green** — *Quality Gate*, *Licenses*, *Security Audit*, *Structure*, *Shells (Android, macOS)* |
 | The receiver | `phairplay-web --profile generic --no-dashboard --port 7879` | **5 of 5 protocols are running** |
 | The discovery in the network | an `M-SEARCH` for the renderer, for the framework and for `ssdp:all` | the renderer answers for the renderer, the framework for the framework, and both for the wildcard — **0 foreign answers** |
+| The archive of Linux | the archive was unpacked and the receiver was started out of it | **5 of 5 protocols are running** |
+| The checksums of the archives | `sha256sum -c *.sha256` | every archive: **OK** |
 
 **The two defects that the release repairs were proved against the old
 code**, not asserted:
@@ -198,10 +200,27 @@ artefacts and the platforms:
 
 | Platform | The artefact | The trigger that it is published |
 |---|---|---|
-| **Linux** (x86-64, aarch64) | `phairplay-web` — the headless receiver with the dashboard | the alpha: the code is delivered and the gate is green |
-| **Windows** (x86-64) | `phairplay-web.exe` | the alpha |
+| **Linux** (x86-64) | `phairplayrust-0.3.0-linux-x86_64.tar.gz` | the alpha: the code is delivered and the gate is green |
+| **Linux** (aarch64) | `phairplayrust-0.3.0-linux-aarch64.tar.gz` | the alpha |
+| **Windows** (x86-64) | `phairplayrust-0.3.0-windows-x86_64.tar.gz` | the alpha |
 | **Android** (arm64-v8a, API 33+) | the APK with the native bridge | the **beta**: the device test of the shell is green |
 | **macOS** (13+, Apple silicon) | the `.app` | the **beta**: the device test of the shell is green |
+
+**Every archive carries the checksum of itself** in a file next to it, so
+that a user can tell whether the file is the one that the release
+published:
+
+```bash
+sha256sum -c phairplayrust-0.3.0-linux-x86_64.tar.gz.sha256
+```
+
+**The archive of Linux was tested, not only built:** it was unpacked and
+the receiver was started out of it — the run reports **5 of 5 protocols are
+running**. The archive of Windows was built and inspected: it carries the
+program as `phairplay-web.exe`. The program of the archive of Windows was
+**not** started — the machine of the measurement has no Windows. The
+release process says that a binary is published when **its own** device
+test is green, and that rule is the reason the shell binaries wait.
 
 **Why the shells wait.** A binary is a build artefact of a platform, of a
 toolchain and of a licence, and a binary that nobody checked is a promise

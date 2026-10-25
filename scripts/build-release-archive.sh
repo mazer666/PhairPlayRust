@@ -39,28 +39,34 @@ if [ -z "$TARGET" ] || [ -z "$OUTPUT" ]; then
 fi
 
 VERSION="$(tr -d '[:space:]' < VERSION)"
-BINARY="$REPO_ROOT/target/$TARGET/release/phairplay-web"
 
-if [ ! -x "$BINARY" ]; then
+# The name of the architecture, for the name of the file. The name of the
+# binary differs on Windows: the program carries the suffix .exe.
+# WHY the platform is part of the name: two archives of the same version
+# and the same architecture — one for Linux and one for Windows — must not
+# carry the same name, or the second one overwrites the first.
+case "$TARGET" in
+    x86_64-unknown-linux-gnu) ARCH="x86_64"; PLATFORM="linux"; BINARY_NAME="phairplay-web" ;;
+    aarch64-unknown-linux-gnu) ARCH="aarch64"; PLATFORM="linux"; BINARY_NAME="phairplay-web" ;;
+    x86_64-pc-windows-gnu) ARCH="x86_64"; PLATFORM="windows"; BINARY_NAME="phairplay-web.exe" ;;
+    *) ARCH="$TARGET"; PLATFORM="unknown"; BINARY_NAME="phairplay-web" ;;
+esac
+
+BINARY="$REPO_ROOT/target/$TARGET/release/$BINARY_NAME"
+
+if [ ! -f "$BINARY" ]; then
     printf 'ERROR: the binary %s does not exist.\n' "$BINARY" >&2
     printf '       Build it with: cargo build --release -p phairplay-web --target %s\n' "$TARGET" >&2
     exit 1
 fi
 
-# The name of the architecture, for the name of the file.
-case "$TARGET" in
-    x86_64-unknown-linux-gnu) ARCH="x86_64" ;;
-    aarch64-unknown-linux-gnu) ARCH="aarch64" ;;
-    *) ARCH="$TARGET" ;;
-esac
-
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
-ROOT="$STAGE/phairplayrust-$VERSION-$ARCH"
+ROOT="$STAGE/phairplayrust-$VERSION-$PLATFORM-$ARCH"
 
 mkdir -p "$ROOT/bin" "$ROOT/deploy" "$ROOT/config" "$ROOT/licenses"
 
-install -m 0755 "$BINARY" "$ROOT/bin/phairplay-web"
+install -m 0755 "$BINARY" "$ROOT/bin/$BINARY_NAME"
 cp -R deploy/. "$ROOT/deploy/"
 cp -R config/. "$ROOT/config/"
 cp LICENSE THIRD_PARTY.md "$ROOT/licenses/"
@@ -68,7 +74,7 @@ cp -R LICENSES/. "$ROOT/licenses/"
 cp README.md "$ROOT/README.md"
 
 # The readme of the archive: what it is and how it is installed.
-cat > "$ROOT/INSTALL.md" <<'TEXT'
+sed "s|BINARY_NAME|$BINARY_NAME|g" > "$ROOT/INSTALL.md" <<'TEXT'
 # PhairPlayRust — the headless receiver
 
 This archive carries the receiver of PhairPlayRust and the files that a
@@ -90,8 +96,10 @@ checkout, or the binary of this archive — the script accepts both, and
 ## Run without installing
 
 ```bash
-./bin/phairplay-web --profile generic
+./bin/BINARY_NAME --profile generic
 ```
+
+On Windows the binary is `phairplay-web.exe`.
 
 The dashboard is served on the loopback interface. The protocols announce
 the receiver over mDNS and over SSDP — **both are multicast**, and a
@@ -111,7 +119,7 @@ project, the licences of the dependencies and the inventory of them in
 TEXT
 
 # The archive itself. The name carries the version and the architecture.
-NAME="phairplayrust-$VERSION-$ARCH"
+NAME="phairplayrust-$VERSION-$PLATFORM-$ARCH"
 ARCHIVE="$OUTPUT/$NAME.tar.gz"
 mkdir -p "$OUTPUT"
 tar czf "$ARCHIVE" -C "$STAGE" "$NAME"
