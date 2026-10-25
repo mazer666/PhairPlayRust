@@ -1,4 +1,49 @@
 import org.gradle.api.tasks.TaskProvider
+import java.util.Properties
+import java.io.FileInputStream
+
+// The properties of the signing of the release.
+//
+// WHY the order: the file beside the project is for the machine of the
+// owner of the key, the environment variable is for the machine that builds
+// without a checkout of the project, and the file of the Gradle home is for
+// the machine that builds for everybody. The first one that exists wins.
+//
+// WHY the key does not live in the repository: a signing key is a secret,
+// and a secret in a repository is a secret that everybody has. The key of a
+// release is the private half of the identity of the application.
+//
+// WHY the release still builds without a key: an APK that is not signed
+// cannot be installed, and a build that fails without a key is a build that
+// nobody but the owner of the key can run. The release build therefore falls
+// back to a build that is **not** signed, and the acceptance record names
+// the APK as **not signed** — a signed APK is the trigger of the beta in
+// the release plan, and the owner of the key decides when it is reached.
+//
+// EXAMPLE:
+//
+//   printf 'phairplay.signing.storeFile=/secure/keys/phairplay.jks\n\
+//   phairplay.signing.storePassword=…\n\
+//   phairplay.signing.keyAlias=phairplay\n\
+//   phairplay.signing.keyPassword=…\n' > ~/.gradle/gradle.properties
+fun signingProperties(): Properties? {
+    val candidates = listOfNotNull(
+        System.getenv("ANDROID_SIGNING_PROPERTIES")?.let { File(it) },
+        project.rootProject.file("keystore.properties").takeIf { it.exists() },
+        File(System.getProperty("user.home"), ".gradle/gradle.properties")
+            .takeIf { it.exists() },
+    )
+    for (candidate in candidates) {
+        val properties = Properties()
+        FileInputStream(candidate).use { properties.load(it) }
+        if (properties.getProperty("phairplay.signing.storeFile") != null) {
+            return properties
+        }
+    }
+    return null
+}
+
+val signing = signingProperties()
 
 plugins {
     id("com.android.application")
@@ -44,6 +89,25 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            if (signing != null) {
+                // WHY the check on the file: a property that points at a key
+                // that does not exist is a broken build with a message that
+                // says nothing. The check says what is missing.
+                val storeFile = signing.getProperty("phairplay.signing.storeFile")
+                val store = file(storeFile)
+                if (!store.exists()) {
+                    throw GradleException(
+                        "the signing key $storeFile does not exist — the release cannot be signed",
+                    )
+                }
+                signingConfig = signingConfigs.create("release") {
+                    this.storeFile = store
+                    storePassword = signing.getProperty("phairplay.signing.storePassword")
+                    keyAlias = signing.getProperty("phairplay.signing.keyAlias")
+                    keyPassword = signing.getProperty("phairplay.signing.keyPassword")
+                }
+            }
         }
     }
 
@@ -128,12 +192,39 @@ fun registerBuildRustBridge(name: String, profile: String, sourceSet: String): T
         outputs.file(library)
 
         workingDir(repositoryRoot)
-        commandLine("cargo", "build", "--target", "aarch64-linux-android", "-p", "phairplay-ffi")
-        environment("CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER", ndk.resolve("toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang").absolutePath)
-        environment("CARGO_TARGET_AARCH64_LINUX_ANDROID_AR", ndk.resolve("toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar").absolutePath)
-        environment("CC_aarch64_linux_android", ndk.resolve("toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang").absolutePath)
+        // WHY the profile on the command line: the task builds the library
+        // for the variant that is being built — the release variant needs
+        // the release profile of Cargo, and the debug variant the debug
+        // profile. Without the flag the build always uses the debug profile,
+        // and the release variant ships a library that was never optimised.
+        commandLine(
+            "cargo",
+            "build",
+            "--target",
+            "aarch64-linux-android",
+            "-p",
+            "phairplay-ffi",
+            "--profile",
+            profile,
+        )
+        // WHY the toolchain in the PATH: a dependency with a C part — `ring`
+        // — looks for the compiler and the archiver of the target **by
+        // name**, and the name of the archiver of the NDK is `llvm-ar` and
+        // not `aarch64-linux-android-ar`. The build script of that
+        // dependency therefore finds nothing, and the build stops with
+        // "failed to find tool".
+        val toolchain = ndk.resolve("toolchains/llvm/prebuilt/linux-x86_64/bin")
+        environment("PATH", "${toolchain.absolutePath}:${System.getenv("PATH")}")
+        environment("CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER", toolchain.resolve("aarch64-linux-android24-clang").absolutePath)
+        environment("CARGO_TARGET_AARCH64_LINUX_ANDROID_AR", toolchain.resolve("llvm-ar").absolutePath)
+        environment("CC_aarch64_linux_android", toolchain.resolve("aarch64-linux-android24-clang").absolutePath)
+        environment("AR_aarch64_linux_android", toolchain.resolve("llvm-ar").absolutePath)
+        environment("RANLIB_aarch64_linux_android", toolchain.resolve("llvm-ar").absolutePath)
         environment("ANDROID_NDK_HOME", ndk.absolutePath)
-        environment("CARGO_PROFILE_DEV_DEBUG", if (profile == "release") "0" else "2")
+        // WHY the profile is not touched here: the profile of Cargo decides
+        // itself what it optimises. The environment variable that was set
+        // here overwrote the debug information of the release profile, and
+        // the release shipped a library with the symbols of a debug build.
         doFirst {
             // The directory of the libraries is created by the task itself,
             // so that a build that never ran the task does not leave an

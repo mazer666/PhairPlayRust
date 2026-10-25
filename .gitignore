@@ -7,6 +7,12 @@ apps/android/.gradle
 apps/android/build
 apps/android/app/build
 apps/android/local.properties
+# The key of the signing of the release is a secret and never belongs into
+# the repository. The properties that name it are read from the machine of
+# the owner of the key.
+apps/android/keystore.properties
+*.jks
+*.keystore
 apps/macos/.build
 apps/macos/Package.resolved
 
