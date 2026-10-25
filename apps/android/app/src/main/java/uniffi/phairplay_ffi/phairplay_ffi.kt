@@ -1181,7 +1181,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_phairplay_ffi_checksum_method_receiver_stop_protocol() != 15847.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 31533.toShort()) {
+    if (lib.uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 5570.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_phairplay_ffi_checksum_method_platformaudiosink_submit_packet() != 34712.toShort()) {
@@ -1850,6 +1850,11 @@ open class Receiver: Disposable, AutoCloseable, ReceiverInterface
     }
     /**
      * Creates a receiver with the given configuration.
+     *
+     * WHY the engines are registered here: a receiver without engines is a
+     * receiver that cannot receive. The native shells reach the receiver
+     * only through this constructor, so this is the one place where the
+     * composition root has to run for them.
      *
      * # Errors
      * Returns [`FfiError`] when the configuration is invalid or when the

@@ -737,6 +737,11 @@ open class Receiver: ReceiverProtocol, @unchecked Sendable {
     /**
      * Creates a receiver with the given configuration.
      *
+     * WHY the engines are registered here: a receiver without engines is a
+     * receiver that cannot receive. The native shells reach the receiver
+     * only through this constructor, so this is the one place where the
+     * composition root has to run for them.
+     *
      * # Errors
      * Returns [`FfiError`] when the configuration is invalid or when the
      * runtime of the bridge cannot be created.
@@ -4960,7 +4965,7 @@ private let initializationResult: InitializationResult = {
     if (uniffi_phairplay_ffi_checksum_method_receiver_stop_protocol() != 15847) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 31533) {
+    if (uniffi_phairplay_ffi_checksum_constructor_receiver_new() != 5570) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_phairplay_ffi_checksum_method_platformaudiosink_submit_packet() != 34712) {
