@@ -134,6 +134,7 @@ commands are the ones that were run.
 | The discovery in the network | an `M-SEARCH` for the renderer, for the framework and for `ssdp:all` | the renderer answers for the renderer, the framework for the framework, and both for the wildcard — **0 foreign answers** |
 | The archive of Linux | the archive was unpacked and the receiver was started out of it | **5 of 5 protocols are running** |
 | The checksums of the archives | `sha256sum -c *.sha256` | every archive: **OK** |
+| The release page itself | the archive was downloaded from the page of the release, the checksum was verified and the receiver was started out of it | `sha256sum -c`: **OK** — the run reports **5 of 5 protocols are running** |
 
 **The two defects that the release repairs were proved against the old
 code**, not asserted:
@@ -214,13 +215,17 @@ published:
 sha256sum -c phairplayrust-0.3.0-linux-x86_64.tar.gz.sha256
 ```
 
-**The archive of Linux was tested, not only built:** it was unpacked and
-the receiver was started out of it — the run reports **5 of 5 protocols are
-running**. The archive of Windows was built and inspected: it carries the
-program as `phairplay-web.exe`. The program of the archive of Windows was
-**not** started — the machine of the measurement has no Windows. The
-release process says that a binary is published when **its own** device
-test is green, and that rule is the reason the shell binaries wait.
+**The archive of Linux was tested, not only built, and the test was made
+through the release page:** the archive was downloaded from the page of the
+release, the checksum was verified with `sha256sum -c` — **OK** — and the
+receiver was started out of the unpacked archive. The run reports **5 of 5
+protocols are running**.
+
+The archive of Windows was built and inspected: it carries the program as
+`phairplay-web.exe`. The program of the archive of Windows was **not**
+started — the machine of the measurement has no Windows. The release
+process says that a binary is published when **its own** device test is
+green, and that rule is the reason the shell binaries wait.
 
 **Why the shells wait.** A binary is a build artefact of a platform, of a
 toolchain and of a licence, and a binary that nobody checked is a promise
