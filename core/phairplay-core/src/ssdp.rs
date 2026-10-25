@@ -153,6 +153,21 @@ pub struct SsdpService {
 }
 
 impl SsdpService {
+    /// The key under which the service is registered.
+    ///
+    /// WHY the key is more than the unique name: the two services of the
+    /// receiver — the DLNA renderer and the Samsung Smart View receiver —
+    /// belong to the **same** device and carry the **same** UDN, because
+    /// the UDN names the device and not the service. A registry that is
+    /// keyed by the UDN alone lets one service push the other out of it:
+    /// both protocols report "advertising", and in the network the renderer
+    /// answers for the framework and the framework answers for the renderer.
+    /// The key therefore names the service *and* the device.
+    #[must_use]
+    pub fn key(&self) -> String {
+        format!("{}#{}", self.usn, self.primary_target)
+    }
+
     /// The type the service answers a search target with.
     ///
     /// WHY: `None` means that the service does not answer for this target
@@ -281,18 +296,24 @@ impl SsdpResponder {
 
     /// Adds a service to the registry.
     ///
-    /// WHY: the service is keyed by its unique name, so that a service
-    /// that is started twice replaces itself and does not answer twice.
+    /// WHY the key is the key of the service and not its unique name: two
+    /// services of the same device carry the same unique name, and a
+    /// registry that is keyed by it would hold only one of them. See
+    /// [`SsdpService::key`].
     pub fn add_service(&self, service: SsdpService) {
         if let Ok(mut services) = self.services.lock() {
-            services.insert(service.usn.clone(), service);
+            services.insert(service.key(), service);
         }
     }
 
     /// Removes a service from the registry.
-    pub fn remove_service(&self, usn: &str) {
+    ///
+    /// WHY the key is the key of the service: the two services of the device
+    /// share their unique name, and a removal that is keyed by it would
+    /// take the other service with it.
+    pub fn remove_service(&self, key: &str) {
         if let Ok(mut services) = self.services.lock() {
-            services.remove(usn);
+            services.remove(key);
         }
     }
 

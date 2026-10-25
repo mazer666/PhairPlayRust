@@ -321,7 +321,7 @@ impl ProtocolEngine for SmartViewEngine {
         if let Err(error) = runtime.ssdp.withdraw(&service) {
             tracing::warn!(reason = %error, "the SSDP farewell could not be sent");
         }
-        runtime.ssdp.remove_service(&runtime.udn);
+        runtime.ssdp.remove_service(&service.key());
         runtime.server.stop().await;
         {
             let mut lifecycle = self.lock_lifecycle();

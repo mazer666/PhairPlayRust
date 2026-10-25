@@ -43,6 +43,25 @@ fn the_search_target_is_the_one_samsung_documents() {
 }
 
 #[test]
+fn a_search_for_everything_is_answered() {
+    // WHY: the UPnP device architecture says that a query for `ssdp:all` is
+    // answered once per service type of the device. The framework of Samsung
+    // is a service type of this receiver, so a control point that asks for
+    // everything has to see it — otherwise the receiver is found only by a
+    // sender that knows the name of the framework.
+    let message = search().replace(SEARCH_TARGET, "ssdp:all");
+    assert!(is_smartview_search(&message));
+
+    // WHY the answer carries the type of the service and not the wildcard:
+    // the answer has to tell the control point *what* it found.
+    let service = service("http://192.168.1.10:8001/description.xml", "uuid:abc");
+    assert_eq!(
+        service.answer_target("ssdp:all"),
+        Some(SEARCH_TARGET.to_string())
+    );
+}
+
+#[test]
 fn a_search_for_another_service_is_not_answered() {
     let message = search().replace(SEARCH_TARGET, "urn:schemas-upnp-org:device:MediaRenderer:1");
     assert!(!is_smartview_search(&message));

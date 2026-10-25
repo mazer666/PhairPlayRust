@@ -125,7 +125,7 @@ fn two_services_share_one_responder() {
     let services = responder.services();
     assert_eq!(services.len(), 2, "{services:?}");
 
-    responder.remove_service("uuid:a");
+    responder.remove_service(&dlna.key());
     assert_eq!(responder.services().len(), 1);
     responder.stop();
 }
@@ -137,5 +137,53 @@ fn a_service_that_is_started_twice_answers_once() {
     responder.add_service(dlna.clone());
     responder.add_service(dlna);
     assert_eq!(responder.services().len(), 1);
+    responder.stop();
+}
+
+#[test]
+fn two_services_of_the_same_device_stay_in_the_registry() {
+    // WHY: the two services of the receiver — the DLNA renderer and the
+    // Samsung Smart View receiver — belong to the **same** device and
+    // therefore carry the **same** UDN: `uuid:<the device id>`. The
+    // registry is keyed by the unique name of the service, so a key that is
+    // only the UDN lets one service push the other out of the registry. The
+    // consequence is not visible in the status of the protocols — both say
+    // "advertising" — but in the network: the renderer answers for the
+    // framework and the framework answers for the renderer, and a sender
+    // finds the wrong description document.
+    let responder = SsdpResponder::bind(0).expect("the responder must bind");
+    let device = "uuid:00000000-0000-0000-0000-000000000000";
+    let dlna = service("urn:schemas-upnp-org:device:MediaRenderer:1", device);
+    let smartview = service("urn:samsung.com:service:MultiScreenService:1", device);
+    responder.add_service(dlna.clone());
+    responder.add_service(smartview.clone());
+
+    let services = responder.services();
+    assert_eq!(
+        services.len(),
+        2,
+        "one of the two services of the device has been pushed out of the registry: {services:?}"
+    );
+    assert!(
+        services
+            .iter()
+            .any(|entry| entry.answers("urn:schemas-upnp-org:device:MediaRenderer:1")),
+        "the renderer does not answer for its own target: {services:?}"
+    );
+    assert!(
+        services
+            .iter()
+            .any(|entry| entry.answers("urn:samsung.com:service:MultiScreenService:1")),
+        "the framework does not answer for its own target: {services:?}"
+    );
+
+    // WHY the removal: the two services share the UDN, so the removal has
+    // to remove **one** service and not every service of the device.
+    responder.remove_service(&dlna.key());
+    assert_eq!(
+        responder.services().len(),
+        1,
+        "the removal of the renderer took the framework with it"
+    );
     responder.stop();
 }

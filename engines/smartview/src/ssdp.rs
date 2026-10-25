@@ -92,9 +92,16 @@ const MAN_DISCOVER: &str = "ssdp:discover";
 /// Whether a message is an `M-SEARCH` that this receiver should answer.
 ///
 /// WHY: the receiver answers only the searches that ask for the MultiScreen
-/// service. Answering every search would put the receiver into the device
-/// list of every control point on the network, including the ones that have
-/// nothing to do with Samsung.
+/// service and for the wildcard. Answering every search would put the
+/// receiver into the device list of every control point on the network,
+/// including the ones that have nothing to do with Samsung.
+///
+/// WHY the wildcard counts: the UPnP device architecture says that a query
+/// for `ssdp:all` is answered once per service type of the device. The
+/// framework of Samsung is a service type of this receiver, so a control
+/// point that asks for everything has to see it. Without that, the
+/// framework is found only by a sender that knows its name — and a sender
+/// that does not know it never finds the receiver.
 ///
 /// A search without a `MAN` header is answered as well — some Samsung
 /// senders omit it — but a search with a *different* `MAN` value is not.
@@ -114,7 +121,8 @@ pub fn is_smartview_search(message: &str) -> bool {
     if has_header(message, "content-length") {
         return false;
     }
-    requested_target(message).eq_ignore_ascii_case(SEARCH_TARGET)
+    let target = requested_target(message);
+    target.eq_ignore_ascii_case(SEARCH_TARGET) || target.eq_ignore_ascii_case(core_ssdp::ST_ALL)
 }
 
 /// The search target of an `M-SEARCH` message.
