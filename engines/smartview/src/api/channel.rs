@@ -34,6 +34,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 
 use crate::api::ApiLimits;
+use crate::api::message::ChannelMessage;
 use crate::error::SmartViewError;
 
 /// The GUID of RFC 6455 that the handshake nonce is combined with.
@@ -87,9 +88,14 @@ pub struct Frame {
     /// The payload of a control frame.
     ///
     /// WHY: RFC 6455 limits the payload of a control frame to 125 bytes and
-    /// requires the answer to a ping to repeat it. The payload of a *data*
-    /// frame is not kept: the content of the channel is not interpreted.
+    /// requires the answer to a ping to repeat it.
     pub control_payload: Vec<u8>,
+    /// The payload of a data frame.
+    ///
+    /// WHY the payload is kept: the messages of the channel are JSON, and
+    /// the receiver reads them. The payload of a frame is bounded by the
+    /// limit of the API, so the buffer is bounded too.
+    pub payload: Vec<u8>,
 }
 
 /// Reads one frame of the channel.
@@ -160,7 +166,7 @@ pub async fn read_frame(
     }
     unmask(&mut payload, mask);
     let control_payload = if is_control(opcode) {
-        payload
+        payload.clone()
     } else {
         Vec::new()
     };
@@ -168,6 +174,7 @@ pub async fn read_frame(
         opcode,
         payload_len: length,
         control_payload,
+        payload,
     })
 }
 
@@ -189,11 +196,18 @@ fn is_control(opcode: u8) -> bool {
 
 /// Holds the channel open until the peer closes it or the idle timeout ends.
 ///
-/// WHY: the channel of a real Smart View session is the one place where the
-/// picture would flow. The format of its messages is proprietary, so the
-/// frames are counted and discarded — the connection is kept alive, a ping
-/// is answered and the close of the peer ends the session. **No picture is
-/// transported by this function, and none is claimed.**
+/// WHY the channel speaks JSON: the messages on the channel of the
+/// MultiScreen Framework are JSON objects with an `event` or a `method` and
+/// a `data` or a `params`. The client library of Samsung builds the same
+/// objects, and the observations of the network show the same. The receiver
+/// therefore reads them and answers them.
+///
+/// WHY the frames are counted and the picture is not transported: the format
+/// of the **picture of the screen** of a device is proprietary and is not
+/// implemented (`EXC-011`). Everything else on the channel is understood:
+/// the events of the sender, the heartbeat, and the keys of the remote
+/// control. **No picture is transported by this function, and none is
+/// claimed.**
 ///
 /// # Errors
 /// Returns [`SmartViewError`] when the channel breaks or a frame violates a
@@ -201,6 +215,24 @@ fn is_control(opcode: u8) -> bool {
 pub async fn hold_channel(
     reader: &mut BufReader<TcpStream>,
     limits: &ApiLimits,
+) -> Result<(), SmartViewError> {
+    hold_channel_with(reader, limits, &mut |_message| {}).await
+}
+
+/// Holds the channel open and hands every message of the sender to the sink.
+///
+/// WHY the sink: the receiver has to *act* on a message — a key of the
+/// remote control belongs to the platform, and the platform of the shell
+/// decides what a key does. The channel therefore does not decide anything;
+/// it reads the message, understands its shape and hands it on.
+///
+/// # Errors
+/// Returns [`SmartViewError`] when the channel breaks or a frame violates a
+/// limit.
+pub async fn hold_channel_with(
+    reader: &mut BufReader<TcpStream>,
+    limits: &ApiLimits,
+    sink: &mut (dyn FnMut(ChannelMessage) + Send),
 ) -> Result<(), SmartViewError> {
     loop {
         let frame = tokio::time::timeout(limits.idle_timeout, read_frame(reader, limits))
@@ -225,7 +257,17 @@ pub async fn hold_channel(
                     .await
                     .map_err(|error| SmartViewError::Request(error.to_string()))?;
             }
-            OPCODE_TEXT | OPCODE_BINARY | OPCODE_CONTINUATION | OPCODE_PONG => {}
+            OPCODE_TEXT | OPCODE_BINARY | OPCODE_CONTINUATION | OPCODE_PONG => {
+                // WHY the payload is read as text: the messages of the
+                // channel are JSON. A frame that carries something else is
+                // ignored — a sender that sends an unknown message has not
+                // broken the channel.
+                if let Ok(text) = std::str::from_utf8(&frame.payload) {
+                    if let Some(message) = ChannelMessage::parse(text) {
+                        sink(message);
+                    }
+                }
+            }
             other => {
                 return Err(SmartViewError::Protocol(format!(
                     "the frame carries the unknown opcode {other}"
@@ -233,4 +275,52 @@ pub async fn hold_channel(
             }
         }
     }
+}
+
+/// Writes a text frame to the channel.
+///
+/// WHY the frame is not masked: RFC 6455 says that a frame of a **server**
+/// is never masked. The receiver is the server of the channel, so its
+/// frames carry the payload as they are.
+///
+/// WHY the length is written in the short form first: a message of the
+/// channel is small — an event with a token and a key press — and the
+/// short form of the length covers everything below 126 bytes. A longer
+/// message carries the second byte of the length, and the eight-byte form
+/// is the last one.
+///
+/// # Errors
+/// Returns [`SmartViewError`] when the frame cannot be written.
+pub async fn write_text_frame(
+    writer: &mut TcpStream,
+    text: &str,
+) -> Result<(), SmartViewError> {
+    let payload = text.as_bytes();
+    let mut frame = Vec::with_capacity(payload.len() + 10);
+    frame.push(0x80 | OPCODE_TEXT);
+    if payload.len() < 126 {
+        frame.push(payload.len() as u8);
+    } else if payload.len() <= u16::MAX as usize {
+        frame.push(126);
+        frame.extend_from_slice(&(payload.len() as u16).to_be_bytes());
+    } else {
+        frame.push(127);
+        frame.extend_from_slice(&(payload.len() as u64).to_be_bytes());
+    }
+    frame.extend_from_slice(payload);
+    writer
+        .write_all(&frame)
+        .await
+        .map_err(|error| SmartViewError::Request(error.to_string()))
+}
+
+/// Writes an event of the channel to the peer.
+///
+/// # Errors
+/// Returns [`SmartViewError`] when the frame cannot be written.
+pub async fn write_event(
+    writer: &mut TcpStream,
+    event: &crate::api::message::ChannelEvent,
+) -> Result<(), SmartViewError> {
+    write_text_frame(writer, &crate::api::message::ChannelMessage::event(event)).await
 }

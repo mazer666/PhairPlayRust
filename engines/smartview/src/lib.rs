@@ -31,13 +31,26 @@
 //!
 //! ## The honest limit
 //!
-//! The **message format of the Smart View channel is proprietary and not
-//! publicly documented**. The Smart View SDK is a closed framework of `.jar`
-//! libraries. What this crate implements is the part that makes a device a
-//! *Smart View target* — the device appears in the list of a Galaxy phone
-//! and the phone connects to it. **The content of the channel is not
-//! implemented.** A Galaxy device finds the device and connects to it, but
-//! no picture flows yet.
+//! The **transport of the picture of the screen** of a Galaxy device is
+//! proprietary and not publicly documented. The Smart View SDK is a closed
+//! framework of `.jar` libraries. Everything else on the channel **is**
+//! implemented, because it is not proprietary in any way that matters:
+//!
+//! - the channel is served under the name that the sender gives it —
+//!   `ws://<host>/api/v2/channels/<name>`, which is the URL that the client
+//!   library of Samsung builds;
+//! - the greeting of the receiver is the event `ms.channel.connect`, and the
+//!   events `ms.channel.ready`, `ms.channel.unauthorized` and the
+//!   heartbeat `__ping` are understood;
+//! - the **keys of the remote control** are read — the method
+//!   `ms.remote.control` with the key in the parameter `DataOfCmd`.
+//!
+//! A proprietary format is not an unimplementable one. The Miracast
+//! receiver, the Google Cast receiver and the AirPlay receiver of this
+//! project are implementations of formats that nobody documents either.
+//! The limit is therefore **one** thing: the picture of the screen. A
+//! Galaxy device finds the receiver, connects to it, holds the channel open
+//! and can drive it with its remote — and no picture of the screen flows.
 //!
 //! Smart View needs **no** HDCP protection and **no** decryption: it is an
 //! open Samsung feature on Galaxy devices, not a DRM pipeline like FairPlay.
@@ -53,7 +66,7 @@
 //! | [`api`] | The HTTP API below `/api/v2/`: the API root, the resource description, the base URL, the handshake of the sender and the WebSocket upgrade. |
 //! | [`lifecycle`] | The public state of the engine: the state, the ports and the reason of the last failure. |
 //! | [`session`] | The single-session rule: the peer that announced itself and the channel that is open. |
-//! | [`engine`] | The [`ProtocolEngine`] implementation: the state machine and the lifecycle. |
+//! | [`engine`] | The implementation of the trait `ProtocolEngine` of the core: the state machine and the lifecycle. |
 //! | [`error`] | The errors of the crate. |
 //!
 //! ## Example

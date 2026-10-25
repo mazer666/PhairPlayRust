@@ -42,14 +42,18 @@ use crate::error::SmartViewError;
 use crate::session::SessionRegistry;
 
 pub mod channel;
+pub mod message;
 mod reader;
 mod routes;
 mod server;
 mod types;
 
 pub use channel::{Frame, accept_key};
+pub use message::{ChannelEvent, ChannelMessage};
 pub use reader::read_request;
-pub use routes::{RouteOutcome, is_websocket_upgrade, route, upgrade_response};
+pub use routes::{
+    RouteOutcome, is_channel_path, is_websocket_upgrade, route, upgrade_response,
+};
 pub use server::ApiServer;
 pub use types::{ApiLimits, ApiRequest, ApiResponse, Method};
 
@@ -62,7 +66,24 @@ pub const RESOURCES_PATH: &str = "/api/v2/resources";
 /// The path of the base URL of the receiver.
 pub const BASE_URL_PATH: &str = "/api/v2/baseurl";
 
+/// The prefix of the path of a WebSocket channel.
+///
+/// WHY a prefix and not a fixed path: the client of Samsung builds the URL
+/// of the channel from the base URL of the service and the name of the
+/// channel — `ws://<host>/api/v2/channels/<name>`. The name of the channel
+/// is chosen by the sender, so the receiver has to accept every name under
+/// this prefix and not one fixed name.
+///
+/// EXAMPLE: the channel `samsung.remote.control` of the remote control of a
+/// Samsung television is `ws://192.168.1.10:8001/api/v2/channels/samsung.remote.control`.
+pub const CHANNEL_PATH_PREFIX: &str = "/api/v2/channels/";
+
 /// The path of the WebSocket channel.
+///
+/// WHY it still exists: the name of the channel that a sender uses for the
+/// picture of the screen of a device is not documented, and a sender that
+/// asks for it without a name finds this path. It is the same handler as
+/// every other channel.
 pub const WEBSOCKET_PATH: &str = "/api/v2/websocket";
 
 /// Everything the request handler needs.
@@ -110,6 +131,20 @@ async fn handle_connection(stream: TcpStream, peer: SocketAddr, context: Arc<Api
                 }
             }
             report_started(&context, &session).await;
+
+            // WHY the event comes first: the client library of Samsung waits
+            // for the event `ms.channel.connect` before it says anything on
+            // the channel. The event carries the token of the session and the
+            // name of the channel.
+            let event = message::ChannelEvent::Connect {
+                token: session.id.to_string(),
+            };
+            if let Err(error) = channel::write_event(reader.get_mut(), &event).await {
+                context.sessions.close(session.id);
+                report_ended(&context, session.id, false).await;
+                return;
+            }
+
             let outcome = channel::hold_channel(&mut reader, &context.limits).await;
             context.sessions.close(session.id);
             report_ended(&context, session.id, outcome.is_ok()).await;

@@ -408,6 +408,88 @@ must be refused with the status `412`.
 **Expected:** the second player is refused; the first session keeps
 running.
 
+### 2.5 The Samsung Smart View path — a Galaxy phone or tablet
+
+| Requirement | What has to be proven | Sender |
+|---|---|---|
+| FR-104 | The receiver is found in the list of *Smart View* of the phone. | a Galaxy phone, Android 12 or later |
+| FR-105 | The description document and the API of the framework are served. | a Galaxy phone |
+| FR-106 | One sender at a time. | two phones |
+| FR-108 | The channel is opened under the name that the sender gives it, and the greeting `ms.channel.connect` arrives. | a Galaxy phone |
+| FR-109 | A key of the remote control reaches the receiver. | a Galaxy phone |
+| FR-107 | **The receiver does not claim a picture that it cannot deliver** (`EXC-011`). | a Galaxy phone |
+
+#### The script
+
+**Step 1 — the discovery.**
+
+```text
+# On the phone: Settings -> Connected devices -> Smart View (or the
+# screen of the quick settings). The list of the devices appears.
+```
+
+**Expected:** the receiver appears in the list with the name of the
+configuration (`device.name`).
+
+**Step 2 — the description and the API.**
+
+```text
+# The description is served over HTTP; the port of the framework is
+# 8001, and the address of the receiver is the address of the SSDP
+# answer.
+curl -s "http://${RECEIVER}:8001/api/v2/" | head -20
+```
+
+**Expected:** the JSON of the root of the API names the service
+`urn:samsung.com:service:MultiScreenService:1`, the version `2`, the base
+URL and the device.
+
+**Step 3 — the channel (FR-108).**
+
+```text
+# The channel is opened by the phone under the name that it gives it.
+# To watch it, the handshake of the phone is seen in the log of the
+# receiver, and the frame is seen with a WebSocket client:
+#
+#   websocat "ws://${RECEIVER}:8001/api/v2/channels/samsung.remote.control"
+```
+
+**Expected:** the receiver answers the upgrade with `101 Switching
+Protocols`, and the **first frame** is the event `ms.channel.connect` with
+the token of the session. The phone shows the receiver as connected.
+
+**Step 4 — the key of the remote control (FR-109).**
+
+```text
+# On the phone: the remote control of Smart View. A key is pressed.
+```
+
+**Expected:** the receiver logs the key of the method `ms.remote.control`,
+and the parameter `DataOfCmd` names it (for example `KEY_VOLUP`). The
+session stays open.
+
+**Step 5 — the second phone is refused (FR-106).**
+
+```text
+# With one phone connected, a second phone opens the list.
+```
+
+**Expected:** the second phone is refused, and the first session keeps
+running.
+
+**Step 6 — the honest limit (FR-107).**
+
+```text
+# The phone shows the receiver as connected. The screen of the phone is
+# not mirrored.
+```
+
+**Expected:** **no picture of the screen of the phone appears on the
+receiver.** The transport of the picture is proprietary and is not
+implemented (`EXC-011`). The receiver finds the sender, holds the channel
+open and understands the keys of the remote control — and no picture flows.
+A report that claims a picture here is a false report.
+
 ---
 
 ## 3. The criteria that need a measurement, not a sender

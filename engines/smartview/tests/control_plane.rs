@@ -110,6 +110,69 @@ async fn the_channel_is_held_open_and_the_sender_is_counted() {
 }
 
 #[tokio::test]
+async fn the_channel_under_its_own_name_opens_and_greets_the_sender() {
+    // WHY: the client library of Samsung names the channel itself. A
+    // receiver that only answers at one fixed path is not found by a sender
+    // that names its channel — and the greeting is the event that the
+    // library waits for before it says anything.
+    let (engine, port) = start().await;
+    let mut stream = tokio::net::TcpStream::connect(("127.0.0.1", port))
+        .await
+        .expect("the connection opens");
+    stream
+        .write_all(
+            upgrade_request_for_channel("samsung.remote.control").as_bytes(),
+        )
+        .await
+        .expect("the upgrade is sent");
+    stream.flush().await.expect("the upgrade is flushed");
+
+    let head = read_head(&mut stream).await;
+    assert!(head.contains("101"), "{head}");
+
+    // The greeting of the receiver: the event that opens the channel.
+    let greeting = read_frame(&mut stream).await;
+    let text = String::from_utf8_lossy(&greeting);
+    assert!(text.contains("ms.channel.connect"), "{text}");
+    assert!(text.contains("\"token\""), "{text}");
+    engine.stop().await.expect("the engine stops");
+}
+
+#[tokio::test]
+async fn a_key_press_of_the_remote_control_reaches_the_sender() {
+    // WHY: the keys of the remote control travel as a method of the channel.
+    // The receiver reads them — and this test proves that the message goes
+    // through the codec of the channel and not only through the parser of
+    // the unit test.
+    let (engine, port) = start().await;
+    let mut stream = tokio::net::TcpStream::connect(("127.0.0.1", port))
+        .await
+        .expect("the connection opens");
+    stream
+        .write_all(upgrade_request().as_bytes())
+        .await
+        .expect("the upgrade is sent");
+    stream.flush().await.expect("the upgrade is flushed");
+    let head = read_head(&mut stream).await;
+    assert!(head.contains("101"), "{head}");
+
+    // The greeting is read first; the key press comes after it.
+    let _greeting = read_frame(&mut stream).await;
+    let key = r#"{"method":"ms.remote.control","params":{"Cmd":"Click","DataOfCmd":"KEY_POWER","Option":"false","TypeOfRemote":"SendRemoteKey"}}"#;
+    stream
+        .write_all(&frame(0x1, key.as_bytes()))
+        .await
+        .expect("the key press is sent");
+    stream.flush().await.expect("the key press is flushed");
+
+    // The channel stays open — a message that the receiver understands does
+    // not end the session.
+    assert_eq!(engine.status().peer_count, 1);
+    assert_eq!(engine.status().state, ProtocolState::Streaming);
+    engine.stop().await.expect("the engine stops");
+}
+
+#[tokio::test]
 async fn a_second_sender_is_refused_while_the_channel_is_open() {
     // WHY: Smart View is a single-session protocol. The second sender is
     // rejected, not queued.

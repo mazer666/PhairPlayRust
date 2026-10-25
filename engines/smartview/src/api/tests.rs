@@ -204,6 +204,47 @@ fn upgrade_request() -> ApiRequest {
 }
 
 #[test]
+fn the_channel_of_a_sender_is_accepted_under_its_own_name() {
+    // WHY: the client library of Samsung builds the URL of the channel from
+    // the base URL of the service and the name of the channel — the remote
+    // control of a television is `samsung.remote.control`. A receiver that
+    // only answers at one fixed path is not found by a sender that names
+    // its channel.
+    let context = context();
+    let mut request = request("GET", "/api/v2/channels/samsung.remote.control");
+    request.headers = vec![
+        ("upgrade".to_string(), "websocket".to_string()),
+        ("connection".to_string(), "Upgrade".to_string()),
+        ("sec-websocket-version".to_string(), "13".to_string()),
+        (
+            "sec-websocket-key".to_string(),
+            "dGhlIHNhbXBsZSBub25jZQ==".to_string(),
+        ),
+    ];
+    match route(&request, &context) {
+        RouteOutcome::Upgrade { key, .. } => {
+            assert_eq!(key, "dGhlIHNhbXBsZSBub25jZQ==");
+        }
+        RouteOutcome::Response(response) => panic!(
+            "the channel of the sender was refused: {}",
+            response.status
+        ),
+    }
+}
+
+#[test]
+fn a_path_without_a_channel_name_is_no_channel() {
+    // WHY: a request for `/api/v2/channels/` without a name asks for a
+    // channel that does not exist, and a name with a second slash is not a
+    // channel at all.
+    assert!(!is_channel_path("/api/v2/channels/"));
+    assert!(!is_channel_path("/api/v2/channels/a/b"));
+    assert!(!is_channel_path("/api/v2/websocket"));
+    assert!(is_channel_path("/api/v2/channels/samsung.remote.control"));
+    assert!(is_channel_path("/api/v2/channels/a"));
+}
+
+#[test]
 fn the_websocket_upgrade_is_accepted() {
     let context = context();
     match route(&upgrade_request(), &context) {

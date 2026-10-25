@@ -102,6 +102,20 @@ pub fn upgrade_request() -> String {
         .to_string()
 }
 
+/// The upgrade request of a sender that names its channel.
+///
+/// WHY: the client library of Samsung builds the URL of the channel from the
+/// base URL of the service and the name of the channel — the remote control
+/// of a television is `samsung.remote.control`.
+pub fn upgrade_request_for_channel(name: &str) -> String {
+    format!(
+        "GET /api/v2/channels/{name} HTTP/1.1\r\nHOST: 127.0.0.1\r\n\
+         UPGRADE: websocket\r\nCONNECTION: Upgrade\r\n\
+         SEC-WEBSOCKET-KEY: dGhlIHNhbXBsZSBub25jZQ==\r\n\
+         SEC-WEBSOCKET-VERSION: 13\r\n\r\n"
+    )
+}
+
 /// Opens the WebSocket channel and returns the stream and the answer.
 ///
 /// WHY: the answer of the upgrade is the head of the response — the channel
@@ -151,6 +165,39 @@ pub fn frame(opcode: u8, payload: &[u8]) -> Vec<u8> {
         out.push(byte ^ mask[index % 4]);
     }
     out
+}
+
+/// Reads one frame of the server.
+///
+/// WHY the payload is not unmasked: RFC 6455 says that a frame of a
+/// **server** is never masked. Only the frames of the client are.
+pub async fn read_frame(stream: &mut tokio::net::TcpStream) -> Vec<u8> {
+    let mut header = [0u8; 2];
+    tokio::time::timeout(Duration::from_secs(5), stream.read_exact(&mut header))
+        .await
+        .expect("the frame arrives")
+        .expect("the frame is read");
+    let length = match header[1] & 0x7F {
+        126 => {
+            let mut extended = [0u8; 2];
+            stream.read_exact(&mut extended).await.expect("the length is read");
+            u16::from_be_bytes(extended) as usize
+        }
+        127 => {
+            let mut extended = [0u8; 8];
+            stream.read_exact(&mut extended).await.expect("the length is read");
+            u64::from_be_bytes(extended) as usize
+        }
+        short => short as usize,
+    };
+    let mut payload = vec![0u8; length];
+    if length > 0 {
+        stream
+            .read_exact(&mut payload)
+            .await
+            .expect("the payload is read");
+    }
+    payload
 }
 
 /// The address of a sender on the loopback interface.

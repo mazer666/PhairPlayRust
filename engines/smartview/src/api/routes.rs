@@ -41,8 +41,8 @@
 use serde_json::json;
 
 use crate::api::{
-    API_ROOT_PATH, ApiContext, ApiRequest, ApiResponse, BASE_URL_PATH, RESOURCES_PATH,
-    WEBSOCKET_PATH,
+    API_ROOT_PATH, ApiContext, ApiRequest, ApiResponse, BASE_URL_PATH, CHANNEL_PATH_PREFIX,
+    RESOURCES_PATH, WEBSOCKET_PATH,
 };
 use crate::description::DESCRIPTION_PATH;
 use crate::session::PeerInfo;
@@ -83,8 +83,29 @@ pub fn route(request: &ApiRequest, context: &ApiContext) -> RouteOutcome {
         ("POST", API_ROOT_PATH) => RouteOutcome::Response(handshake(request, context)),
         ("GET", WEBSOCKET_PATH) => upgrade(request, context),
         ("GET", "/") | ("HEAD", "/") => RouteOutcome::Response(index(context)),
+        // WHY the check comes before the arm below: the client of Samsung
+        // names the channel itself, and every name under the prefix is a
+        // channel of the receiver.
+        _ if is_channel_path(&request.path) => upgrade(request, context),
         _ => RouteOutcome::Response(ApiResponse::not_found(&request.path)),
     }
+}
+
+/// Whether the path names a channel of the receiver.
+///
+/// WHY the name may not be empty: a request for `/api/v2/channels/` without
+/// a name asks for a channel that does not exist, and the answer of the
+/// receiver is the same as for every other unknown path.
+///
+/// WHY the name may not contain a slash: the name is one segment. A path
+/// with a second slash is not a channel, and the receiver does not read a
+/// path of its own.
+#[must_use]
+pub fn is_channel_path(path: &str) -> bool {
+    let Some(name) = path.strip_prefix(CHANNEL_PATH_PREFIX) else {
+        return false;
+    };
+    !name.is_empty() && !name.contains('/')
 }
 
 /// The answer to a request for the root of the API.
