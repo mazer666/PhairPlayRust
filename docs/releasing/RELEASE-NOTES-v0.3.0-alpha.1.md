@@ -248,6 +248,12 @@ sha256sum -c phairplayrust-0.3.0-alpha.1-android-arm64-v8a-test.apk.sha256
 adb install -r phairplayrust-0.3.0-alpha.1-android-arm64-v8a-test.apk
 ```
 
+**The artefact carries the name of the device class**, not the name of the
+architecture: `phairplayrust-0.3.0-raspberry-pi.tar.gz` and not
+`aarch64-unknown-linux-gnu`. A user thinks in devices — the board in the
+cupboard — and not in triples. The narrative of every platform is in
+[`../guides/PLATFORMS.md`](../guides/PLATFORMS.md).
+
 **Every archive carries the checksum of itself** in a file next to it, so
 that a user can tell whether the file is the one that the release
 published:

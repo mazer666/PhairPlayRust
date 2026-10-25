@@ -65,7 +65,16 @@ fi
 
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
-ROOT="$STAGE/phairplayrust-$VERSION-$PLATFORM-$ARCH"
+# WHY the name is built in one place: the directory of the archive and
+# the name of the archive have to be the same, and a name that is built
+# twice drifts apart. The architecture is only part of the name when it
+# carries a name of its own.
+if [ -n "$ARCH" ]; then
+    NAME="phairplayrust-$VERSION-$PLATFORM-$ARCH"
+else
+    NAME="phairplayrust-$VERSION-$PLATFORM"
+fi
+ROOT="$STAGE/$NAME"
 
 mkdir -p "$ROOT/bin" "$ROOT/deploy" "$ROOT/config" "$ROOT/licenses"
 
@@ -122,11 +131,6 @@ project, the licences of the dependencies and the inventory of them in
 TEXT
 
 # The archive itself. The name carries the version and the architecture.
-if [ -n "$ARCH" ]; then
-    NAME="phairplayrust-$VERSION-$PLATFORM-$ARCH"
-else
-    NAME="phairplayrust-$VERSION-$PLATFORM"
-fi
 ARCHIVE="$OUTPUT/$NAME.tar.gz"
 mkdir -p "$OUTPUT"
 tar czf "$ARCHIVE" -C "$STAGE" "$NAME"
