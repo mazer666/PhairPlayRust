@@ -99,7 +99,7 @@ The rules that follow from this shape are part of the decision:
    reject a second concurrent connection instead of queueing it (FR-021,
    FR-036, FR-051). Google Cast is the documented exception (FR-040).
 6. **A protocol that is not a receiver is not an engine.** `engines/discovery`
-   is the facility the four protocols share, not a fifth protocol, and
+   is the facility the receiver protocols share, not a protocol of its own, and
    therefore does not implement `ProtocolEngine`. Adding
    `ProtocolKind::Discovery` would change the vocabulary of the core, which
    this ADR forbids.

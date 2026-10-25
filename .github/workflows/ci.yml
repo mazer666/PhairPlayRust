@@ -206,6 +206,62 @@ jobs:
             echo "  — see \`docs/acceptance/M0-ACCEPTANCE.md\`, the limitation L-7."
           } >> "$GITHUB_STEP_SUMMARY"
 
+  # ── the native shells ─────────────────────────────────────────────────────
+  # WHY this job exists: the gate of the workspace builds the crates of Rust
+  # and not the shells. A shell that does not compile against the bridge of
+  # the current core therefore passes the whole gate unnoticed — and the
+  # defect only shows up on the device of a user. The job builds both shells
+  # and runs their tests.
+  shells:
+    name: Shells (Android, macOS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install the Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+          rustc --version
+
+      # WHY the shared library before the tests of the macOS shell: the tests
+      # of the kit link against the bridge of the repository. Without the
+      # library the link fails with "cannot find -lphairplay_ffi".
+      - name: The shared library of the bridge
+        run: cargo build -p phairplay-ffi
+
+      - name: The macOS shell
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.3"
+
+      - name: Build and test the macOS shell
+        run: |
+          swift --version
+          cd apps/macos
+          swift build
+          swift test
+
+      - name: The Android shell
+        uses: android-actions/setup-android@v3
+
+      - name: The unit tests of the Android shell
+        run: |
+          cd apps/android
+          ./gradlew --no-daemon :app:testDebugUnitTest
+
+      - name: The summary of the run
+        if: always()
+        run: |
+          {
+            echo "### The shells"
+            echo ""
+            echo "- The macOS shell: \`swift build\` and \`swift test\` in \`apps/macos\`"
+            echo "- The Android shell: \`./gradlew :app:testDebugUnitTest\` in \`apps/android\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   # ── the shape of the repository ───────────────────────────────────────────
   structure:
     name: Structure (boundaries, file size, licence headers, documentation)

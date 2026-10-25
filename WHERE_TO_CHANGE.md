@@ -276,11 +276,32 @@ reports a failure; it never reports a success without doing the work.
    `config/app-defaults.toml`.
 4. The registration of the engine in the composition root,
    `apps/web/src/receiver.rs`.
-5. An ADR, because a protocol is an architectural addition.
-6. A requirement, a milestone slot and a device test plan entry.
-7. A change request in `docs/cr/` — the fifth protocol is the proof of the
+5. **The protocol in every shell** — the shell that does not know the protocol
+   leaves its card out of the grid:
+   - the enumeration of the protocols of the Android shell,
+     `apps/android/app/src/main/java/org/phairplay/receiver/model/ProtocolId.kt`,
+     the mapping of the kind of the bridge in `ReceiverMapping.kt`, the label
+     in `ui/StateLabels.kt` and the string in `res/values/strings.xml` (and in
+     every translation of it),
+   - the enumeration of the protocols of the macOS shell,
+     `apps/macos/Sources/PhairPlayMacKit/ReceiverModel.swift`, the mapping in
+     `ReceiverMapping.swift` and the string in the catalogues of
+     `Resources/*.lproj/Localizable.strings`,
+   - the list of the protocols in the defaults of the shell,
+     `receiver-defaults.properties` of both shells, and the entry in the
+     profiles of the device, `config/profiles/*.toml`,
+   - the dashboard, `apps/web/assets/api.js` and the catalogues of
+     `apps/web/assets/lang/`.
+6. An ADR, because a protocol is an architectural addition.
+7. A requirement, a milestone slot and a device test plan entry.
+8. A change request in `docs/cr/` — the fifth protocol is the proof of the
    shape of such a request:
    [`docs/cr/CR-0001-samsung-smart-view.md`](docs/cr/CR-0001-samsung-smart-view.md).
+
+**The continuous integration builds the workspace of Rust and not the shells.**
+A change in a shell is therefore proved by the build of the shell itself —
+`./gradlew :app:testDebugUnitTest` in `apps/android` and `swift test` in
+`apps/macos` — and not by the gate of the workspace.
 
 The core does not change. If a new protocol forces a change in the core, the
 protocol abstraction is wrong — that is a finding for the architect, not a

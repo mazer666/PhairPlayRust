@@ -17,20 +17,21 @@ import XCTest
 /// card of Google Cast.
 final class ShellFocusTests: XCTestCase {
 
-    func testTheRingHoldsTheFourCardsInTheOrderOfTheProduct() {
+    func testTheRingHoldsTheFiveCardsInTheOrderOfTheProduct() {
         let ring = FocusRing(state: state())
         XCTAssertEqual(ring.targets, [
             .card(.airplay),
             .card(.miracast),
             .card(.cast),
             .card(.dlna),
+            .card(.smartview),
         ])
     }
 
     func testTheRingHoldsTheButtonOfTheBannerBeforeTheCards() {
         let ring = FocusRing(state: state(failure: true))
         XCTAssertEqual(ring.targets.first, .dismissFailure)
-        XCTAssertEqual(ring.cards.count, 4)
+        XCTAssertEqual(ring.cards.count, 5)
     }
 
     func testTheRingHoldsNoButtonWithoutAFailure() {
@@ -53,19 +54,19 @@ final class ShellFocusTests: XCTestCase {
 
     func testTheTabKeyComesBackToTheFirstCardAtTheEnd() {
         let ring = FocusRing(state: state())
-        XCTAssertEqual(ring.next(after: .card(.dlna)), .card(.airplay))
+        XCTAssertEqual(ring.next(after: .card(.smartview)), .card(.airplay))
     }
 
     func testTheShiftTabKeyGoesToThePreviousCard() {
         let ring = FocusRing(state: state())
         XCTAssertEqual(ring.previous(before: .card(.miracast)), .card(.airplay))
-        XCTAssertEqual(ring.previous(before: .card(.airplay)), .card(.dlna))
+        XCTAssertEqual(ring.previous(before: .card(.airplay)), .card(.smartview))
     }
 
     func testTheTabKeyStartsAtTheFirstSurfaceWhenNothingHoldsTheFocus() {
         let ring = FocusRing(state: state())
         XCTAssertEqual(ring.next(after: nil), .card(.airplay))
-        XCTAssertEqual(ring.previous(before: nil), .card(.dlna))
+        XCTAssertEqual(ring.previous(before: nil), .card(.smartview))
     }
 
     func testTheArrowKeysMoveInsideTheGrid() {
@@ -83,6 +84,7 @@ final class ShellFocusTests: XCTestCase {
         XCTAssertEqual(ring.move(.up, from: .card(.airplay)), .card(.airplay))
         XCTAssertEqual(ring.move(.right, from: .card(.miracast)), .card(.miracast))
         XCTAssertEqual(ring.move(.down, from: .card(.dlna)), .card(.dlna))
+        XCTAssertEqual(ring.move(.down, from: .card(.smartview)), .card(.smartview))
         XCTAssertEqual(ring.move(.left, from: .card(.cast)), .card(.cast))
     }
 
@@ -100,7 +102,7 @@ final class ShellFocusTests: XCTestCase {
         XCTAssertNil(ring.move(.right, from: nil))
     }
 
-    /// A state of the receiver with the four cards.
+    /// A state of the receiver with the five cards.
     private func state(failure: Bool = false) -> ReceiverUIState {
         ReceiverUIState(
             running: true,

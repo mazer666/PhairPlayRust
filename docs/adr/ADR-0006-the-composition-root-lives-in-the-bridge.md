@@ -29,7 +29,7 @@ correct answer, and nobody answered it:
   supervisor with an **empty** engine table.
 
 The consequence was not a compile error. It was a product that starts, shows
-four protocols in its dashboard and answers every attempt to start one with
+the protocols in its dashboard and answers every attempt to start one with
 *"no engine implementation is registered for the protocol"*. The native
 shells of Android and macOS could display the state of a receiver that could
 not receive.

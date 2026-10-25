@@ -135,6 +135,7 @@ fn load_from(profile: DeviceProfile, directories: &[PathBuf]) -> Result<AppConfi
 mod tests {
     #![allow(clippy::expect_used, clippy::unwrap_used)]
     use super::*;
+    use phairplay_core::protocol::ProtocolKind;
 
     #[test]
     fn the_search_carries_the_checkout_of_the_repository() {
@@ -175,6 +176,34 @@ mod tests {
             assert!(
                 configuration.validate().is_ok(),
                 "the profile {profile} is not a valid configuration"
+            );
+        }
+    }
+
+    #[test]
+    fn every_profile_of_the_repository_describes_the_five_protocols() {
+        // WHY: the receiver speaks five protocols. A profile that does not
+        // mention one of them hands the engine of that protocol the default
+        // of the core instead of the value the profile owner reviewed — and
+        // a profile that mentions a protocol twice is a configuration that
+        // says two different things about the same protocol.
+        //
+        // WHY the switch is not checked here: a profile may switch a
+        // protocol off on purpose. The Raspberry Pi switches Miracast off
+        // because the device has no Wi-Fi Direct radio.
+        for profile in DeviceProfile::ALL {
+            let configuration = load(profile)
+                .unwrap_or_else(|error| panic!("the profile {profile} must load: {error}"));
+            for kind in ProtocolKind::ALL {
+                assert!(
+                    configuration.protocols.contains_key(kind.as_str()),
+                    "the profile {profile} does not describe the protocol {kind}"
+                );
+            }
+            assert_eq!(
+                configuration.protocols.len(),
+                ProtocolKind::ALL.len(),
+                "the profile {profile} does not describe exactly the five protocols"
             );
         }
     }

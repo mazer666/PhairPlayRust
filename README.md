@@ -41,14 +41,18 @@ network and without a decoder.
 | The platform bridge and the local dashboard | **implemented and tested** — the bridge carries a value out and back, the dashboard answers its API |
 | The headless receiver: the command line, the configuration file, the device profiles, the systemd unit, the container | **implemented and tested** — the program starts the protocols itself |
 | The interface as a remote control: the arrow keys, the visible focus, the card as the switch, the Leanback launcher | **implemented** — the evidence is in [`docs/audit/`](docs/audit/tv-web-dashboard.md) |
-| Native shells for Android and macOS | **written**; their Gradle and Xcode builds are a device test — see the acceptance record |
+| Native shells for Android and macOS | **implemented and tested** — the unit tests of the Android shell and the tests of the kit of the macOS shell pass; the application of macOS and the device tests need a Mac and a device — see the acceptance record |
 | Hardening, structural gates and the licence gate | **in place** — the gates are green, see [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md) |
 
 **The gate of the workspace is green:** the workspace compiles, the lint is
 clean under `-D warnings`, the whole test suite passes, and the crate
 boundaries, the file-length limit, the licence headers, the documentation
 links and the dependency policy are all checked by scripts that fail when a
-rule is broken. The number of the tests and the state of every gate are
+rule is broken. **The native shells have their own gates** —
+`./gradlew :app:testDebugUnitTest` in `apps/android` and `swift test` in
+`apps/macos` — and they run in the continuous integration in the job *Shells
+(Android, macOS)*, because the gate of the workspace builds the crates of Rust
+and not the shells. The number of the tests and the state of every gate are
 machine-readable in [`project/project.yaml`](project/project.yaml). What is
 **not** proven is the behaviour on real hardware — the acceptance record names
 every such row as NOT RUN and says where it will be measured.
@@ -96,9 +100,10 @@ status. One conflict is written down and not glossed over: the DLNA renderer
 and the Smart View responder both want the SSDP port, and in the default
 configuration the renderer holds it first — so the fifth protocol does not
 reach the advertising state. The run that shows it is quoted in
-[`ROADMAP.md`](ROADMAP.md) (M5). The **card of the fifth protocol in the
-dashboard is still missing** — the panel of the browser lists four
-protocols.
+[`ROADMAP.md`](ROADMAP.md) (M5). The **card of the fifth protocol is drawn
+everywhere**: the panel of the browser lists five protocols, and the native
+shells of Android and macOS carry the fifth protocol in their enumeration of
+the protocols, in their grid of the cards and in their configuration.
 
 Every protocol can be switched on and off independently, and a disabled
 protocol is neither advertised nor bound to a socket.

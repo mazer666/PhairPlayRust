@@ -14,9 +14,9 @@ import org.phairplay.receiver.model.ProtocolCardState
 import org.phairplay.receiver.model.ProtocolId
 
 /**
- * The grid of the four protocols.
+ * The grid of the five protocols.
  *
- * WHAT: the four cards of the protocols in two rows of two, and nothing
+ * WHAT: the five cards of the protocols in three rows of two, and nothing
  * else.
  *
  * WHY: A user of a television must be able to see every protocol at once.
@@ -25,13 +25,13 @@ import org.phairplay.receiver.model.ProtocolId
  * place where the focus was. The grid therefore fills the space that is
  * left over, and it never scrolls.
  *
- * The order of the cards is fixed — AirPlay, Miracast, Cast, DLNA — and
- * the columns are the axis of the horizontal keys, the rows are the axis
- * of the vertical keys. The grid does not move the focus by itself: the
+ * The order of the cards is fixed — AirPlay, Miracast, Cast, DLNA, Smart
+ * View — and the columns are the axis of the horizontal keys, the rows are
+ * the axis of the vertical keys. The grid does not move the focus by itself: the
  * screen does that, with the rule of [TvFocusGraph].
  *
  * EXAMPLE: `ProtocolGrid(cards, registry) { protocol, enabled -> ... }`
- * draws the four cards and gives every card its own focus requester.
+ * draws the five cards and gives every card its own focus requester.
  */
 @Composable
 fun ProtocolGrid(
@@ -85,7 +85,7 @@ fun ProtocolGrid(
  * The number of columns of the grid.
  *
  * WHY: The grid has two columns on every television and on every
- * telephone. Four protocols in two rows of two fit on a screen of 853 dp
+ * telephone. Five protocols in three rows of two fit on a screen of 853 dp
  * of width, and they are read in one glance.
  */
 private const val COLUMNS: Int = 2

@@ -13,7 +13,7 @@ import PhairPlayMacKit
 /// without opening the window, and the item is the only part of the shell
 /// that is visible in every situation.
 ///
-/// EXAMPLE: the menu of the item lists the four protocols with their
+/// EXAMPLE: the menu of the item lists the five protocols with their
 /// state.
 final class StatusItemController {
 

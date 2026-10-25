@@ -1,8 +1,8 @@
 //! The protocol abstraction that every receiver engine implements.
 //!
-//! WHY: PhairPlayRust speaks four receiver protocols — AirPlay 2, Miracast,
-//! Google Cast and DLNA/UPnP. They share a shape: advertise a service,
-//! accept a peer, negotiate, stream media, tear down. Encoding that shape once
+//! WHY: PhairPlayRust speaks five receiver protocols — AirPlay 2, Miracast,
+//! Google Cast, DLNA/UPnP and Samsung Smart View. They share a shape: advertise a
+//! service, accept a peer, negotiate, stream media, tear down. Encoding that shape once
 //! as a trait means the session registry, the metrics, the capability
 //! advertisement and the native bridge all work the same way regardless of
 //! which protocol is running.

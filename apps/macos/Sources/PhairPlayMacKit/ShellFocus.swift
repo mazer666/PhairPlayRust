@@ -48,8 +48,8 @@ public enum GridDirection: Sendable, CaseIterable {
 /// WHAT: the list of the surfaces that the keyboard walks through, and the
 /// moves inside the grid of the cards.
 ///
-/// WHY: The window has four cards in a grid of two columns and two rows,
-/// and the user has to be able to walk through them with the tab key and
+/// WHY: The window has five cards in a grid of two columns and three
+/// rows, and the user has to be able to walk through them with the tab key and
 /// with the arrow keys without the mouse. The order of the focus is
 /// therefore written down here, as data that can be tested, and the view
 /// only draws it.

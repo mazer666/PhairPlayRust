@@ -24,7 +24,12 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
   proprietary and is not implemented** — the limit is written down as
   `EXC-011` in [`REQUIREMENTS.md`](REQUIREMENTS.md). The crate is
   `engines/smartview`; the vocabulary of the core knows the new kind, its
-  service type and its port.
+  service type and its port. **The native shells know the fifth protocol as
+  well**: the Android shell and the macOS shell name it in their enumeration
+  of the protocols, map it from the kind of the bridge, read its configuration
+  from the defaults of the shell and draw it in the grid of the cards. The
+  device profiles of [`config/profiles/`](config/profiles/README.md) describe
+  it with the port of the framework.
 - **The receiver runs headless.** `phairplay-web` starts the protocols that
   the configuration enables at the start of the process, reads its
   configuration from a file, knows the **device profiles** of
@@ -75,6 +80,16 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
   still NOT RUN.
 
 ### Fixed
+
+The native shells did not compile against the bridge of the current core. The
+bridge requires the byte budget of the audio queue since the limits of the
+process were extended, and neither shell handed it over — the record of the
+limits was built from a data structure without that field. **Both shells are
+broken at the commit that the shells were last touched**, and the continuous
+integration did not notice it, because the gate builds the workspace of Rust
+and not the shells. The shells now hand the limit over, and the profiles of
+the device describe the fifth protocol, so that a profile does not fall back
+to the default of the core for a protocol that its owner reviewed.
 
 The adversarial review of the first implementation found real defects. Each
 of them now has a test that fails without the fix:

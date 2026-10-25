@@ -150,7 +150,19 @@ measured values.
   the other four (`apps/web/assets/api.js:33`).
 - The distinction of the states ("disabled", "advertising", "streaming", "error"): **proved for the fifth protocol.** The run of the receiver shows three of the four states of the fifth protocol — `advertising` (DLNA off), `not started — the protocol is switched off in the configuration` (disabled) and `not started — … Address already in use (os error 98)` (error, with the reason). The state `streaming` is proved by the tests of the engine (`the_channel_is_held_open_and_the_sender_is_counted`), not on a device.
 - The clarity of an error message: **proved.** The reason of the failure of the fifth protocol reaches the status of the protocol and the summary of the receiver with the cause and the system error (`os error 98`); the composition root reports the failure of one protocol without stopping the others — *4 of 5 protocols are running*.
-- The mobile / native behaviour: **NOT RUN** — no Galaxy device, and the native shells were not built in this sandbox (no Android SDK, no macOS SDK).
+- The mobile / native behaviour: **partly proved.** The native shells name the
+  fifth protocol, map it from the kind of the bridge, read its configuration and
+  draw it in the grid of the cards. The Android shell builds and its unit tests
+  pass (**39 tests, 0 failures**), the macOS shell builds and its tests of the
+  kit pass (**101 tests, 0 failures**). The behaviour **on a Galaxy device** is
+  still NOT RUN — no Galaxy device and no second host in the sandbox.
+- The order of the cards in the native shells: **proved.** The Android shell
+  derives the slots of the focus from the number of the protocols
+  (`TvFocusRegistry(cardSlots = ProtocolId.entries.size)`), and the macOS shell
+  derives the rows of the grid from the number of the cards
+  (`let rows = (cards.count + Self.columns - 1) / Self.columns`). Both carry
+  five cards with the fifth protocol at the end, and the tests of the macOS
+  shell prove the order of the focus (`testTheRingHoldsTheFiveCardsInTheOrderOfTheProduct`).
 
 ## 5. Accessibility
 
@@ -306,7 +318,8 @@ measurement but a race (§9).
 | The picture of a Galaxy device on the display of the receiver | the message format of the channel is proprietary and is not implemented (`EXC-011`) | the documentation of the format by Samsung, or another implementation under a licence that allows the port |
 | The browser gate of the fifth dashboard card (layout, contrast, keyboard) | the browser gate of the dashboard belongs to the dashboard milestone; this acceptance did not re-run it | `node apps/web/tools/check-layout.mjs`, `check-contrast.mjs`, `check-keyboard.mjs` |
 | The licence audit (`cargo-deny`) and the advisory audit (`cargo-audit`) | the tools are not installed in the sandbox and the registry is not reachable offline | the CI jobs *Licenses (cargo-deny, pinned)* and *Security Audit (cargo-audit)* of `.github/workflows/ci.yml` |
-| The build of the native shells (Android, macOS) | no Android SDK and no macOS SDK in the sandbox | the Gradle and the Xcode build of the shells |
+| The build of the **macOS application** (the `PhairPlayMacApp` target and the Xcode project) | the sandbox has Swift 6.0.3 for Linux but no macOS SDK — the *application* needs `CoreGraphics` and `AppKit` | a macOS runner |
+| The **instrumented** Android tests (`androidTest`) | they need a device or an emulator | a device or an emulator |
 | The run of the whole workspace | the acceptance of this milestone is measured on the crates of the milestone; the run of the workspace was attempted **twice** and stopped in the compilation, because another workstream was editing the tree at the same moment: the first attempt failed in `engines/dlna/src/ssdp.rs`, the second in `core/phairplay-core/src/ssdp.rs`. Both files carry a change of a **different** workstream (the SSDP port of the workspace); the crate of the milestone compiled and passed in both runs | `cargo test --offline --workspace` on a tree that no other workstream edits — or the CI job *Quality Gate* |
 
 A check that did not run is **NOT RUN** with the exact reason. It is never

@@ -664,8 +664,7 @@ down.
 > of the API and the engine crate `engines/smartview` with the discovery, the
 > description document, the HTTP API and the handshake of the sender.
 >
-> **What is not delivered:** the card of the fifth protocol in the dashboard
-> (the panel of the browser lists five protocols) and the message format of
+> **What is not delivered:** the message format of
 > the channel. That format is proprietary and not publicly documented, so the
 > content of the channel is not implemented: a Galaxy device finds the
 > receiver and connects to it, but no picture flows yet. The limit is written
@@ -698,6 +697,12 @@ Framework* (MSF).
       browser lists five protocols, the state badge of a card in a row of
       five got a tighter tracking, and the grid carries five columns on a
       television (`apps/web/assets/api.js`, `apps/web/assets/cards.css`)
+- [x] The card of the fifth protocol in the native shells — the Android shell
+      and the macOS shell name the fifth protocol in their enumeration of the
+      protocols, map it from the kind of the bridge, read its configuration
+      from the defaults of the shell and draw it in the grid of the cards
+      (`apps/android/app/src/main/java/org/phairplay/receiver/model/ProtocolId.kt`,
+      `apps/macos/Sources/PhairPlayMacKit/ReceiverModel.swift`)
 - [ ] The message format of the channel — **not implemented**, the format is
       proprietary (`EXC-011`)
 

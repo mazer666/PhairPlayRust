@@ -1,4 +1,4 @@
-# The four protocols, from the point of view of a sender
+# The five protocols, from the point of view of a sender
 
 A guide for the developer who wants to know what a sender actually does, and
 where the limits of the receiver are.
@@ -11,7 +11,7 @@ practical one.
 
 ## 1. The shared shape
 
-All four protocols have the same shape, and the receiver implements the shape
+All five protocols have the same shape, and the receiver implements the shape
 once, as the trait `ProtocolEngine`:
 
 ```text
@@ -21,16 +21,16 @@ advertise → accept → negotiate → stream → report → tear down
 The differences are in the middle: how the peer is found, what the
 handshake looks like, and how the media is transported.
 
-| | AirPlay 2 | Miracast | Google Cast | DLNA / UPnP |
-|---|---|---|---|---|
-| Discovery | DNS-SD | DNS-SD | DNS-SD | SSDP |
-| Service type | `_airplay._tcp`, `_raop._tcp` | `_miracast._tcp` | `_googlecast._tcp` | — |
-| Control plane | RTSP over TCP | RTSP (WFD) over TCP | CastV2 over TLS | HTTP + SOAP |
-| Transport | RTP, interleaved | RTP, usually MPEG-TS | Cast media channels | HTTP |
-| Picture | yes | yes | yes | no (audio and pictures) |
-| Sound | yes | yes | yes | yes |
-| Peers at a time | one | one | several | one |
-| Milestone | M1 | M2 | M2 | M2 |
+| | AirPlay 2 | Miracast | Google Cast | DLNA / UPnP | Smart View |
+|---|---|---|---|---|---|
+| Discovery | DNS-SD | DNS-SD | DNS-SD | SSDP | SSDP |
+| Service type | `_airplay._tcp`, `_raop._tcp` | `_miracast._tcp` | `_googlecast._tcp` | — | `_samsungmsf._tcp` |
+| Control plane | RTSP over TCP | RTSP (WFD) over TCP | CastV2 over TLS | HTTP + SOAP | HTTP + WebSocket |
+| Transport | RTP, interleaved | RTP, usually MPEG-TS | Cast media channels | HTTP | WebSocket |
+| Picture | yes | yes | yes | no (audio and pictures) | **not implemented** (`EXC-011`) |
+| Sound | yes | yes | yes | yes | **not implemented** (`EXC-011`) |
+| Peers at a time | one | one | several | one | one |
+| Milestone | M1 | M2 | M2 | M2 | M5 |
 
 The "peers at a time" rule is data, not code: the
 `session.multi_peer_protocols` list in
@@ -174,7 +174,39 @@ The "peers at a time" rule is data, not code: the
 
 ---
 
-## 6. The sender matrix
+## 6. Samsung Smart View
+
+### What the sender does
+
+1. The sender searches for the MultiScreen Framework with an SSDP `M-SEARCH`
+   multicast datagram. The receiver answers with the description of its
+   framework.
+2. The sender fetches the description document over HTTP — the port of the
+   API is 8001 — and reads the routes of the framework below `/api/v2/`.
+3. The sender opens the channel with a WebSocket and announces its address
+   and its name in the handshake.
+
+### What the receiver does with it
+
+- answers the SSDP search of the framework,
+- serves the description document,
+- answers the routes of the API below `/api/v2/`,
+- performs the handshake of the sender and holds the channel open.
+
+### The limits
+
+- **The message format of the channel is not implemented** (`EXC-011`). The
+  framework of Samsung is proprietary and only documented through the closed
+  SDK. The receiver therefore **finds** the sender and **holds** the channel,
+  but it does not deliver a picture. The device appears in the list of a
+  Galaxy phone and connects — and no picture flows.
+- **One peer at a time.**
+- **The channel is not a DRM path.** The exclusion of FairPlay (`EXC-001`)
+  does not apply to it.
+
+---
+
+## 7. The sender matrix
 
 The matrix that decides when a protocol is accepted. A sender that could not
 be tested is named with the reason — a silent gap is a false claim.
@@ -192,15 +224,16 @@ be tested is named with the reason — a silent gap is a false claim.
 | DLNA | Windows "Cast to Device" | Windows | M2 |
 | DLNA | VLC | any | M2 |
 | DLNA | a mobile UPnP controller | Android, iOS | later |
+| Smart View | a Galaxy phone or tablet | Android | M5 — the discovery and the handshake, the picture is `EXC-011` |
 
 The device test plan with the exact steps belongs into the acceptance record
 of the milestone that covers the protocol.
 
 ---
 
-## 7. The standard ports and how to watch the traffic
+## 8. The standard ports and how to watch the traffic
 
-This section is the **single place** where the ports of the four protocols
+This section is the **single place** where the ports of the five protocols
 are written down. Every other document links here instead of repeating a
 number.
 
@@ -212,6 +245,7 @@ number.
 | Google Cast | the CastV2 control plane | TCP 8009 | TLS |
 | DLNA / UPnP | SSDP discovery | UDP 1900 | multicast |
 | DLNA / UPnP | the description documents and the SOAP control | TCP 8200 | the conventional port of the media renderer |
+| Smart View | the API and the channel of the framework | TCP 8001 | the port of the MultiScreen Framework |
 | all | DNS-SD | UDP 5353 | multicast |
 
 The receiver does not pin these ports in the configuration: the
@@ -252,7 +286,7 @@ A sender that finds no receiver usually means one of three things:
 
 ---
 
-## 8. The parts that are common to all four
+## 9. The parts that are common to all five
 
 - **Discovery is not authentication.** Every device in the local network may
   reach the receiver. Whether a PIN is required is a setting of the user

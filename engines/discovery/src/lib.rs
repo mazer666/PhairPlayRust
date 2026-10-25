@@ -25,7 +25,7 @@
 //! [`ProtocolKind`](phairplay_core::protocol::ProtocolKind), and the core
 //! crate knows four of them — AirPlay, Miracast, Cast and DLNA. The
 //! discovery layer is not a fifth protocol; it is the facility that the
-//! four protocols share. Adding a `ProtocolKind::Discovery` variant would
+//! protocols share. Adding a `ProtocolKind::Discovery` variant would
 //! change the core vocabulary, which the build contract reserves for the
 //! owner (see `docs/design/BUILD-CONTRACT.md`, section 2).
 //!

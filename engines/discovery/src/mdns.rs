@@ -267,7 +267,7 @@ struct DiscoveryState {
 
 /// The mDNS advertisement layer.
 ///
-/// WHY: the four protocols of PhairPlayRust all rely on the receiver being
+/// WHY: the protocols of PhairPlayRust all rely on the receiver being
 /// discoverable. Centralising the advertisement here means one place decides
 /// the instance names, the TXT records and the failure handling — and one
 /// place has to be correct.

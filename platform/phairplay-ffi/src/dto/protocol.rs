@@ -3,7 +3,7 @@
 //! WHAT: The kind of a protocol, the state of its engine and the status
 //! snapshot of one protocol.
 //!
-//! WHY: The dashboard and the native shells show the same four protocols in
+//! WHY: The dashboard and the native shells show the same five protocols in
 //! the same order with the same states. If the bridge handed out free-form
 //! strings, every host would grow its own spelling of "advertising", and
 //! the states of the receiver and of the dashboard would drift apart.

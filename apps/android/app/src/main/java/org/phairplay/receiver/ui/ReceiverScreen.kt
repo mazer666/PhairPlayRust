@@ -32,11 +32,11 @@ import org.phairplay.receiver.model.orderedProtocols
  * The dashboard of the shell.
  *
  * WHAT: the head of the dashboard, the banner of a failure, the panel of
- * the running session and the grid of the four protocols.
+ * the running session and the grid of the five protocols.
  *
  * WHY: The dashboard is the one screen of the shell, and it is read from
  * a distance with a remote control. It therefore shows everything at
- * once — the four protocols in a grid of two rows, never scrolled — and
+ * once — the five protocols in a grid of three rows, never scrolled — and
  * it moves the focus with a written-down rule instead of with the order
  * of the composition.
  *

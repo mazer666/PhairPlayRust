@@ -49,6 +49,23 @@ Evidence:
 - the static analysis and the lint
 - the review of the dependency
 
+### The gates of the shells
+
+The native shells have their own gates, because the gate of the workspace
+builds the crates of Rust and not the shells. A shell that does not compile
+against the bridge of the current core passes the whole gate of the workspace
+without a complaint — the defect only shows up on the device of a user.
+
+| Shell | Gate | Where |
+|---|---|---|
+| Android (Kotlin) | `./gradlew :app:testDebugUnitTest` | `apps/android` |
+| macOS (Swift) | `swift build` and `swift test` | `apps/macos` |
+
+Both gates run in the continuous integration in the job *Shells (Android,
+macOS)* of [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The tests
+of the macOS shell link against the shared library of the bridge, so the
+library is built before the tests run.
+
 ---
 
 ## 3. Performance acceptance
