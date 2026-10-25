@@ -39,6 +39,7 @@ class ReceiverMappingTest {
             videoQueueFrames = 90uL,
             videoQueueBytes = 67108864uL,
             audioQueuePackets = 200uL,
+            audioQueueBytes = 4194304uL,
             maxPairingAttempts = 5u,
             maxArtworkBytes = 8388608uL,
             maxPhotoBytes = 20971520uL,

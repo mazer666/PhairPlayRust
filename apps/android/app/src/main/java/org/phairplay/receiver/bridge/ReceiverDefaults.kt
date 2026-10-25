@@ -91,11 +91,13 @@ object ReceiverDefaults {
                 protocol(values, "miracast"),
                 protocol(values, "cast"),
                 protocol(values, "dlna"),
+                protocol(values, "smartview"),
             ),
             limits = FfiLimitsConfig(
                 videoQueueFrames = ulong(values, "limits.video_queue_frames"),
                 videoQueueBytes = ulong(values, "limits.video_queue_bytes"),
                 audioQueuePackets = ulong(values, "limits.audio_queue_packets"),
+                audioQueueBytes = ulong(values, "limits.audio_queue_bytes"),
                 maxPairingAttempts = uint(values, "limits.max_pairing_attempts"),
                 maxArtworkBytes = ulong(values, "limits.max_artwork_bytes"),
                 maxPhotoBytes = ulong(values, "limits.max_photo_bytes"),

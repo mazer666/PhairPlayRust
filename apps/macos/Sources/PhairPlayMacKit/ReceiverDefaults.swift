@@ -115,13 +115,14 @@ public enum ReceiverDefaults {
                 manufacturer: try string(values, "device.manufacturer"),
                 protocolVersion: try string(values, "device.protocol_version")
             ),
-            protocols: try ["airplay", "miracast", "cast", "dlna"].map {
+            protocols: try ["airplay", "miracast", "cast", "dlna", "smartview"].map {
                 try protocolConfiguration(values, name: $0)
             },
             limits: FfiLimitsConfig(
                 videoQueueFrames: try ulong(values, "limits.video_queue_frames"),
                 videoQueueBytes: try ulong(values, "limits.video_queue_bytes"),
                 audioQueuePackets: try ulong(values, "limits.audio_queue_packets"),
+                audioQueueBytes: try ulong(values, "limits.audio_queue_bytes"),
                 maxPairingAttempts: try uint(values, "limits.max_pairing_attempts"),
                 maxArtworkBytes: try ulong(values, "limits.max_artwork_bytes"),
                 maxPhotoBytes: try ulong(values, "limits.max_photo_bytes"),

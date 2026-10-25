@@ -69,9 +69,13 @@ class ReceiverDefaultsTest {
             protocol.dlna.enabled = true
             protocol.dlna.port = 0
             protocol.dlna.require_pin = false
+            protocol.smartview.enabled = true
+            protocol.smartview.port = 0
+            protocol.smartview.require_pin = false
             limits.video_queue_frames = 90
             limits.video_queue_bytes = 67108864
             limits.audio_queue_packets = 200
+            limits.audio_queue_bytes = 4194304
             limits.max_pairing_attempts = 5
             limits.max_artwork_bytes = 8388608
             limits.max_photo_bytes = 20971520
@@ -88,9 +92,10 @@ class ReceiverDefaultsTest {
 
         assertEquals("PhairPlay", config.device.name)
         assertEquals("PhairPlayRust", config.device.manufacturer)
-        assertEquals(4, config.protocols.size)
+        assertEquals(5, config.protocols.size)
         assertEquals("airplay", config.protocols[0].name)
         assertEquals("dlna", config.protocols[3].name)
+        assertEquals("smartview", config.protocols[4].name)
         assertEquals(90uL, config.limits.videoQueueFrames)
         assertEquals(67108864uL, config.limits.videoQueueBytes)
         assertEquals(5u, config.limits.maxPairingAttempts)
@@ -117,9 +122,13 @@ class ReceiverDefaultsTest {
             protocol.dlna.enabled = true
             protocol.dlna.port = 0
             protocol.dlna.require_pin = false
+            protocol.smartview.enabled = true
+            protocol.smartview.port = 0
+            protocol.smartview.require_pin = false
             limits.video_queue_frames = 90
             limits.video_queue_bytes = 67108864
             limits.audio_queue_packets = 200
+            limits.audio_queue_bytes = 4194304
             limits.max_pairing_attempts = 5
             limits.max_artwork_bytes = 8388608
             limits.max_photo_bytes = 20971520

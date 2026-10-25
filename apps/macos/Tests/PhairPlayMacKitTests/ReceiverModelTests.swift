@@ -216,6 +216,7 @@ final class ReceiverModelTests: XCTestCase {
                 videoQueueFrames: 90,
                 videoQueueBytes: 67_108_864,
                 audioQueuePackets: 200,
+                audioQueueBytes: 4_194_304,
                 maxPairingAttempts: 5,
                 maxArtworkBytes: 8_388_608,
                 maxPhotoBytes: 20_971_520,

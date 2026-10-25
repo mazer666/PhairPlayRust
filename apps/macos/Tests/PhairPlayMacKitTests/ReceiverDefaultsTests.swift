@@ -47,9 +47,10 @@ final class ReceiverDefaultsTests: XCTestCase {
         let config = try ReceiverDefaults.configuration(from: try values())
         XCTAssertEqual(config.device.name, "PhairPlay")
         XCTAssertEqual(config.device.manufacturer, "PhairPlayRust")
-        XCTAssertEqual(config.protocols.count, 4)
+        XCTAssertEqual(config.protocols.count, 5)
         XCTAssertEqual(config.protocols[0].name, "airplay")
         XCTAssertEqual(config.protocols[3].name, "dlna")
+        XCTAssertEqual(config.protocols[4].name, "smartview")
         XCTAssertEqual(config.limits.videoQueueFrames, 90)
         XCTAssertEqual(config.limits.videoQueueBytes, 67_108_864)
         XCTAssertEqual(config.limits.maxPairingAttempts, 5)
@@ -91,9 +92,13 @@ final class ReceiverDefaultsTests: XCTestCase {
             protocol.dlna.enabled = true
             protocol.dlna.port = 0
             protocol.dlna.require_pin = false
+            protocol.smartview.enabled = true
+            protocol.smartview.port = 0
+            protocol.smartview.require_pin = false
             limits.video_queue_frames = 90
             limits.video_queue_bytes = 67108864
             limits.audio_queue_packets = 200
+            limits.audio_queue_bytes = 4194304
             limits.max_pairing_attempts = 5
             limits.max_artwork_bytes = 8388608
             limits.max_photo_bytes = 20971520
