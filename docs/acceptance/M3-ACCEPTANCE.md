@@ -329,15 +329,39 @@ permission beyond the network ones.
 
 ## 10. Decision
 
-**NOT ACCEPTED at the revision under test (`2d0c4b4` of `feat/other-devices`).**
+**ACCEPTED with a documented limitation, at the revision `c4476db` of
+`main`.**
 
-The reason is one sentence long and it is measured: **the Kotlin of the
-Android shell and the kit of the macOS shell do not compile.** Two errors in
-the Kotlin (`ReceiverMapping.kt:91`, `ReceiverDefaults.kt:104`) and two in the
-Swift (`ReceiverMapping.swift:83`, `ReceiverDefaults.swift:124`) — all four
-of them from the same cause, the new contract of the bridge of the milestone
-M5. A milestone whose deliverable is "an application that the user installs"
-cannot be accepted while the application does not build.
+The decision of the first version of this record was **NOT ACCEPTED** at the
+revision under test (`2d0c4b4` of `feat/other-devices`), and the reason was
+one sentence long and it was measured: **the Kotlin of the Android shell and
+the kit of the macOS shell did not compile.** Two errors in the Kotlin
+(`ReceiverMapping.kt:91`, `ReceiverDefaults.kt:104`) and two in the Swift
+(`ReceiverMapping.swift:83`, `ReceiverDefaults.swift:124`) — all four of them
+from the same cause, the new contract of the bridge of the milestone M5.
+
+**That reason does not hold any more, and it is measured on the revision of
+this decision:**
+
+| The shell | The command | The result |
+|---|---|---|
+| Android | `./gradlew :app:compileDebugKotlin` | `BUILD SUCCESSFUL in 4m 48s` |
+| Android | `./gradlew :app:testDebugUnitTest` | **39 tests, 0 failures, 0 errors, 0 skipped** |
+| macOS | `swift build` | `Build complete!` |
+| macOS | `swift test` | **102 tests, 0 failures** — the 101 of the kit and the new test of the checksum of the bindings |
+
+The four places that the first version of this record named are the four
+places that carried the defect; they carry the repair now. The cause was
+that the bridge of M5 requires the byte budget of the audio queue and that
+neither shell handed it over, and that the fifth protocol was missing in
+both. Both are fixed, and the two shells are built and tested by the job
+*Shells (Android, macOS)* of the continuous integration.
+
+**What stays open** is the device evidence of §9 — the rows that need a
+sender, a television, a device or a Mac. They are **NOT RUN**, and they are
+the limitation that travels with this acceptance. The SwiftUI part of the
+macOS application is still **NOT RUN**: the machine of this measurement has
+Swift for Linux and no macOS SDK.
 
 **What the record does accept:**
 

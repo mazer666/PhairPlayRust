@@ -18,6 +18,7 @@
 | File | What it is | The state |
 |---|---|---|
 | [`RELEASING.md`](RELEASING.md) | the process: what has to be true before a release, how the version is set, which gate runs, how the commit and the tag are made, how the release is published, and what does **not** belong into a release | living |
+| [`RELEASE-NOTES-v0.3.0-alpha.1.md`](RELEASE-NOTES-v0.3.0-alpha.1.md) | the notes of the release v0.3.0-alpha.1 — what it contains, what it does not, and the source of every number | written for an **alpha**: the code of the milestones is delivered and the gate is green, the device tests have not been run, and the release ships the headless receiver for the server platforms |
 | [`RELEASE-NOTES-v0.2.0.md`](RELEASE-NOTES-v0.2.0.md) | the notes of the release v0.2.0 — what it contains, what it does not, and the source of every number | written for a **pre-release**: the tag `v0.2.0` exists in the repository, the publication on the release page is the step of the owner ([`RELEASING.md`](RELEASING.md) §7) |
 
 The index of the whole documentation tree is in [`../README.md`](../README.md).

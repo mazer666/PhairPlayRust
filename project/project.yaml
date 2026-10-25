@@ -8,6 +8,13 @@ project:
   # exist. What is missing is the evidence that only a device can produce:
   # the device test plan.
   product_status: "m5-code-and-acceptance-records-delivered-awaiting-device-tests"
+  # The version of the workspace and the release that carries it. The owner
+  # of the number is VERSION; the decision belongs to the owner, the process
+  # is in docs/releasing/RELEASING.md.
+  current_version: "0.3.0"
+  current_release: "v0.3.0-alpha.1"
+  release_kind: "alpha"
+  release_notes: "docs/releasing/RELEASE-NOTES-v0.3.0-alpha.1.md"
   current_milestone: "M5"
   current_milestone_name: "Smart View"
   current_submilestone: null
@@ -22,7 +29,7 @@ project:
     workspace_builds: true
     lint_clean: true
     format_clean: true
-    tests_passed: 1237
+    tests_passed: 1241
     tests_failed: 0
     tests_ignored: 0
     structural_gates_green: true
@@ -31,6 +38,15 @@ project:
     device_tests: "not-run"
     performance_budgets_measured: "not-run"
     acceptance_record: "docs/acceptance/M5-ACCEPTANCE.md"
+    # The gates of the shells are separate from the gate of the workspace:
+    # the gate of the workspace builds the crates of Rust and not the shells.
+    android_shell_builds: true
+    android_shell_tests_passed: 39
+    macos_shell_builds: true
+    macos_shell_tests_passed: 102
+    # The release plan: the trigger of every release and the platform that
+    # ships a binary with it. The narrative is in ROADMAP.md.
+    release_plan: "ROADMAP.md#the-release-plan"
     # The budgets are not repeated here: the owner of every number is the
     # file of the configuration. A copy of a budget in a second place is a
     # budget that drifts.

@@ -4,6 +4,11 @@
 **Current milestone:** M5 — Smart View (**IN PROGRESS** — the code and the
 acceptance record stand; the device tests are missing)
 
+**Current release:** `v0.3.0-alpha.1` — the **alpha** of the plan below. The
+code of the milestones is delivered, the gate of the project is green, and
+the release ships the headless receiver for the server platforms. The
+binaries of the shells wait for their own device test.
+
 The roadmap is milestone-driven. A milestone is not complete because "the
 picture appears"; it is complete only when its functional, technical,
 performance, usability, security/privacy, interoperability and documentation

@@ -215,6 +215,16 @@ output of every measurement is in [`../audit/`](../audit/).
 | The checks of the dashboard | 35 keyboard checks, 30 layout checks, 38 measured colour pairs — 0 failures | [`../acceptance/M3-ACCEPTANCE.md`](../acceptance/M3-ACCEPTANCE.md) §10; the raw output in [`../audit/tv-web-dashboard.md`](../audit/tv-web-dashboard.md) |
 | The Android shell | at the commit of M3 the Kotlin compiles and its 39 tests are green; **at the revision of this release the module does not compile** — 2 errors | [`../acceptance/M3-ACCEPTANCE.md`](../acceptance/M3-ACCEPTANCE.md) §1 and §1a |
 | The macOS shell | at the commit of M3 the kit runs 101 tests with 0 failures; **at the revision of this release the kit does not compile** — 2 errors | the same record, §1 and §1a |
+
+> **The two shells compile after this release.** The notes of a release
+> describe the release and are not rewritten afterwards — the two rows above
+> are the state of the revision `2d0c4b4`. The defect was fixed afterwards:
+> the bridge of M5 requires the byte budget of the audio queue and neither
+> shell handed it over. The measurement of the repair is in
+> [`../acceptance/M3-ACCEPTANCE.md`](../acceptance/M3-ACCEPTANCE.md) §10 —
+> `BUILD SUCCESSFUL in 4m 48s` and 39 tests on Android, `Build complete!`
+> and 102 tests on macOS — and both shells are built by the job *Shells
+> (Android, macOS)* of the continuous integration on every push since.
 | The Smart View engine | 112 tests of the crate, 0 failed | [`../acceptance/M5-ACCEPTANCE.md`](../acceptance/M5-ACCEPTANCE.md) §10; the raw output in [`../audit/smartview-engine-test.log`](../audit/smartview-engine-test.log) |
 | The milestone M5 | **ACCEPTED with a documented limitation** | [`../acceptance/M5-ACCEPTANCE.md`](../acceptance/M5-ACCEPTANCE.md) §10 |
 | The milestone M3 | **NOT ACCEPTED at the revision of this release** | [`../acceptance/M3-ACCEPTANCE.md`](../acceptance/M3-ACCEPTANCE.md) §10 |
