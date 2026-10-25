@@ -1,5 +1,5 @@
 /**
- * The four receiver cards of the dashboard.
+ * The five receiver cards of the dashboard.
  *
  * WHAT: builds the cards, paints their state and switches a receiver on and
  * off.
@@ -96,7 +96,7 @@ export class ProtocolCards {
   }
 
   /**
-   * Builds the four cards and hands them to the focus group.
+   * Builds the five cards and hands them to the focus group.
    */
   build() {
     const fragment = document.createDocumentFragment();

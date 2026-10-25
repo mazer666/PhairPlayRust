@@ -10,6 +10,7 @@ fn context() -> EngineContext {
     EngineContext {
         identity: Arc::new(DeviceIdentity::with_name("Living Room")),
         capabilities: Arc::new(MediaCapabilities::empty()),
+        peer_limit: phairplay_core::protocol::PeerLimit::One,
         video_sink: Arc::new(NullVideoSink),
         audio_sink: Arc::new(NullAudioSink),
         events: sender,

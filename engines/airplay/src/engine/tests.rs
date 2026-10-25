@@ -12,6 +12,7 @@ fn context() -> EngineContext {
     EngineContext {
         identity: Arc::new(DeviceIdentity::default()),
         capabilities: Arc::new(phairplay_core::capabilities::MediaCapabilities::empty()),
+        peer_limit: phairplay_core::protocol::PeerLimit::One,
         video_sink: Arc::new(NullVideoSink),
         audio_sink: Arc::new(NullAudioSink),
         events,

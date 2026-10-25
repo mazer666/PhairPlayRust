@@ -128,11 +128,26 @@ container is therefore the safe way.
 The Pi is the common case: a computer without a screen that is supposed to
 stand in the network.
 
+**The fast way — the release artefact.** The release carries the receiver
+of the board as an archive that carries the device class in its name:
+
+```bash
+tar xzf phairplayrust-<version>-raspberry-pi.tar.gz
+cd phairplayrust-<version>-raspberry-pi
+sudo ./deploy/install.sh --no-build --profile raspberry-pi
+```
+
+**The way for a developer — the checkout.**
+
 ```bash
 git clone https://github.com/mazer666/PhairPlayRust.git
 cd PhairPlayRust
 deploy/install.sh --profile raspberry-pi
 ```
+
+The list of every platform, with the artefact that belongs to it and the
+test that measures it, is in
+[`PLATFORMS.md`](PLATFORMS.md).
 
 The script does, in this order: it builds the receiver, it creates the
 unprivileged user `phairplay`, it installs the binary under

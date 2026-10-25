@@ -917,6 +917,7 @@ only when the milestone before them is green.
 |---|---|---|
 | Linux shell | A native Linux application | A green M4 |
 | Windows shell | A native Windows application | A green Linux track |
+| Meta Quest | a Quest as a **sender** of the picture of a computer — the protocols of that role are implemented for other senders already | a way to the Wi-Fi Direct APIs of the platform that does not need a location permission; the reason is in [`docs/guides/PLATFORMS.md`](docs/guides/PLATFORMS.md) §4 |
 | Transcoding | A format conversion in the receiver | A green M4 and a decision about the CPU budget |
 | Control from outside the local network | A control channel that reaches the receiver from another network — **not** the remote control interface of the dashboard and of the shells, which runs inside the local network | a decision about the privacy promise — the current promise forbids it |
 

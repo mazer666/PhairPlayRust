@@ -5,6 +5,7 @@
 //! receiver that cannot be restarted.
 
 #![allow(clippy::expect_used, clippy::unwrap_used)]
+use phairplay_core::protocol::PeerLimit;
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use std::time::Duration;
@@ -24,6 +25,7 @@ fn context() -> EngineContext {
     EngineContext {
         identity: Arc::new(DeviceIdentity::with_name("Living Room")),
         capabilities: Arc::new(MediaCapabilities::empty()),
+        peer_limit: phairplay_core::protocol::PeerLimit::One,
         video_sink: Arc::new(NullVideoSink),
         audio_sink: Arc::new(NullAudioSink),
         events: sender,
@@ -196,7 +198,10 @@ async fn a_peer_that_opened_a_channel_is_counted() {
     engine.start(context()).await.expect("the engine starts");
     let session = engine
         .sessions()
-        .open("127.0.0.1:40000".parse().expect("the address is valid"))
+        .open(
+            "127.0.0.1:40000".parse().expect("the address is valid"),
+            PeerLimit::One,
+        )
         .expect("the session opens");
     assert_eq!(engine.status().peer_count, 1);
     assert_eq!(engine.status().state, ProtocolState::Streaming);

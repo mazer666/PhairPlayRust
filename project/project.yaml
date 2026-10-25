@@ -29,7 +29,7 @@ project:
     workspace_builds: true
     lint_clean: true
     format_clean: true
-    tests_passed: 1241
+    tests_passed: 1258
     tests_failed: 0
     tests_ignored: 0
     structural_gates_green: true
@@ -123,27 +123,59 @@ product:
       statement: "Proprietary and not publicly documented. The discovery and the handshake are implemented; the content of the channel is not."
 
 platforms:
+  # The narrative of every platform — the artefact, the installation and the
+  # test — is in docs/guides/PLATFORMS.md. This block is the machine
+  # readable state of the same thing.
   phase_1:
-    android:
-      minimum_api_family: "Android 13+"
+    android_tv_fire_tv:
+      device_class: "Google TV, Fire TV"
+      minimum_api_family: "Android 13+ (API 33)"
       primary_abi: "arm64-v8a"
-      status: "implemented"
+      artifact: "phairplayrust-<version>-android-arm64-v8a-test.apk"
+      status: "built-device-test-not-run"
       milestone: "M3"
-      note: "The Kotlin compiles, the unit tests are green and the lint is green — docs/audit/tv-android-shell.md. The APK is NOT RUN: the NDK of the version that the Android Gradle plugin wants is not installed here."
+      note: "The release variant of the shell builds — BUILD SUCCESSFUL — and the package carries the library of the bridge, the Leanback launcher, the nine permissions without a location and without a microphone, and a signature. The APK is signed with a TEST key: the key of a release belongs to the owner of the project. The APK was never installed on a device and the application was never started — it proves that the shell can be BUILT for a television, not that it works on one."
     macos:
+      device_class: "Mac"
       minimum: "13"
       architecture: "arm64"
-      status: "implemented"
+      status: "written-device-test-not-run"
       milestone: "M3"
-      note: "The kit of the shell has a green test suite — docs/audit/tv-macos-shell.md. The SwiftUI part is NOT RUN: this machine has no macOS SDK."
+      note: "The kit of the shell has a green test suite — 102 tests, 0 failures. The SwiftUI part of the application is NOT RUN: the machine of the measurement has no macOS SDK."
   phase_2:
+    raspberry_pi:
+      device_class: "Raspberry Pi 3 and later, every other aarch64 Linux"
+      artifact: "phairplayrust-<version>-raspberry-pi.tar.gz"
+      profile: "config/profiles/raspberry-pi.toml"
+      installation: "deploy/install.sh --profile raspberry-pi"
+      status: "shipped-device-test-not-run"
+      entry_condition: "met"
+      note: "The board is the device the project was built for: it runs nothing else and sits in the living room. The archive is built and the receiver was started out of it; the device test — the rows that need a sender and the rows that need a measurement — is NOT RUN. On this board the measurement matters more than anywhere else, because it is the slowest device the project supports."
     linux:
-      status: "headless-receiver-available"
-      entry_condition: "a green M4"
-      note: "The receiver runs headless on Linux — deploy/. A native Linux shell is a later track."
+      device_class: "a NAS, a mini PC, a desktop, a server"
+      artifact: "phairplayrust-<version>-linux-x86_64.tar.gz"
+      profile: "config/profiles/generic.toml"
+      installation: "deploy/install.sh"
+      status: "shipped-device-test-not-run"
+      entry_condition: "met"
+      note: "The headless receiver with the dashboard. The binary was built and started out of the archive."
     windows:
+      device_class: "a Windows computer, a NAS"
+      artifact: "phairplayrust-<version>-windows-x86_64.tar.gz"
+      status: "built-device-test-not-run"
+      entry_condition: "met"
+      note: "The binary is built. The installation as a service on Windows is not written yet."
+  phase_3:
+    meta_quest:
+      device_class: "Quest 2, Quest 3, Quest 3S, Quest Pro"
+      status: "not-a-target"
+      entry_condition: "a way to the Wi-Fi Direct APIs of the platform that does not need a location permission"
+      note: "The developer documentation of Meta names minSdkVersion 32 — and on Android 12L and earlier the platform forces ACCESS_FINE_LOCATION onto every application that calls the Wi-Fi Direct APIs, which the Miracast engine does. Lowering minSdk would put a location permission into the manifest and break FR-075. A Quest is also a SENDER and not a receiver: the protocols of that role are implemented for other senders already. The reason is in docs/guides/PLATFORMS.md §4."
+    linux_shell:
+      device_class: "a Linux desktop"
       status: "planned"
-      entry_condition: "a green Linux track"
+      entry_condition: "a green M4"
+      note: "A NATIVE Linux application. The headless receiver on Linux is not that track."
 
 architecture:
   shared_core: "Rust"

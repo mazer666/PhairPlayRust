@@ -5,7 +5,7 @@
  * exactly one of them is in the tab order, the arrow keys move the focus
  * inside the group, and the Tab key leaves it.
  * WHY: the dashboard is watched on a television, where the only pointer is
- * the remote control. Four cards that are four tab stops would need four
+ * the remote control. Five cards that are five tab stops would need five
  * presses of Tab before the user reaches the second card; a group that
  * behaves like one widget needs one press and then the arrow keys. This is
  * the standard pattern for composite widgets (the roving tabindex of the

@@ -45,9 +45,12 @@ VERSION="$(tr -d '[:space:]' < VERSION)"
 # WHY the platform is part of the name: two archives of the same version
 # and the same architecture — one for Linux and one for Windows — must not
 # carry the same name, or the second one overwrites the first.
+# WHY the name of the device class and not the architecture: a user thinks in
+# devices, not in triples. `aarch64-unknown-linux-gnu` says nothing about
+# the board in the cupboard — `raspberry-pi` does.
 case "$TARGET" in
     x86_64-unknown-linux-gnu) ARCH="x86_64"; PLATFORM="linux"; BINARY_NAME="phairplay-web" ;;
-    aarch64-unknown-linux-gnu) ARCH="aarch64"; PLATFORM="linux"; BINARY_NAME="phairplay-web" ;;
+    aarch64-unknown-linux-gnu) ARCH=""; PLATFORM="raspberry-pi"; BINARY_NAME="phairplay-web" ;;
     x86_64-pc-windows-gnu) ARCH="x86_64"; PLATFORM="windows"; BINARY_NAME="phairplay-web.exe" ;;
     *) ARCH="$TARGET"; PLATFORM="unknown"; BINARY_NAME="phairplay-web" ;;
 esac
@@ -119,7 +122,11 @@ project, the licences of the dependencies and the inventory of them in
 TEXT
 
 # The archive itself. The name carries the version and the architecture.
-NAME="phairplayrust-$VERSION-$PLATFORM-$ARCH"
+if [ -n "$ARCH" ]; then
+    NAME="phairplayrust-$VERSION-$PLATFORM-$ARCH"
+else
+    NAME="phairplayrust-$VERSION-$PLATFORM"
+fi
 ARCHIVE="$OUTPUT/$NAME.tar.gz"
 mkdir -p "$OUTPUT"
 tar czf "$ARCHIVE" -C "$STAGE" "$NAME"

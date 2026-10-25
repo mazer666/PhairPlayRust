@@ -72,9 +72,34 @@ an error** and not a silently ignored line.
 | How many headers may a request carry? | `limits.max_header_count` |
 | How large may an artwork be? | `limits.max_artwork_bytes` |
 | Is a PIN required? | `protocols.<name>.require_pin` |
+| May a protocol serve several peers at the same time? | `session.multi_peer_protocols` |
 | Which service types does a protocol advertise? | `protocols.<name>.mdns_service_types` |
 | May the dashboard be reached from the network? | `web.allow_remote_access` (it may not) |
 | Are the names of the senders masked in the log? | `privacy.mask_device_names` (in `security-policy.toml`) |
+
+---
+
+## 4a. The rule of the peers
+
+```toml
+[session]
+multi_peer_protocols = ["cast"]
+```
+
+Most protocols serve **one** peer at a time: a second sender is refused,
+not queued — a queued sender waits for a session that may never end, and
+the sender sees a device that hangs. Google Cast is the documented
+exception: a Cast receiver may serve several senders at the same time.
+
+**The list is the one owner of the rule.** Every engine asks the
+configuration, and the rule travels over the bridge to the native shells.
+The list is read by the core (`SessionConfig`), handed to every engine in
+the `EngineContext`, and read again by the shells from the configuration of
+the receiver.
+
+**The numbers of the peers of a protocol are not configurable.** The list
+says *whether* a protocol may serve several peers; the number of peers that
+the machine carries is a property of the protocol. Google Cast serves eight.
 
 ---
 

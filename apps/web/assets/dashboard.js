@@ -2,7 +2,7 @@
  * The PhairPlayRust dashboard.
  *
  * WHAT: reads the local receiver API and paints the control panel — the
- * four receivers, the live sessions, the throughput graph and the codec
+ * five receivers, the live sessions, the throughput graph and the codec
  * reference.
  * WHY: the panel is the only place where the state of the receiver is
  * visible, so it has to be unambiguous. "Stopped" and "switched off" are

@@ -131,11 +131,26 @@ Gerät oder der Container der sichere Weg.
 Der Pi ist der häufigste Fall: ein Rechner ohne Bildschirm, der im Netz
 stehen soll.
 
+**Der schnelle Weg — das Artefakt des Releases.** Das Release trägt den
+Receiver des Boards als Archiv, und der Name des Archivs nennt die
+Geräteklasse:
+
+```bash
+tar xzf phairplayrust-<version>-raspberry-pi.tar.gz
+cd phairplayrust-<version>-raspberry-pi
+sudo ./deploy/install.sh --no-build --profile raspberry-pi
+```
+
+**Der Weg für die Entwicklung — der Checkout.**
+
 ```bash
 git clone https://github.com/mazer666/PhairPlayRust.git
 cd PhairPlayRust
 deploy/install.sh --profile raspberry-pi
 ```
+
+Die Liste jeder Plattform, mit dem Artefakt, das zu ihr gehört, und dem
+Test, der sie misst, steht in [`PLATFORMS.md`](PLATFORMS.md).
 
 Das Skript macht, in dieser Reihenfolge: es baut den Receiver, es legt den
 unprivilegierten Benutzer `phairplay` an, es installiert das Binary unter

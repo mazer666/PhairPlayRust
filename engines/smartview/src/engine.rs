@@ -246,6 +246,11 @@ impl ProtocolEngine for SmartViewEngine {
                 sessions,
                 events,
                 limits,
+                // WHY the rule comes from the context of the engine: the
+                // list `session.multi_peer_protocols` of the configuration
+                // is the single owner of the question "may this protocol
+                // serve several peers".
+                peer_limit: ctx.peer_limit,
             })
         })
         .await

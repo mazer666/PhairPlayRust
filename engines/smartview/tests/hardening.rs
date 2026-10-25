@@ -129,6 +129,7 @@ async fn a_control_character_in_the_name_of_the_device_never_reaches_the_documen
             "Living\u{0} Room\u{1b}",
         )),
         capabilities: std::sync::Arc::new(phairplay_core::capabilities::MediaCapabilities::empty()),
+        peer_limit: phairplay_core::protocol::PeerLimit::One,
         video_sink: std::sync::Arc::new(phairplay_core::media::NullVideoSink),
         audio_sink: std::sync::Arc::new(phairplay_core::media::NullAudioSink),
         events: sender,

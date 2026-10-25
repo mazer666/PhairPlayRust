@@ -113,6 +113,21 @@ The versions of the workspace live in [`VERSION`](VERSION) and in
 
 ### Fixed
 
+**The one-peer rule had four owners.** The requirement `FR-040` says that the
+rule that says how many peers a protocol serves lives in **one** place — the
+list `session.multi_peer_protocols` of the configuration. **No Rust code read
+that list.** The engine of Cast carried the number eight, the engine of
+Miracast the number one, the engine of AirPlay the number one in its own
+state, and the engine of DLNA did not carry the rule at all — it only counted
+the connections. The list was a decoration.
+
+The core owns the rule now: the list is read, the supervisor hands it to
+every engine in the context, and every engine asks it. The tests are the two
+that `FR-040` asks for and that did not exist — `two_senders_are_served_at_the_same_time`
+for Cast and `the_rule_comes_from_the_configuration_and_not_from_the_engine`
+for Miracast, with the opposite case. The rule travels over the bridge as
+well, so that the native shells do not have to guess it.
+
 **The exclusion of the message format of the Smart View channel was too
 broad.** The messages of the channel are JSON objects with an `event` or a
 `method` and a `data` or a `params`, and the names of the events and the

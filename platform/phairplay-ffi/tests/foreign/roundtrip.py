@@ -71,6 +71,10 @@ def a_configuration():
             max_cpu_percent=55,
             idle_timeout_ms=9999,
         ),
+        # The rule that says how many peers a protocol serves. The round-trip
+        # proves that it survives the C ABI — a rule that does not reach the
+        # foreign caller is a rule that the native shell has to guess.
+        session=ffi.FfiSessionConfig(multi_peer_protocols=["cast"]),
     )
 
 

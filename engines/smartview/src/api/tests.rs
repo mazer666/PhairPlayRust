@@ -21,6 +21,7 @@ fn peer() -> SocketAddr {
 fn context() -> Arc<ApiContext> {
     let (sender, _receiver) = tokio::sync::mpsc::channel(8);
     Arc::new(ApiContext {
+        peer_limit: PeerLimit::One,
         description: DeviceDescription::new(
             "Living Room",
             "PhairPlay Rust Receiver",

@@ -51,6 +51,9 @@ here go deeper.
 
 ### The guides
 
+- [`guides/PLATFORMS.md`](guides/PLATFORMS.md) — the devices the project
+  supports: the artefact that belongs to each of them, the installation and
+  the test that measures it — and why the Meta Quest is **not** one of them
 - [`guides/PROTOCOL_OVERVIEW.md`](guides/PROTOCOL_OVERVIEW.md) — what a sender
   actually does in each of the five protocols, and where the limits are
 - [`guides/OTHER-DEVICES.md`](guides/OTHER-DEVICES.md) — on which devices the

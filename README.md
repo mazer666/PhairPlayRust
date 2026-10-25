@@ -37,11 +37,13 @@ network and without a decoder.
 | Build contract for the crate interfaces | in place: [`docs/design/BUILD-CONTRACT.md`](docs/design/BUILD-CONTRACT.md) |
 | Central configuration: defaults, performance budgets, security policy, device profiles | in place: [`config/`](config/README.md) |
 | Documentation landscape in the house format | in place: [`docs/`](docs/README.md) |
-| The five protocol engines and the four format crates | **implemented and tested** — the control plane of each protocol; the media path belongs to the platform layer. The Smart View engine implements the discovery and the handshake; the message format of its channel is proprietary and **not** implemented |
+| The five protocol engines and the four format crates | **implemented and tested** — the control plane of each protocol; the media path belongs to the platform layer. The Smart View engine implements the discovery, the handshake, the channel under the name that the sender gives it and the keys of the remote control; the **picture of the screen** of a Galaxy device is proprietary and **not** implemented (`EXC-011`) |
 | The platform bridge and the local dashboard | **implemented and tested** — the bridge carries a value out and back, the dashboard answers its API |
 | The headless receiver: the command line, the configuration file, the device profiles, the systemd unit, the container | **implemented and tested** — the program starts the protocols itself |
 | The interface as a remote control: the arrow keys, the visible focus, the card as the switch, the Leanback launcher | **implemented** — the evidence is in [`docs/audit/`](docs/audit/tv-web-dashboard.md) |
-| Native shells for Android and macOS | **implemented and tested** — the unit tests of the Android shell and the tests of the kit of the macOS shell pass; the application of macOS and the device tests need a Mac and a device — see the acceptance record |
+| Native shells for Android and macOS | **implemented and tested** — the unit tests of the Android shell and the tests of the kit of the macOS shell pass, and the **release APK of the Android shell is built** (with the bridge of the receiver, the Leanback launcher of the television and a signature); the application of macOS and the device tests need a Mac and a device — see the acceptance record |
+| The platforms: Linux, Raspberry Pi, Windows, Android TV / Fire TV, macOS | **defined and built** — every platform has an artefact with the name of its device class, an installation and a test; the device tests are NOT RUN. The list is in [`docs/guides/PLATFORMS.md`](docs/guides/PLATFORMS.md) |
+| The rule that says how many peers a protocol serves | **one owner** — the list `session.multi_peer_protocols` of the configuration; every engine asks it, and the rule travels over the bridge to the native shells |
 | Hardening, structural gates and the licence gate | **in place** — the gates are green, see [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md) |
 
 **The gate of the workspace is green:** the workspace compiles, the lint is
@@ -353,18 +355,38 @@ drifts.
    contract, the central configuration, the documentation landscape, the gate.
    The acceptance record is in
    [`docs/acceptance/M0-ACCEPTANCE.md`](docs/acceptance/M0-ACCEPTANCE.md).
-2. **M1 — AirPlay 2 receiver** *(the code stands; the acceptance record is
-   missing)* — the format layer, the discovery, the AirPlay engine
+2. **M1 — AirPlay 2 receiver** *(the code stands; the acceptance record
+   exists and is ACCEPTED with a documented limitation)* — the format layer,
+   the discovery, the AirPlay engine. The record is in
+   [`docs/acceptance/M1-ACCEPTANCE.md`](docs/acceptance/M1-ACCEPTANCE.md).
 3. **M2 — Protocol breadth and local control** *(the code stands; the
-   acceptance record is missing)* — Google Cast, Miracast, the DLNA renderer,
-   the platform bridge, the local dashboard
-4. **M3 — Native shells** *(the code stands; the evidence is in
-   [`docs/audit/`](docs/audit/tv-android-shell.md); the acceptance record is
-   missing)* — the Android and the macOS application
+   acceptance record exists and is ACCEPTED with a documented limitation)* —
+   Google Cast, Miracast, the DLNA renderer, the platform bridge, the local
+   dashboard. The record is in
+   [`docs/acceptance/M2-ACCEPTANCE.md`](docs/acceptance/M2-ACCEPTANCE.md).
+4. **M3 — Native shells** *(the code stands; the acceptance record exists
+   and is ACCEPTED with a documented limitation)* — the Android and the
+   macOS application. **The release APK of the Android shell is built** — it
+   carries the bridge of the receiver, the Leanback launcher of the
+   television and a signature; it was never installed on a device. The
+   record is in
+   [`docs/acceptance/M3-ACCEPTANCE.md`](docs/acceptance/M3-ACCEPTANCE.md).
 5. **M4 — Hardening, interoperability and release readiness** *(largely
-   done; the device tests of the interoperability are NOT RUN)*
-6. **M5 — Smart View** *(the code stands; the acceptance record is
-   missing)* — the fifth protocol
+   done; the device tests of the interoperability are NOT RUN)* — the record
+   is in
+   [`docs/acceptance/M4-ACCEPTANCE.md`](docs/acceptance/M4-ACCEPTANCE.md).
+6. **M5 — Smart View** *(the code stands; the acceptance record exists and
+   is ACCEPTED with a documented limitation)* — the fifth protocol. The
+   channel is served under the name that the sender gives it, the greeting
+   and the keys of the remote control are understood; **the picture of the
+   screen of the device is not implemented** (`EXC-011`). The record is in
+   [`docs/acceptance/M5-ACCEPTANCE.md`](docs/acceptance/M5-ACCEPTANCE.md).
+
+**The open point of every milestone is the same:** the evidence that only a
+device can produce. The script that closes the gap is the device test plan
+([`docs/guides/DEVICE_TEST_PLAN.md`](docs/guides/DEVICE_TEST_PLAN.md)), and
+the list of the devices with their artefacts is in
+[`docs/guides/PLATFORMS.md`](docs/guides/PLATFORMS.md).
 
 The gates of every milestone are in [`ROADMAP.md`](ROADMAP.md), the quality
 model in [`QUALITY.md`](QUALITY.md).
