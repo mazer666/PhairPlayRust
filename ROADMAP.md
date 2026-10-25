@@ -1,8 +1,8 @@
 # PhairPlayRust Roadmap
 
 **Roadmap version:** 0.2
-**Current milestone:** M5 — Smart View (**IN PROGRESS** — the code stands;
-the acceptance record and the device tests are missing)
+**Current milestone:** M5 — Smart View (**IN PROGRESS** — the code and the
+acceptance record stand; the device tests are missing)
 
 The roadmap is milestone-driven. A milestone is not complete because "the
 picture appears"; it is complete only when its functional, technical,
@@ -657,7 +657,7 @@ down.
 
 ---
 
-# M5 — Smart View *(Status: `in_progress` — the code is delivered, the acceptance record and the device tests are missing)*
+# M5 — Smart View *(Status: `in_progress` — the code and the acceptance record are delivered, the device tests are missing)*
 
 > **What is delivered:** the fifth protocol of the vocabulary
 > (`ProtocolKind::SmartView`), the service type `_samsungmsf._tcp`, the port
@@ -784,7 +784,16 @@ Framework* (MSF).
 
 ### QA evidence
 
-- The acceptance record of M5. **Open** — the record does not exist yet.
+- The acceptance record of M5. **Green** —
+  [`docs/acceptance/M5-ACCEPTANCE.md`](docs/acceptance/M5-ACCEPTANCE.md). The
+  record names the tests, the measurements and every gate that is **NOT RUN**
+  with the exact reason.
+- The gate of the project. **Green** — 1237 tests of the workspace, 0 fail.
+  The two native shells have their own gate since the job *Shells (Android,
+  macOS)*: 101 tests of the kit of the macOS shell and 39 unit tests of the
+  Android shell, 0 failures.
+- The licence audit and the advisory audit. **Green** — the jobs *Licenses
+  (cargo-deny, pinned)* and *Security Audit (cargo-audit)*.
 
 ## Explicit non-goals
 

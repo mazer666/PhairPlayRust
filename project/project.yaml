@@ -3,10 +3,11 @@ project:
   baseline_version: "0.1"
   # The state of the code and the state of the evidence are two different
   # things. The code of the five engines, the four format crates, the
-  # bridge, the dashboard and the headless receiver is written and tested.
-  # What is missing is the evidence that only a device can produce: the
-  # device test plan, and the acceptance records of the milestones M1 to M5.
-  product_status: "m5-code-delivered-awaiting-acceptance-records-and-device-tests"
+  # bridge, the dashboard, the headless receiver and the two native shells
+  # is written and tested. The acceptance records of the milestones M1 to M5
+  # exist. What is missing is the evidence that only a device can produce:
+  # the device test plan.
+  product_status: "m5-code-and-acceptance-records-delivered-awaiting-device-tests"
   current_milestone: "M5"
   current_milestone_name: "Smart View"
   current_submilestone: null
@@ -16,17 +17,12 @@ project:
   in_progress_submilestones: []
   # The milestones whose code is delivered and whose acceptance record is
   # missing. The narrative is in ROADMAP.md.
-  milestones_awaiting_acceptance_record:
-    - "M1"
-    - "M2"
-    - "M3"
-    - "M4"
-    - "M5"
+  milestones_awaiting_acceptance_record: []
   verification:
     workspace_builds: true
     lint_clean: true
     format_clean: true
-    tests_passed: 1224
+    tests_passed: 1237
     tests_failed: 0
     tests_ignored: 0
     structural_gates_green: true
@@ -34,7 +30,7 @@ project:
     documentation_links_green: true
     device_tests: "not-run"
     performance_budgets_measured: "not-run"
-    acceptance_record: "docs/acceptance/M0-ACCEPTANCE.md"
+    acceptance_record: "docs/acceptance/M5-ACCEPTANCE.md"
     # The budgets are not repeated here: the owner of every number is the
     # file of the configuration. A copy of a budget in a second place is a
     # budget that drifts.
@@ -62,7 +58,7 @@ project:
   contribution_model: "DCO"
   # The last time this file was written by hand. The state of the project
   # lives here; the narrative of the milestones lives in ROADMAP.md.
-  state_updated: "2026-10-24"
+  state_updated: "2026-10-25"
 
 product:
   summary: "A free, open-source, privacy-first receiver for AirPlay 2, Miracast, Google Cast, DLNA/UPnP and Samsung Smart View on the local network."

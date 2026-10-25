@@ -317,13 +317,36 @@ measurement but a race (§9).
 | The five performance budgets | three of them are a property of a picture that does not flow (`EXC-011`); the other two are a property of the running receiver on a real device | the device test plan, §3 |
 | The picture of a Galaxy device on the display of the receiver | the message format of the channel is proprietary and is not implemented (`EXC-011`) | the documentation of the format by Samsung, or another implementation under a licence that allows the port |
 | The browser gate of the fifth dashboard card (layout, contrast, keyboard) | the browser gate of the dashboard belongs to the dashboard milestone; this acceptance did not re-run it | `node apps/web/tools/check-layout.mjs`, `check-contrast.mjs`, `check-keyboard.mjs` |
-| The licence audit (`cargo-deny`) and the advisory audit (`cargo-audit`) | the tools are not installed in the sandbox and the registry is not reachable offline | the CI jobs *Licenses (cargo-deny, pinned)* and *Security Audit (cargo-audit)* of `.github/workflows/ci.yml` |
+| The licence audit (`cargo-deny`) and the advisory audit (`cargo-audit`) | the tools were not installed in the sandbox when this record was written — **both have run since and both are green**, see the table below | the CI jobs *Licenses (cargo-deny, pinned)* and *Security Audit (cargo-audit)* of `.github/workflows/ci.yml` |
 | The build of the **macOS application** (the `PhairPlayMacApp` target and the Xcode project) | the sandbox has Swift 6.0.3 for Linux but no macOS SDK — the *application* needs `CoreGraphics` and `AppKit` | a macOS runner |
 | The **instrumented** Android tests (`androidTest`) | they need a device or an emulator | a device or an emulator |
-| The run of the whole workspace | the acceptance of this milestone is measured on the crates of the milestone; the run of the workspace was attempted **twice** and stopped in the compilation, because another workstream was editing the tree at the same moment: the first attempt failed in `engines/dlna/src/ssdp.rs`, the second in `core/phairplay-core/src/ssdp.rs`. Both files carry a change of a **different** workstream (the SSDP port of the workspace); the crate of the milestone compiled and passed in both runs | `cargo test --offline --workspace` on a tree that no other workstream edits — or the CI job *Quality Gate* |
+| The run of the whole workspace | the acceptance of this milestone is measured on the crates of the milestone; the run of the workspace was attempted **twice** and stopped in the compilation, because another workstream was editing the tree at the same moment: the first attempt failed in `engines/dlna/src/ssdp.rs`, the second in `core/phairplay-core/src/ssdp.rs`. Both files carry a change of a **different** workstream (the SSDP port of the workspace); the crate of the milestone compiled and passed in both runs — **the whole workspace has run since and is green**, see the table below | `cargo test --offline --workspace` on a tree that no other workstream edits — or the CI job *Quality Gate* |
 
 A check that did not run is **NOT RUN** with the exact reason. It is never
 reported as a success.
+
+### The checks that the continuous integration has run since
+
+The record above was written in a sandbox without the tools of the shells.
+The state of the tree has moved on since, and the gaps that the table names
+are closed by the continuous integration — the run `40150605534` of the
+commit `61b33a7`:
+
+| Job | Result | What it proves |
+|---|---|---|
+| *Quality Gate (format, lint, tests, documentation)* | **success** | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (**1237 tests pass, 0 fail, 0 ignored**), `cargo doc --workspace --no-deps` |
+| *Structure (boundaries, file size, licence headers, documentation)* | **success** | the four structural gates, including the link check |
+| *Licenses (cargo-deny, pinned)* | **success** | `cargo-deny 0.20.2` against `deny.toml` — the licence gate that was NOT RUN in the sandbox |
+| *Security Audit (cargo-audit)* | **success** | `cargo audit` against the lock file of the repository |
+| *Shells (Android, macOS)* | **success** | the new job: `swift build` and `swift test` in `apps/macos` (**101 tests pass, 0 failures**), `./gradlew :app:testDebugUnitTest` in `apps/android` (**39 tests pass, 0 failures**) |
+
+The job *Shells (Android, macOS)* is **new**. It did not exist while this
+record was written, and its absence is the reason why the shells could break
+without a notice: the gate of the workspace builds the crates of Rust and not
+the shells. The two shells did not compile against the bridge of the current
+core — the bridge requires the byte budget of the audio queue, and neither
+shell handed it over. The defect is fixed, and the job that would have
+caught it now runs on every push.
 
 ## 10. Decision
 
@@ -342,7 +365,11 @@ the configuration, and is registered with the supervisor in the composition
 root — **112 tests of the crate pass, 0 fail, 0 are ignored**, and the
 **43 tests of the bridge** — the tests of the composition root — pass as
 well; the lint is clean, the format is clean, the boundary gate is green
-and it still catches five real violations.
+and it still catches five real violations. **The whole workspace passes
+since: 1237 tests, 0 fail, 0 ignored.** The two native shells carry the
+fifth protocol as well and have their own gate: **101 tests of the kit of
+the macOS shell** and **39 unit tests of the Android shell**, 0 failures
+each.
 
 The limitation is named, not hidden:
 
