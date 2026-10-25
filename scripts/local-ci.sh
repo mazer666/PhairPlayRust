@@ -281,6 +281,7 @@ run_check_script "the crate boundaries" scripts/check-crate-boundaries.sh
 run_check_script "the length of the source files" scripts/check-file-size.sh
 run_check_script "the licence headers" scripts/check-license-headers.sh
 run_check_script "the links of the documentation" scripts/check-docs-links.sh
+run_check_script "the version of the workspace" scripts/check-version-consistency.sh
 
 # ── 2. the licences of the dependencies ─────────────────────────────────────
 run_step "the licence audit (cargo-deny)" bash scripts/audit-licenses.sh

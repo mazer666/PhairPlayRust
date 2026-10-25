@@ -304,6 +304,14 @@ jobs:
       - name: The links of the documentation
         run: bash scripts/check-docs-links.sh
 
+      # WHY this step exists: the version of the workspace lives in three
+      # places — VERSION, Cargo.toml and the changelog — and a release sets
+      # all of them in one change. The release v0.2.0 was published with the
+      # file VERSION still carrying 0.1.0, because nothing compared the
+      # three places.
+      - name: The version of the workspace
+        run: bash scripts/check-version-consistency.sh
+
       - name: The summary of the run
         if: always()
         run: |
@@ -314,4 +322,5 @@ jobs:
             echo "- The length of the sources: \`scripts/check-file-size.sh\`"
             echo "- The licence headers: \`scripts/check-license-headers.sh\`"
             echo "- The links of the documentation: \`scripts/check-docs-links.sh\`"
+            echo "- The version of the workspace: \`scripts/check-version-consistency.sh\`"
           } >> "$GITHUB_STEP_SUMMARY"
