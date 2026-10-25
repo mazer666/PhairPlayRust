@@ -207,6 +207,47 @@ artefacts and the platforms:
 | **Android** (arm64-v8a, API 33+) | the APK with the native bridge | the **beta**: the device test of the shell is green |
 | **macOS** (13+, Apple silicon) | the `.app` | the **beta**: the device test of the shell is green |
 
+### The test build of the Android shell
+
+The release carries **one** more artefact: the APK of the Android shell,
+signed with a **test key**. It is the artefact that the device test needs —
+without it there is nothing to install on a Google TV or a Fire TV.
+
+| What | The measurement |
+|---|---|
+| the file | `phairplayrust-0.3.0-alpha.1-android-arm64-v8a-test.apk` (23 156 276 Bytes) |
+| the checksum | `phairplayrust-0.3.0-alpha.1-android-arm64-v8a-test.apk.sha256` |
+| the package | `org.phairplay.receiver`, `versionName='0.3.0'`, `versionCode='1'` |
+| the architecture | `native-code: 'arm64-v8a'` — `lib/arm64-v8a/libphairplay_ffi.so` |
+| the launcher of the television | `leanback-launchable-activity: name='org.phairplay.receiver.MainActivity'` |
+| the permissions | nine — and **no** location and **no** microphone |
+| the signature | `apksigner verify` → **Verifies**, the scheme **v2**, the RSA key of 4096 bits of the **test** store |
+| the build | `BUILD SUCCESSFUL in 12m 39s` — and the continuous integration builds it on every push |
+
+**What this artefact is NOT.** The signature is a **test key** that was
+made for the measurement and that signs nothing else: an update that is
+signed with the real key cannot replace an installation that carries the
+test key, and the other way round. The APK was **never installed on a
+device** and the application was **never started** — it proves that the
+shell can be built for a television, not that it works on one.
+
+**What it is FOR**: the device test. The script is section 2.5 of
+[`../guides/DEVICE_TEST_PLAN.md`](../guides/DEVICE_TEST_PLAN.md) — the
+path of a Galaxy phone, of a Google TV and of a Fire TV. The result of
+that test is what turns this into the beta of the release plan.
+
+**How to install it:**
+
+```bash
+# The checksum first — the file is not signed by a key that anybody else
+# has, so the checksum is the proof that the file is the one of the release.
+sha256sum -c phairplayrust-0.3.0-alpha.1-android-arm64-v8a-test.apk.sha256
+
+# On the television: Settings -> Apps -> See all apps -> the menu of the
+# application -> Install. Or with ADB:
+adb install -r phairplayrust-0.3.0-alpha.1-android-arm64-v8a-test.apk
+```
+
 **Every archive carries the checksum of itself** in a file next to it, so
 that a user can tell whether the file is the one that the release
 published:
