@@ -89,6 +89,10 @@ public enum ReceiverMapping {
             return .cast
         case .dlna:
             return .dlna
+        // WHY: the shell names every protocol of the bridge. A member that
+        // is missing here would leave its card out of the grid.
+        case .smartView:
+            return .smartview
         }
     }
 

@@ -86,5 +86,6 @@
     <string name="protocol_miracast">Miracast</string>
     <string name="protocol_cast">Google Cast</string>
     <string name="protocol_dlna">DLNA / UPnP</string>
+    <string name="protocol_smartview">Samsung Smart View</string>
 
 </resources>

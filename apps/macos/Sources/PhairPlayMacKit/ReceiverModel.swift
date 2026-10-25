@@ -57,14 +57,14 @@ public enum ProtocolPhase: String, Sendable, CaseIterable {
     }
 }
 
-/// The four protocols the receiver speaks.
+/// The five protocols the receiver speaks.
 ///
 /// WHAT: the identifier of a protocol and the name the bridge knows it by.
 ///
 /// WHY: The bridge speaks the names of the core: "airplay", "miracast",
-/// "cast" and "dlna". The shell needs those names to start and to stop an
-/// engine, and they have to be exactly the names of the core — a different
-/// spelling would be answered with the structured failure "unknown
+/// "cast", "dlna" and "smartview". The shell needs those names to start and
+/// to stop an engine, and they have to be exactly the names of the core — a
+/// different spelling would be answered with the structured failure "unknown
 /// protocol". The table below is therefore the contract between the shell
 /// and the bridge, and it is written down in one place.
 ///
@@ -82,6 +82,9 @@ public enum ProtocolId: String, Sendable, CaseIterable {
 
     /// DLNA / UPnP MediaRenderer — media playback.
     case dlna = "dlna"
+
+    /// Samsung Smart View — the MultiScreen Framework.
+    case smartview = "smartview"
 
     /// The protocol with the given name, if the name is a protocol.
     ///

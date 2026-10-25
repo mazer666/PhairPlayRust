@@ -78,6 +78,14 @@ enabled = true
 # SSDP on UDP 1900. The port therefore stays unpinned.
 port = 0
 
+[protocols.smartview]
+# WHY: Samsung Smart View is the MultiScreen Framework. A sender that speaks
+# it expects the API of the receiver on the port of the framework, so the
+# port is pinned here. The owner of the number is
+# core/phairplay-core/src/config/ports.rs.
+enabled = true
+port = 8001
+
 # ── Resource budgets of this device class ────────────────────────────────────
 [performance]
 # WHY: 512 MB. A desktop has the memory, and the budget exists to bound the

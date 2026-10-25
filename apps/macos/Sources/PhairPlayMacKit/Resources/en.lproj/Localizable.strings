@@ -38,6 +38,7 @@
 "protocol.miracast" = "Miracast";
 "protocol.cast" = "Google Cast";
 "protocol.dlna" = "DLNA / UPnP";
+"protocol.smartview" = "Samsung Smart View";
 
 "protocol.state.disabled" = "Disabled in the settings";
 "protocol.state.disabled.reason" = "The service is not advertised at all.";

@@ -67,6 +67,7 @@ fun ProtocolId.label(): String = stringResource(
         ProtocolId.MIRACAST -> R.string.protocol_miracast
         ProtocolId.CAST -> R.string.protocol_cast
         ProtocolId.DLNA -> R.string.protocol_dlna
+        ProtocolId.SMARTVIEW -> R.string.protocol_smartview
     },
 )
 

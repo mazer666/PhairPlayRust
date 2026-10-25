@@ -93,6 +93,7 @@ fun protocolIdOf(kind: FfiProtocolKind): ProtocolId? = when (kind) {
     FfiProtocolKind.MIRACAST -> ProtocolId.MIRACAST
     FfiProtocolKind.CAST -> ProtocolId.CAST
     FfiProtocolKind.DLNA -> ProtocolId.DLNA
+    FfiProtocolKind.SMART_VIEW -> ProtocolId.SMARTVIEW
 }
 
 /**

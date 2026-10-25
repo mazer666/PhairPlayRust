@@ -1,15 +1,15 @@
 package org.phairplay.receiver.model
 
 /**
- * The four protocols the receiver speaks.
+ * The five protocols the receiver speaks.
  *
  * WHAT: the identifier of a protocol, the name the bridge knows it by and
  * the name of the codec of the bridge that belongs to it.
  *
  * WHY: The bridge speaks the names of the core: "airplay", "miracast",
- * "cast" and "dlna". The shell needs those names to start and to stop an
- * engine, and it needs them to be exactly the names of the core — a
- * different spelling would be answered with the structured failure
+ * "cast", "dlna" and "smartview". The shell needs those names to start and
+ * to stop an engine, and it needs them to be exactly the names of the core
+ * — a different spelling would be answered with the structured failure
  * "unknown protocol". The table below is therefore the contract between
  * the shell and the bridge, and it is written down in one place.
  *
@@ -31,6 +31,9 @@ enum class ProtocolId(
 
     /** DLNA / UPnP MediaRenderer — media playback. */
     DLNA("dlna"),
+
+    /** Samsung Smart View — the MultiScreen Framework. */
+    SMARTVIEW("smartview"),
     ;
 
     companion object {

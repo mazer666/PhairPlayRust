@@ -59,6 +59,15 @@ require_pin = false
 # every protocol is described in exactly one place.
 discovery = "ssdp"
 
+[protocols.smartview]
+enabled = true
+# WHY: a Samsung sender reaches the MultiScreen Framework of a receiver on
+# the port of the framework. The owner of the number is
+# core/phairplay-core/src/config/ports.rs.
+port = 8001
+require_pin = false
+mdns_service_types = ["_samsungmsf._tcp"]
+
 # ── Session behaviour ────────────────────────────────────────────────────────
 [session]
 # AirPlay, Miracast and DLNA serve one peer at a time. A second concurrent
